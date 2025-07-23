@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus, ChevronRight } from 'lucide-react';
 import avatar from '../../assets/icon/user-big.svg';
 import Edit2 from '../../assets/icon/edit.svg';
@@ -11,6 +11,8 @@ import FeedbackIcon from '../../assets/icon/red-star.svg';
 import PasswordIcon from '../../assets/icon/red-lock.svg';
 import Share from '../../assets/icon/share.svg';
 import LogOut from '../../assets/icon/logout-red.svg';
+import Add from '../../assets/icon/add-blue.svg';
+import Location from '../../assets/icon/location-red.svg';
 import Earn from '../../assets/images/earn-image.svg';
 
 const supportItems = [
@@ -21,7 +23,14 @@ const supportItems = [
   { label: 'Change Password', icon: PasswordIcon },
 ];
 
+const addressItems = [
+  { title: 'Health Services 726 Broadway', label: 'New York, NY 10012' },
+  { title: '34 Long address with a lot of characters Kevorkian 50 Washington', label: 'New York, NY 10012' },
+];
+
 const Account = () => {
+  const [hasServiceAddress, setHasServiceAddress] = useState(true);
+
   return (
     <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
       {/* Left Section */}
@@ -97,27 +106,73 @@ const Account = () => {
         </div>
 
         {/* Add Service Address */}
-        <div
-          className="rounded-[15px] bg-white p-[15px] flex items-center justify-center"
-        >
-          <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
-            <div className="flex flex-col gap-[4px]">
-              <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
-                Add Service Address
-              </h3>
-              <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
-                You can Add Multiple Service addresses
-              </p>
+        {hasServiceAddress ? (
+          // If addresses exist
+          <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
+            <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
+              <div className="flex items-center justify-center gap-1">
+                <img
+                  src={Location}
+                  alt="Location Icon"
+                  className="w-[24px] h-[24px]"
+                />
+                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                  Addresses
+                </h3>
+              </div>
+              <button className="flex items-center justify-center gap-1">
+                <img
+                  src={Add}
+                  alt="Add Icon"
+                  className="w-[15px] h-[15px]"
+                />
+                <span className="text-[14px] font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
+                  Add
+                </span>
+              </button>
             </div>
-            <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
-              <Plus size={20} />
-            </button>
+
+            {addressItems.map((item, index) => (
+              <div
+                key={item.label}
+                className={`flex justify-between items-center pt-2 ${index !== addressItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                  }`}
+              >
+                <div className="flex flex-col gap-1 w-[219px]">
+                  <span className="text-[14px] font-medium text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                    {item.title}
+                  </span>
+                  <span className="text-[14px] font-normal text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                    {item.label}
+                  </span>
+                </div>
+                <ChevronRight size={24} className="text-gray-400" />
+              </div>
+            ))}
+
           </div>
-        </div>
+        ) : (
+          <div className="rounded-[15px] shadow-md bg-white p-[15px] flex items-center justify-center">
+            <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
+              <div className="flex flex-col gap-[4px]">
+                <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
+                  Add Service Address
+                </h3>
+                <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
+                  You can Add Multiple Service addresses
+                </p>
+              </div>
+              <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>
+        )}
+
 
         {/* Add Card */}
         <div
-          className="bg-white rounded-[15px] p-[15px] flex items-center justify-center"
+          className="bg-white rounded-[15px] shadow-md p-[15px] flex items-center justify-center"
         >
           <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
             <div className="flex flex-col gap-[4px]">
