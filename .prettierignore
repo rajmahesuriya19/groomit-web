@@ -1,0 +1,11 @@
+/node_modules
+
+/dist
+/dist-ssr
+/.idea
+
+yarn.lock
+yarn-error.log
+
+package-lock.json
+*.md

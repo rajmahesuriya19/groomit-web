@@ -1,0 +1,16 @@
+tailwind.config.cjs
+postcss.config.cjs
+vite.config.js
+
+/dist
+/dist-ssr
+/.idea
+
+.env
+*.md
+
+yarn.lock
+yarn-error.log
+
+package-lock.json
+
