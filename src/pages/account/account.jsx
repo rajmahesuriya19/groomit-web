@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, ChevronRight } from 'lucide-react';
+import Tooltip from "@mui/material/Tooltip";
 import avatar from '../../assets/icon/user-big.svg';
 import Edit2 from '../../assets/icon/edit.svg';
 import Mail from '../../assets/icon/sms-red.svg';
@@ -31,7 +32,7 @@ const supportItems = [
 ];
 
 const addressItems = [
-  { title: 'Health Services 726 Broadway', label: 'New York, NY 10012' },
+  { title: 'Health Services 726 Broadway', label: 'New York, NY 10012', selected: 'Yes' },
   { title: '34 Long address with a lot of characters Kevorkian 50 Washington', label: 'New York, NY 10012' },
 ];
 
@@ -51,7 +52,17 @@ const Account = () => {
   const [hasServiceAddress, setHasServiceAddress] = useState(true);
   const [hasCard, setHasCard] = useState(true);
   const [groomerExist, setGroomerExist] = useState(true);
+  const [tooltipText, setTooltipText] = useState("Click to Copy");
   const isEditMode = true;
+
+  const handleClick = () => {
+    navigator.clipboard.writeText("SANTIAGO123");
+    setTooltipText("Clicked");
+
+    setTimeout(() => {
+      setTooltipText("Click to Copy");
+    }, 2000);
+  };
 
   return (
     <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
@@ -162,21 +173,25 @@ const Account = () => {
             {addressItems.map((item, index) => (
               <div
                 key={item.label}
-                className={`flex justify-between items-center pt-2 ${index !== addressItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-start pt-2 ${index !== addressItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
-                <div className="flex flex-col gap-1 w-[219px]">
-                  <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                <div className="flex flex-col w-[220px]">
+                  <span className="text-[14px] font-bold text-[#2E2E2E] leading-[18px] font-inter">
                     {item.title}
                   </span>
-                  <span className="text-[14px] font-normal text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                  <span className="text-[14px] font-normal text-[#2E2E2E] leading-[18px] font-inter">
                     {item.label}
                   </span>
                 </div>
-                <ChevronRight size={24} className="text-gray-400" />
+                <div className="flex items-center gap-2">
+                  {item?.selected && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
+                    Default
+                  </div>}
+                  <ChevronRight size={24} className="text-gray-400" />
+                </div>
               </div>
             ))}
-
           </div>
         ) : (
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex items-center justify-center">
@@ -386,12 +401,37 @@ const Account = () => {
                 $10 Credits
               </span>
             </p>
-            <div className="w-[172px] h-[38px] flex items-center justify-center gap-[5px] mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full text-sm font-medium tracking-wide">
-              <img src={Share} alt="Share Icon" className="w-[24px] h-[24px]" />
-              <p className="text-[16px] font-semibold text-[#2E2E2E] leading-[100%] tracking-[0] font-inter text-center">
-                SANTIAGO123
-              </p>
-            </div>
+            <Tooltip
+              title={tooltipText}
+              arrow
+              placement="top"
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: "black",
+                    color: "white",
+                    fontSize: 12,
+                    padding: "6px 12px",
+                    borderRadius: "4px",
+                  },
+                },
+                arrow: {
+                  sx: {
+                    color: "black",
+                  },
+                },
+              }}
+            >
+              <div
+                onClick={handleClick}
+                className="w-[172px] h-[38px] flex items-center justify-center gap-[5px] mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full text-sm font-medium tracking-wide cursor-pointer"
+              >
+                <img src={Share} alt="Share Icon" className="w-[24px] h-[24px]" />
+                <p className="text-[16px] font-semibold text-[#2E2E2E] leading-[100%] tracking-[0] font-inter text-center">
+                  SANTIAGO123
+                </p>
+              </div>
+            </Tooltip>
           </div>
           <img src={Earn} alt="Share & Earn" className="w-[130px] h-[130px] object-contain" />
         </div>
