@@ -1,7 +1,6 @@
 import React from 'react';
 import { Modal, Box, Typography, Button, IconButton } from '@mui/material';
 import Close from '../../assets/icon/close.svg';
-import CloseIcon from '../../assets/icon/close-circle-red.svg';
 
 const modalStyle = {
   position: 'absolute',
@@ -17,7 +16,7 @@ const modalStyle = {
   outline: 'none',
 };
 
-const DeleteAccountModal = ({ open, onClose, onConfirm }) => {
+const DeleteAccountModal = ({ type, open, onClose, onConfirm, icon, title, decription }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={modalStyle} className="relative text-center font-inter">
@@ -26,15 +25,15 @@ const DeleteAccountModal = ({ open, onClose, onConfirm }) => {
         </IconButton>
 
         <div className="flex justify-center mt-2 mb-2">
-          <img src={CloseIcon} alt="Warning" className="w-[42px] h-[42px]" />
+          <img src={icon} alt="Warning" className="w-[42px] h-[42px]" />
         </div>
 
         <h2 className="text-[#2E2E2E] text-[20px] font-bold leading-[26px] text-center font-inter mb-2">
-          Are you sure you want to delete your groomit account?
+          {title}
         </h2>
 
         <p className="text-[#2E2E2E] text-[16px] font-normal leading-[23px] tracking-[-0.02em] text-center font-inter mb-6">
-          Your groomit account and all related data will be deleted.
+          {decription}
         </p>
 
         <Box className="flex flex-col sm:flex-row justify-between gap-4">

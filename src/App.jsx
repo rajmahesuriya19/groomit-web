@@ -7,6 +7,7 @@ import Account from './pages/account/account.jsx';
 import Dashboard from './pages/dashboard/dashboard.jsx';
 import Page404 from './pages/page404/index.jsx';
 import CreateEditAccount from './pages/account/create-edit-account/CreateEditAccount.jsx';
+import CreateEditServices from './pages/services/create-edit-services/CreateEditServices.jsx';
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
             <Route path={RoutePath.CREATE_ACCOUNT} element={<CreateEditAccount />} />
             <Route path={RoutePath.EDIT_ACCOUNT} element={<CreateEditAccount />} />
+            <Route path={RoutePath.ADD_SERVICE} element={<CreateEditServices />} />
+            <Route path={RoutePath.EDIT_SERVICE} element={<CreateEditServices />} />
             <Route path={RoutePath.DASHBOARD} element={<Dashboard />} />
             <Route path={RoutePath.PAGE_404} element={<Page404/>}/>
             <Route path="*" element={<Navigate to={RoutePath.PAGE_404} replace/>}/>

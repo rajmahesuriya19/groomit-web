@@ -11,6 +11,7 @@ import emailIcon from '../../../assets/icon/sms-red.svg';
 import phoneIcon from '../../../assets/icon/phone-red.svg';
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import passwordIcon from '../../../assets/icon/red-lock.svg';
+import CloseIcon from '../../../assets/icon/close-circle-red.svg';
 import { ChevronRight } from 'lucide-react';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
 
@@ -62,7 +63,6 @@ const CreateEditAccount = () => {
         setIsDeleteModalOpen(false);
         alert('Account deleted');
     };
-
 
     return (
         <>
@@ -217,9 +217,13 @@ const CreateEditAccount = () => {
             </div>
 
             <DeleteAccountModal
+                type={'account'}
                 open={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteAccount}
+                icon={CloseIcon}
+                title={"Are you sure you want to delete your groomit account?"}
+                decription={"Your groomit account and all related data will be deleted."}
             />
         </>
     );

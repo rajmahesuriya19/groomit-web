@@ -140,7 +140,6 @@ const Account = () => {
               className="w-[24px] h-[24px] md:w-[28px] md:h-[28px] lg:w-[35px] lg:h-[35px]"
             />
           </button>
-
         </div>
 
         {/* Add Service Address */}
@@ -158,7 +157,7 @@ const Account = () => {
                   Addresses
                 </h3>
               </div>
-              <button className="flex items-center justify-center gap-1">
+              <button className="flex items-center justify-center gap-1" onClick={() => navigate("/user/address/add")}>
                 <img
                   src={Add}
                   alt="Add Icon"
@@ -188,7 +187,11 @@ const Account = () => {
                   {item?.selected && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
                     Default
                   </div>}
-                  <ChevronRight size={24} className="text-gray-400" />
+                  <button
+                    onClick={() => navigate("/user/address/edit/1")}
+                  >
+                    <ChevronRight size={24} className="text-gray-400" />
+                  </button>
                 </div>
               </div>
             ))}
