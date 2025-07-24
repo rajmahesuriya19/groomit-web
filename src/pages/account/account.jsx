@@ -6,14 +6,21 @@ import Mail from '../../assets/icon/sms-red.svg';
 import Phone from '../../assets/icon/phone-red.svg';
 import Info from '../../assets/icon/info-circle-yellow.svg';
 import infoRed from '../../assets/icon/info-circle.svg';
+import infoGrey from '../../assets/icon/info-circle-grey.svg';
 import Message from '../../assets/icon/messages-red.svg';
 import FeedbackIcon from '../../assets/icon/red-star.svg';
 import PasswordIcon from '../../assets/icon/red-lock.svg';
 import Share from '../../assets/icon/share.svg';
-import LogOut from '../../assets/icon/logout-red.svg';
+import LogOut from '../../assets/icon/logout.svg';
 import Add from '../../assets/icon/add-blue.svg';
 import Location from '../../assets/icon/location-red.svg';
+import Card from '../../assets/icon/card-red.svg';
+import StaticUser from '../../assets/icon/sandra-static.svg';
+import FillStar from '../../assets/icon/fill-star.svg';
+import Visa from '../../assets/cards/Visa-light.svg';
+import Fallback from '../../assets/cards/fall-card.svg';
 import Earn from '../../assets/images/earn-image.svg';
+import { useNavigate } from 'react-router';
 
 const supportItems = [
   { label: 'FAQs', icon: infoRed },
@@ -28,8 +35,23 @@ const addressItems = [
   { title: '34 Long address with a lot of characters Kevorkian 50 Washington', label: 'New York, NY 10012' },
 ];
 
+const cardsItems = [
+  { name: 'Ending with 0034', label: 'Craig Johnson Shiik', icon: Visa },
+  { name: 'Ending with 0037', label: 'Craig Johnson Shiik' },
+  { name: 'Ending with 0038', icon: Visa },
+];
+
+const groomersList = [
+  { name: 'Sandra D.', rating: '4.9', review: '127', icon: StaticUser },
+  { name: 'Sandra D.', rating: '4.9', review: '127', icon: StaticUser }
+];
+
 const Account = () => {
+  const navigate = useNavigate();
   const [hasServiceAddress, setHasServiceAddress] = useState(true);
+  const [hasCard, setHasCard] = useState(true);
+  const [groomerExist, setGroomerExist] = useState(true);
+  const isEditMode = true;
 
   return (
     <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
@@ -98,11 +120,16 @@ const Account = () => {
           </div>
 
           {/* Edit Icon */}
-          <img
-            src={Edit2}
-            alt="Edit"
-            className="w-[35px] h-[35px]"
-          />
+          <button
+            onClick={() => navigate(isEditMode ? "/user/account/edit/1" : "/user/account/create")}
+          >
+            <img
+              src={Edit2}
+              alt="Edit"
+              className="w-[24px] h-[24px] md:w-[28px] md:h-[28px] lg:w-[35px] lg:h-[35px]"
+            />
+          </button>
+
         </div>
 
         {/* Add Service Address */}
@@ -139,7 +166,7 @@ const Account = () => {
                   }`}
               >
                 <div className="flex flex-col gap-1 w-[219px]">
-                  <span className="text-[14px] font-medium text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                  <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
                     {item.title}
                   </span>
                   <span className="text-[14px] font-normal text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
@@ -171,23 +198,144 @@ const Account = () => {
 
 
         {/* Add Card */}
-        <div
-          className="bg-white rounded-[15px] shadow-md p-[15px] flex items-center justify-center"
-        >
-          <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
-            <div className="flex flex-col gap-[4px]">
-              <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
-                Add a Debit/Credit Card
-              </h3>
-              <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
-                Add Visa, Mastercard, AMEX, Discover
-              </p>
+        {hasCard ? (
+          // If Card exist
+          <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
+            <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
+              <div className="flex items-center justify-center gap-1">
+                <img
+                  src={Card}
+                  alt="Card Icon"
+                  className="w-[24px] h-[24px]"
+                />
+                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                  Payment Methods
+                </h3>
+              </div>
+              <button className="flex items-center justify-center gap-1">
+                <img
+                  src={Add}
+                  alt="Add Icon"
+                  className="w-[15px] h-[15px]"
+                />
+                <span className="text-[14px] font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
+                  Add
+                </span>
+              </button>
             </div>
-            <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
-              <Plus size={20} />
-            </button>
+
+            {cardsItems.map((item, index) => (
+              <div
+                key={item.label}
+                className={`flex justify-between items-center pt-2 ${index !== cardsItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                  }`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  {item.icon ? (<img
+                    src={item.icon}
+                    alt={item.name}
+                    className="w-[47px] h-[28px]"
+                  />) : (<img
+                    src={Fallback}
+                    alt='FallBack Image'
+                    className="w-[47px] h-[28px]"
+                  />)}
+                  <div className="flex flex-col gap-1 w-[219px]">
+                    <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                      {item.name}
+                    </span>
+                    {item.label ? (
+                      <span className="text-[14px] font-normal text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                        {item.label}
+                      </span>
+                    ) : (
+                      <div className="flex items-center gap-1 py-[2px] rounded-[4px] w-fit">
+                        <img src={Info} alt="Info" className="w-[16px] h-[16px]" />
+                        <span className="text-[12px] font-semibold text-[#ED9F00] leading-[14px] tracking-[0] font-inter">
+                          NOT VERIFIED
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={24} className="text-gray-400" />
+              </div>
+            ))}
           </div>
-        </div>
+        ) :
+          (<div
+            className="bg-white rounded-[15px] shadow-md p-[15px] flex items-center justify-center"
+          >
+            <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
+              <div className="flex flex-col gap-[4px]">
+                <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
+                  Add a Debit/Credit Card
+                </h3>
+                <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
+                  Add Visa, Mastercard, AMEX, Discover
+                </p>
+              </div>
+              <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>)}
+
+        {/* Add Groomers List */}
+        {groomerExist && (
+          // If Groomer exist
+          <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
+            <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
+              <div className="flex items-center justify-center gap-1">
+                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                  My Groomers
+                </h3>
+              </div>
+            </div>
+
+            {groomersList.map((item, index) => (
+              <div
+                key={item.name}
+                className={`flex justify-between items-center pt-2 ${index !== groomersList.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                  }`}
+              >
+                <div className="flex items-center gap-2 w-full">
+                  {item.icon && (
+                    <img
+                      src={item.icon}
+                      alt={item.name}
+                      className="w-[48px] h-[48px]"
+                    />
+                  )}
+                  <div className="flex flex-col gap-1 w-[219px]">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                        {item.name}
+                      </span>
+                      <img
+                        src={infoGrey}
+                        alt="Info"
+                        className="w-[20px] h-[20px]"
+                      />
+                    </div>
+                    {item.rating && item.review && (
+                      <div className="flex items-center gap-1 bg-[#2E2E2E] rounded-[25px] px-[6px] py-[4px] w-[79px]">
+                        <img src={FillStar} alt="Rating" className="w-[10px] h-[11px]" />
+                        <span className="text-[12px] font-bold text-white leading-[11px] tracking-[0]">
+                          {item.rating}
+                        </span>
+                        <span className="text-[12px] font-bold text-white leading-[11px] tracking-[0]">
+                          ({item.review})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <ChevronRight size={24} className="text-gray-400" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Divider Section */}
@@ -211,7 +359,7 @@ const Account = () => {
           {supportItems.map((item, index) => (
             <div
               key={item.label}
-              className={`flex justify-between items-center pt-3 ${index !== supportItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'
+              className={`flex cursor-pointer justify-between items-center pt-3 ${index !== supportItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'
                 }`}
             >
               <div className="flex items-center gap-2">

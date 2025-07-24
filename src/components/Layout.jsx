@@ -3,11 +3,9 @@ import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation.jsx';
 import Sidebar from './Sidebar.jsx';
 
-const sidebarRoutes = ['/user/account', '/user/dashboard', '/user/appointments'];
-
 const Layout = ({ children }) => {
   const location = useLocation();
-  const showSidebar = sidebarRoutes.includes(location.pathname);
+  const showSidebar = location.pathname.startsWith('/user');
 
   return (
     <div className="min-h-screen bg-gray-50">
