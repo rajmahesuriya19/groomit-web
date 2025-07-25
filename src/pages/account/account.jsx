@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, ChevronRight } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
 import Tooltip from "@mui/material/Tooltip";
 import avatar from '../../assets/icon/user-big.svg';
 import Edit2 from '../../assets/icon/edit.svg';
@@ -68,22 +68,46 @@ const Account = () => {
     <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
       {/* Left Section */}
       <div className="space-y-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2
-            className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em]"
-          >
-            My Account
-          </h2>
+        <div>
+          <div className="hidden md:flex justify-between items-center mb-6">
+            <h2 className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em]">
+              My Account
+            </h2>
+            <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-[#FF314A] px-3 py-2">
+              <p className="text-[10px] font-bold text-white leading-none tracking-normal">
+                CREDITS
+              </p>
+              <p className="text-[18px] font-bold text-white leading-none tracking-[-0.01em]">
+                $518
+              </p>
+            </div>
+          </div>
 
-          <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-[#FF314A] px-3 py-2">
-            <p className="text-[10px] font-bold text-white leading-none tracking-normal">
-              CREDITS
-            </p>
-            <p className="text-[18px] font-bold text-white leading-none tracking-[-0.01em]">
-              $518
-            </p>
+          <div className="md:mx-0 -mx-4 -my-4 mb-6">
+            <div className="flex md:hidden items-center justify-between bg-white px-5 py-4 h-[64px] w-full">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center justify-center"
+              >
+                <ChevronLeft size={24} className="text-[#7C868A]" />
+              </button>
+
+              <h2 className="text-[20px] font-['Filson Soft'] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em] capitalize">
+                My Account
+              </h2>
+
+              <div className="w-[62px] h-[38px] bg-[#FF314A] rounded-[5px] px-2 py-1 flex flex-col justify-center items-center gap-[2px]">
+                <span className="text-[8px] font-bold text-white leading-none tracking-[0px]">
+                  CREDITS
+                </span>
+                <span className="text-[14px] font-bold text-white leading-none tracking-[-0.01em]">
+                  $518
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+
         {/* Profile Card */}
         <div
           className="bg-white rounded-[15px] shadow-md flex justify-center items-start px-4 py-3"
@@ -377,12 +401,11 @@ const Account = () => {
           {supportItems.map((item, index) => (
             <div
               key={item.label}
-              className={`flex cursor-pointer justify-between items-center pt-3 ${index !== supportItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'
-                }`}
+              className={`flex justify-between items-center cursor-pointer pt-3 ${index !== supportItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'}`}
             >
               <div className="flex items-center gap-2">
-                <img src={item.icon} alt={item.label} className="w-[24px] h-[24px]" />
-                <span className="text-[14px] font-bold leading-[100%] tracking-[-0.01em] text-[#2E2E2E] font-inter">
+                <img src={item.icon} alt={item.label} className="w-6 h-6" />
+                <span className="text-[14px] font-bold text-[#2E2E2E] tracking-[-0.01em] font-inter">
                   {item.label}
                 </span>
               </div>
@@ -391,19 +414,19 @@ const Account = () => {
           ))}
         </div>
 
-
         {/* Share & Earn */}
-        <div className="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
-          <div>
+        <div className="bg-white rounded-2xl p-4 shadow-md flex md:flex-row items-center justify-between gap-4">
+          <div className="flex-1 w-full">
             <h3 className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
               Share & Earn
             </h3>
             <p className="text-[16px] font-medium text-[#7C868A] leading-[100%] tracking-[0] font-inter py-1">
               Refer a Friend & both receive{' '}
-              <span className="text-[#FF314A] font-semibold font-inter leading-[100%] tracking-[0]">
+              <span className="text-[#FF314A] font-semibold font-inter tracking-[0]">
                 $10 Credits
               </span>
             </p>
+
             <Tooltip
               title={tooltipText}
               arrow
@@ -427,23 +450,30 @@ const Account = () => {
             >
               <div
                 onClick={handleClick}
-                className="w-[172px] h-[38px] flex items-center justify-center gap-[5px] mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full text-sm font-medium tracking-wide cursor-pointer"
+                className="max-w-[172px] h-[38px] flex items-center justify-center gap-2 mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full cursor-pointer"
               >
                 <img src={Share} alt="Share Icon" className="w-[24px] h-[24px]" />
-                <p className="text-[16px] font-semibold text-[#2E2E2E] leading-[100%] tracking-[0] font-inter text-center">
+                <p className="text-[16px] font-semibold text-[#2E2E2E] font-inter text-center">
                   SANTIAGO123
                 </p>
               </div>
             </Tooltip>
           </div>
-          <img src={Earn} alt="Share & Earn" className="w-[130px] h-[130px] object-contain" />
+
+          <div className="w-full max-w-[130px] md:w-[130px] md:h-[130px] flex-shrink-0">
+            <img
+              src={Earn}
+              alt="Share & Earn"
+              className="w-full h-auto object-contain mx-auto"
+            />
+          </div>
         </div>
 
         {/* Logout */}
-        <div className="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer">
           <div className="flex items-center gap-2">
-            <img src={LogOut} alt="Logout" className="w-[24px] h-[24px]" />
-            <span className="text-[14px] font-bold leading-[100%] tracking-[-0.01em] text-[#2E2E2E] font-inter">
+            <img src={LogOut} alt="Logout" className="w-6 h-6" />
+            <span className="text-[14px] font-bold text-[#2E2E2E] tracking-[-0.01em] font-inter">
               Log Out
             </span>
           </div>
