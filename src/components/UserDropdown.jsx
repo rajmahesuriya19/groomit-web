@@ -54,7 +54,7 @@ const UserDropdown = () => {
 
         {/* Divider */}
         <div
-          className="bg-[#7C868A] opacity-30"
+          className="bg-primary-light opacity-30"
           style={{
             width: '1px',
             height: '19px',

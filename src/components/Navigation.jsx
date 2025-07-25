@@ -53,11 +53,11 @@ const Navigation = () => {
               <div className="flex flex-wrap items-center gap-4 min-w-0 ml-4">
 
                 {/* Credits Display */}
-                <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-[#FF314A] px-3 py-2">
-                  <p className="text-[12px] font-medium text-white leading-none font-inter tracking-normal">
+                <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-brand px-3 py-2">
+                  <p className="text-xs font-medium text-white leading-none font-inter tracking-normal">
                     CREDITS
                   </p>
-                  <p className="text-[16px] font-extrabold text-white leading-none font-inter tracking-[-0.01em]">
+                  <p className="text-base font-extrabold text-white leading-none font-inter tracking-[-0.01em]">
                     $518
                   </p>
                 </div>
@@ -78,7 +78,7 @@ const Navigation = () => {
                     alt="Help Icon"
                     className="w-[24px] h-[24px]"
                   />
-                  <span className="text-[14px] font-semibold text-[#2E2E2E] leading-none tracking-[-0.01em]  font-inter px-2 py-0.5 rounded-sm">
+                  <span className="text-sm font-semibold text-primary-dark leading-none tracking-[-0.01em]  font-inter px-2 py-0.5 rounded-sm">
                     Need Help?
                   </span>
                 </Link>

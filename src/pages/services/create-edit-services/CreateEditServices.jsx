@@ -74,14 +74,14 @@ const CreateEditServices = () => {
                         >
                             <img src={backIcon} alt="Back" className="w-[24px] h-[24px]" />
                         </button>
-                        <h2 className="text-[20px] font-bold text-[#2E2E2E]">
+                        <h2 className="text-xl font-bold text-primary-dark">
                             {isEdit ? 'Edit' : 'Add'} New Address
                         </h2>
                     </div>
 
                     {isEdit && <button
                         onClick={() => setIsDeleteModalOpen(true)}
-                        className="text-[#EB5757] underline text-[16px]"
+                        className="text-[#EB5757] underline text-base"
                     >
                         Delete Service Address
                     </button>}
@@ -93,10 +93,10 @@ const CreateEditServices = () => {
                             onClick={() => navigate(-1)}
                             className="flex items-center justify-center"
                         >
-                            <ChevronLeft size={24} className="text-[#7C868A]" />
+                            <ChevronLeft size={24} className="text-primary-light" />
                         </button>
 
-                        <h2 className="text-[20px] font-bold text-[#2E2E2E]">
+                        <h2 className="text-xl font-bold text-primary-dark">
                             {isEdit ? 'Edit' : 'Add'} New Address
                         </h2>
 
@@ -109,12 +109,12 @@ const CreateEditServices = () => {
                         <div className="flex flex-col gap-4 md:w-1/2">
                             {/* Address */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-[14px] font-bold text-[#2E2E2E] font-inter">Address</label>
+                                <label className="text-sm font-bold text-primary-dark font-inter">Address</label>
                                 <input
                                     type="text"
                                     placeholder="123 Main Street"
                                     {...register('address')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-[16px] leading-[21px] tracking-[-0.02em] font-inter text-[#2E2E2E] placeholder:text-gray-300"
+                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
                                 <div className="text-red-500 text-sm">{errors.address?.message}</div>
                             </div>
@@ -122,10 +122,10 @@ const CreateEditServices = () => {
                             {/* Apartment or suite number */}
                             <div className="flex flex-col gap-2">
                                 <div className="flex justify-between items-center">
-                                    <label className="text-[14px] font-bold text-[#2E2E2E] font-inter">
+                                    <label className="text-sm font-bold text-primary-dark font-inter">
                                         Apartment or suite number
                                     </label>
-                                    <span className="font-inter font-normal italic text-[14px] leading-[100%] text-[#7C868A] text-right">
+                                    <span className="font-inter font-normal italic text-sm leading-[100%] text-primary-light text-right">
                                         Optional
                                     </span>
                                 </div>
@@ -133,7 +133,7 @@ const CreateEditServices = () => {
                                     type="text"
                                     placeholder="Apt 204"
                                     {...register('apartment')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-[16px] leading-[21px] tracking-[-0.02em] font-inter text-[#2E2E2E] placeholder:text-gray-300"
+                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
                                 <div className="text-red-500 text-sm">{errors.apartment?.message}</div>
                             </div>
@@ -146,12 +146,12 @@ const CreateEditServices = () => {
                         <div className="flex flex-col md:w-1/2 gap-4">
                             {/* City */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-[14px] font-bold text-[#2E2E2E] font-inter">City</label>
+                                <label className="text-sm font-bold text-primary-dark font-inter">City</label>
                                 <input
                                     type="text"
                                     placeholder="New York"
                                     {...register('city')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-[16px] leading-[21px] tracking-[-0.02em] font-inter text-[#2E2E2E] placeholder:text-gray-300"
+                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
                                 <div className="text-red-500 text-sm">{errors.city?.message}</div>
                             </div>
@@ -159,23 +159,23 @@ const CreateEditServices = () => {
                             {/* State & Zip Code */}
                             <div className="flex gap-2">
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <label className="text-[14px] font-bold text-[#2E2E2E] font-inter">State</label>
+                                    <label className="text-sm font-bold text-primary-dark font-inter">State</label>
                                     <input
                                         type="text"
                                         placeholder="NY"
                                         {...register('state')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-[16px] leading-[21px] tracking-[-0.02em] font-inter text-[#2E2E2E] placeholder:text-gray-300"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
                                     <div className="text-red-500 text-sm">{errors.state?.message}</div>
                                 </div>
 
                                 <div className="flex-1 flex flex-col gap-2">
-                                    <label className="text-[14px] font-bold text-[#2E2E2E] font-inter">Zip Code</label>
+                                    <label className="text-sm font-bold text-primary-dark font-inter">Zip Code</label>
                                     <input
                                         type="text"
                                         placeholder="10001"
                                         {...register('zipCode')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-[16px] leading-[21px] tracking-[-0.02em] font-inter text-[#2E2E2E] placeholder:text-gray-300"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
                                     <div className="text-red-500 text-sm">{errors.zipCode?.message}</div>
                                 </div>
@@ -203,7 +203,7 @@ const CreateEditServices = () => {
                                         },
                                     }}
                                 />
-                                <span className="font-inter font-normal text-[16px] leading-[21px] tracking-[-0.02em] text-[#2E2E2E]">
+                                <span className="font-inter font-normal text-base leading-[21px] tracking-[-0.02em] text-primary-dark">
                                     Make this to default address
                                 </span>
                             </div>
@@ -215,36 +215,35 @@ const CreateEditServices = () => {
                         <button
                             type="submit"
                             disabled={!!id && !isDirty}
-                            className={`w-[193px] h-[48px] rounded-[30px] px-[31px] py-[11px] gap-[10px] flex items-center justify-center text-[16px] font-semibold font-inter leading-[18px] text-center transition-colors duration-200
-      ${!id || isDirty ? 'bg-[#FF314A] text-white cursor-pointer' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
+                            className={`w-[193px] h-[48px] rounded-[30px] px-[31px] py-[11px] gap-[10px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] text-center transition-colors duration-200
+      ${!id || isDirty ? 'bg-brand text-white cursor-pointer' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
                         >
                             Add Address
                         </button>
                     </div>
 
                     {/* Mobile Delete Button */}
-                    <div className="md:hidden px-5 pt-4 text-center mb-28">
+                    {isEdit && <div className="md:hidden px-5 pt-4 text-center mb-28">
                         <button
                             onClick={() => setIsDeleteModalOpen(true)}
-                            className="text-[#EB5757] underline text-[16px]"
+                            className="text-[#EB5757] underline text-base"
                         >
                             Delete Service Address
                         </button>
-                    </div>
+                    </div>}
 
                     {/* Sticky Mobile Save Button */}
                     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
                         <button
                             type="submit"
                             disabled={!!id && !isDirty}
-                            className={`w-full h-[48px] rounded-[30px] flex items-center justify-center text-[16px] font-semibold font-inter leading-[18px] transition-colors duration-200
-      ${!id || isDirty ? 'bg-[#FF314A] text-white' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
+                            className={`w-full h-[48px] rounded-[30px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] transition-colors duration-200
+      ${!id || isDirty ? 'bg-brand text-white' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
                         >
                             {isEdit ? 'Edit' : 'Add'} Address
                         </button>
                     </div>
                 </form>
-
             </div>
 
             <DeleteAccountModal

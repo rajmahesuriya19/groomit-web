@@ -28,24 +28,24 @@ const DeleteAccountModal = ({ type, open, onClose, onConfirm, icon, title, decri
           <img src={icon} alt="Warning" className="w-[42px] h-[42px]" />
         </div>
 
-        <h2 className="text-[#2E2E2E] text-[20px] font-bold leading-[26px] text-center font-inter mb-2">
+        <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center font-inter mb-2">
           {title}
         </h2>
 
-        <p className="text-[#2E2E2E] text-[16px] font-normal leading-[23px] tracking-[-0.02em] text-center font-inter mb-6">
+        <p className="text-primary-dark text-base font-normal leading-[23px] tracking-[-0.02em] text-center font-inter mb-6">
           {decription}
         </p>
 
         <Box className="flex flex-col sm:flex-row justify-between gap-4">
           <button
             onClick={onConfirm}
-            className="!bg-black text-white font-inter text-[16px] font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
+            className="!bg-black text-white font-inter text-base font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
           >
             Yes, Delete
           </button>
           <button
             onClick={onClose}
-            className="!bg-[#FF314A] text-white font-inter text-[16px] font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
+            className="!bg-brand text-white font-inter text-base font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
           >
             No
           </button>

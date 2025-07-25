@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
 import Tooltip from "@mui/material/Tooltip";
 import avatar from '../../assets/icon/user-big.svg';
@@ -22,6 +22,7 @@ import Visa from '../../assets/cards/Visa-light.svg';
 import Fallback from '../../assets/cards/fall-card.svg';
 import Earn from '../../assets/images/earn-image.svg';
 import { useNavigate } from 'react-router';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
 const supportItems = [
   { label: 'FAQs', icon: infoRed },
@@ -37,7 +38,7 @@ const addressItems = [
 ];
 
 const cardsItems = [
-  { name: 'Ending with 0034', label: 'Craig Johnson Shiik', icon: Visa },
+  { name: 'Ending with 0034', label: 'Craig Johnson Shiik', icon: Visa, selected: 'Yes' },
   { name: 'Ending with 0037', label: 'Craig Johnson Shiik' },
   { name: 'Ending with 0038', icon: Visa },
 ];
@@ -49,9 +50,10 @@ const groomersList = [
 
 const Account = () => {
   const navigate = useNavigate();
-  const [hasServiceAddress, setHasServiceAddress] = useState(true);
-  const [hasCard, setHasCard] = useState(true);
-  const [groomerExist, setGroomerExist] = useState(true);
+  const { showLoader, hideLoader } = useLoader();
+  const [serviceAddressData, setServiceAddressData] = useState();
+  const [cardData, setCardData] = useState();
+  const [groomerExistData, setGroomerExistData] = useState();
   const [tooltipText, setTooltipText] = useState("Click to Copy");
   const isEditMode = true;
 
@@ -64,20 +66,40 @@ const Account = () => {
     }, 2000);
   };
 
+  const fetchData = async () => {
+    try {
+      showLoader();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setServiceAddressData(addressItems)
+      setGroomerExistData(groomersList)
+      setCardData(cardsItems)
+    } catch (error) {
+      console.error(error);
+    } finally {
+      hideLoader();
+    }
+  };
+
+
+  useEffect(() => {
+    // fetchData();
+  }, [])
+
+
   return (
     <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
       {/* Left Section */}
       <div className="space-y-4">
         <div>
           <div className="hidden md:flex justify-between items-center mb-6">
-            <h2 className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em]">
+            <h2 className="text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]">
               My Account
             </h2>
-            <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-[#FF314A] px-3 py-2">
+            <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-brand px-3 py-2">
               <p className="text-[10px] font-bold text-white leading-none tracking-normal">
                 CREDITS
               </p>
-              <p className="text-[18px] font-bold text-white leading-none tracking-[-0.01em]">
+              <p className="text-lg font-bold text-white leading-none tracking-[-0.01em]">
                 $518
               </p>
             </div>
@@ -89,18 +111,18 @@ const Account = () => {
                 onClick={() => navigate(-1)}
                 className="flex items-center justify-center"
               >
-                <ChevronLeft size={24} className="text-[#7C868A]" />
+                <ChevronLeft size={24} className="text-primary-light" />
               </button>
 
-              <h2 className="text-[20px] font-['Filson Soft'] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em] capitalize">
+              <h2 className="text-xl font-['Filson Soft'] font-bold text-primary-dark leading-[100%] tracking-[-0.01em] capitalize">
                 My Account
               </h2>
 
-              <div className="w-[62px] h-[38px] bg-[#FF314A] rounded-[5px] px-2 py-1 flex flex-col justify-center items-center gap-[2px]">
+              <div className="w-[62px] h-[38px] bg-brand rounded-[5px] px-2 py-1 flex flex-col justify-center items-center gap-[2px]">
                 <span className="text-[8px] font-bold text-white leading-none tracking-[0px]">
                   CREDITS
                 </span>
-                <span className="text-[14px] font-bold text-white leading-none tracking-[-0.01em]">
+                <span className="text-sm font-bold text-white leading-none tracking-[-0.01em]">
                   $518
                 </span>
               </div>
@@ -123,7 +145,7 @@ const Account = () => {
           {/* Profile Text */}
           <div className="flex-1 ml-4 flex flex-col gap-[4px]">
             <h2
-              className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[-0.01em]"
+              className="text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]"
             >
               Andrew Smith
             </h2>
@@ -133,7 +155,7 @@ const Account = () => {
                 alt="Mail"
                 className="w-[20px] h-[20px]"
               />
-              <span className="text-[14px] font-normal text-[#2E2E2E] leading-[100%] tracking-[-0.01em]">
+              <span className="text-sm font-normal text-primary-dark leading-[100%] tracking-[-0.01em]">
                 andrewsmith123@mail.com
               </span>
             </div>
@@ -143,7 +165,7 @@ const Account = () => {
                 alt="Phone"
                 className="w-[20px] h-[20px]"
               />
-              <span className="text-[14px] font-medium text-[#2E2E2E] leading-[100%] tracking-[-0.01em]">
+              <span className="text-sm font-medium text-primary-dark leading-[100%] tracking-[-0.01em]">
                 +123 456 7890
               </span>
               <img
@@ -167,7 +189,7 @@ const Account = () => {
         </div>
 
         {/* Add Service Address */}
-        {hasServiceAddress ? (
+        {serviceAddressData?.length > 0 ? (
           // If addresses exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -177,7 +199,7 @@ const Account = () => {
                   alt="Location Icon"
                   className="w-[24px] h-[24px]"
                 />
-                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
                   Addresses
                 </h3>
               </div>
@@ -187,23 +209,23 @@ const Account = () => {
                   alt="Add Icon"
                   className="w-[15px] h-[15px]"
                 />
-                <span className="text-[14px] font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
+                <span className="text-sm font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
                   Add
                 </span>
               </button>
             </div>
 
-            {addressItems.map((item, index) => (
+            {serviceAddressData.map((item, index) => (
               <div
                 key={item.label}
-                className={`flex justify-between items-start pt-2 ${index !== addressItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-start pt-2 ${index !== serviceAddressData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
                 <div className="flex flex-col w-[220px]">
-                  <span className="text-[14px] font-bold text-[#2E2E2E] leading-[18px] font-inter">
+                  <span className="text-sm font-bold text-primary-dark leading-[18px] font-inter">
                     {item.title}
                   </span>
-                  <span className="text-[14px] font-normal text-[#2E2E2E] leading-[18px] font-inter">
+                  <span className="text-sm font-normal text-primary-dark leading-[18px] font-inter">
                     {item.label}
                   </span>
                 </div>
@@ -224,14 +246,14 @@ const Account = () => {
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex items-center justify-center">
             <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
               <div className="flex flex-col gap-[4px]">
-                <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
+                <h3 className="text-primary-dark text-base font-bold leading-[100%] tracking-[0%]">
                   Add Service Address
                 </h3>
-                <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
+                <p className="text-primary-light text-sm font-normal leading-[100%] tracking-[-0.01em]">
                   You can Add Multiple Service addresses
                 </p>
               </div>
-              <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
+              <button className="bg-brand text-white rounded-[10px] flex items-center justify-center p-[10px]" onClick={() => navigate("/user/address/add")}>
                 <Plus size={20} />
               </button>
             </div>
@@ -240,7 +262,7 @@ const Account = () => {
 
 
         {/* Add Card */}
-        {hasCard ? (
+        {cardData?.length > 0 ? (
           // If Card exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -250,26 +272,26 @@ const Account = () => {
                   alt="Card Icon"
                   className="w-[24px] h-[24px]"
                 />
-                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
                   Payment Methods
                 </h3>
               </div>
-              <button className="flex items-center justify-center gap-1">
+              <button className="flex items-center justify-center gap-1" onClick={() => navigate("/user/card/add")}>
                 <img
                   src={Add}
                   alt="Add Icon"
                   className="w-[15px] h-[15px]"
                 />
-                <span className="text-[14px] font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
+                <span className="text-sm font-normal text-right text-[#3064A3] leading-[100%] tracking-[-0.01em]">
                   Add
                 </span>
               </button>
             </div>
 
-            {cardsItems.map((item, index) => (
+            {cardData.map((item, index) => (
               <div
                 key={item.label}
-                className={`flex justify-between items-center pt-2 ${index !== cardsItems.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-center pt-2 ${index !== cardData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
                 <div className="flex items-center gap-3 w-full">
@@ -283,24 +305,33 @@ const Account = () => {
                     className="w-[47px] h-[28px]"
                   />)}
                   <div className="flex flex-col gap-1 w-[219px]">
-                    <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                    <span className="text-sm font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                       {item.name}
                     </span>
                     {item.label ? (
-                      <span className="text-[14px] font-normal text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                      <span className="text-sm font-normal text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                         {item.label}
                       </span>
                     ) : (
                       <div className="flex items-center gap-1 py-[2px] rounded-[4px] w-fit">
                         <img src={Info} alt="Info" className="w-[16px] h-[16px]" />
-                        <span className="text-[12px] font-semibold text-[#ED9F00] leading-[14px] tracking-[0] font-inter">
+                        <span className="text-xs font-semibold text-[#ED9F00] leading-[14px] tracking-[0] font-inter">
                           NOT VERIFIED
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
-                <ChevronRight size={24} className="text-gray-400" />
+                <div className="flex items-center gap-2">
+                  {item?.selected && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
+                    Default
+                  </div>}
+                  <button
+                    onClick={() => navigate(item?.label ? "/user/card/edit/1" : "/user/card/view")}
+                  >
+                    <ChevronRight size={24} className="text-gray-400" />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -310,35 +341,35 @@ const Account = () => {
           >
             <div className="w-full bg-[#F1F1F1] rounded-[10px] px-[15px] py-[15px] flex items-center justify-between">
               <div className="flex flex-col gap-[4px]">
-                <h3 className="text-[#2E2E2E] text-[16px] font-bold leading-[100%] tracking-[0%]">
+                <h3 className="text-primary-dark text-base font-bold leading-[100%] tracking-[0%]">
                   Add a Debit/Credit Card
                 </h3>
-                <p className="text-[#7C868A] text-[14px] font-normal leading-[100%] tracking-[-0.01em]">
+                <p className="text-primary-light text-sm font-normal leading-[100%] tracking-[-0.01em]">
                   Add Visa, Mastercard, AMEX, Discover
                 </p>
               </div>
-              <button className="bg-[#FF314A] text-white rounded-[10px] flex items-center justify-center p-[10px]">
+              <button className="bg-brand text-white rounded-[10px] flex items-center justify-center p-[10px]" onClick={() => navigate("/user/card/add")}>
                 <Plus size={20} />
               </button>
             </div>
           </div>)}
 
         {/* Add Groomers List */}
-        {groomerExist && (
+        {groomerExistData?.length > 0 && (
           // If Groomer exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
               <div className="flex items-center justify-center gap-1">
-                <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+                <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
                   My Groomers
                 </h3>
               </div>
             </div>
 
-            {groomersList.map((item, index) => (
+            {groomerExistData.map((item, index) => (
               <div
                 key={item.name}
-                className={`flex justify-between items-center pt-2 ${index !== groomersList.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-center pt-2 ${index !== groomerExistData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
                 <div className="flex items-center gap-2 w-full">
@@ -351,7 +382,7 @@ const Account = () => {
                   )}
                   <div className="flex flex-col gap-1 w-[219px]">
                     <div className="flex items-center gap-1">
-                      <span className="text-[14px] font-bold text-[#2E2E2E] leading-[22px] tracking-[-0.01em] font-inter">
+                      <span className="text-sm font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                         {item.name}
                       </span>
                       <img
@@ -361,12 +392,12 @@ const Account = () => {
                       />
                     </div>
                     {item.rating && item.review && (
-                      <div className="flex items-center gap-1 bg-[#2E2E2E] rounded-[25px] px-[6px] py-[4px] w-[79px]">
+                      <div className="flex items-center gap-1 bg-primary-dark rounded-[25px] px-[6px] py-[4px] w-[79px]">
                         <img src={FillStar} alt="Rating" className="w-[10px] h-[11px]" />
-                        <span className="text-[12px] font-bold text-white leading-[11px] tracking-[0]">
+                        <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
                           {item.rating}
                         </span>
-                        <span className="text-[12px] font-bold text-white leading-[11px] tracking-[0]">
+                        <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
                           ({item.review})
                         </span>
                       </div>
@@ -390,10 +421,10 @@ const Account = () => {
         {/* Support List */}
         <div className="bg-white rounded-2xl p-4 shadow-md">
           <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
-            <h3 className="text-[16px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+            <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
               Support
             </h3>
-            <span className="text-[14px] font-normal text-right text-[#7C868A] leading-[100%] tracking-[-0.01em]">
+            <span className="text-sm font-normal text-right text-primary-light leading-[100%] tracking-[-0.01em]">
               Have Questions?
             </span>
           </div>
@@ -405,7 +436,7 @@ const Account = () => {
             >
               <div className="flex items-center gap-2">
                 <img src={item.icon} alt={item.label} className="w-6 h-6" />
-                <span className="text-[14px] font-bold text-[#2E2E2E] tracking-[-0.01em] font-inter">
+                <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
                   {item.label}
                 </span>
               </div>
@@ -417,12 +448,12 @@ const Account = () => {
         {/* Share & Earn */}
         <div className="bg-white rounded-2xl p-4 shadow-md flex md:flex-row items-center justify-between gap-4">
           <div className="flex-1 w-full">
-            <h3 className="text-[20px] font-bold text-[#2E2E2E] leading-[100%] tracking-[0]">
+            <h3 className="text-xl font-bold text-primary-dark leading-[100%] tracking-[0]">
               Share & Earn
             </h3>
-            <p className="text-[16px] font-medium text-[#7C868A] leading-[100%] tracking-[0] font-inter py-1">
+            <p className="text-base font-medium text-primary-light leading-[100%] tracking-[0] font-inter py-1">
               Refer a Friend & both receive{' '}
-              <span className="text-[#FF314A] font-semibold font-inter tracking-[0]">
+              <span className="text-brand font-semibold font-inter tracking-[0]">
                 $10 Credits
               </span>
             </p>
@@ -453,7 +484,7 @@ const Account = () => {
                 className="max-w-[172px] h-[38px] flex items-center justify-center gap-2 mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full cursor-pointer"
               >
                 <img src={Share} alt="Share Icon" className="w-[24px] h-[24px]" />
-                <p className="text-[16px] font-semibold text-[#2E2E2E] font-inter text-center">
+                <p className="text-base font-semibold text-primary-dark font-inter text-center">
                   SANTIAGO123
                 </p>
               </div>
@@ -473,7 +504,7 @@ const Account = () => {
         <div className="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer">
           <div className="flex items-center gap-2">
             <img src={LogOut} alt="Logout" className="w-6 h-6" />
-            <span className="text-[14px] font-bold text-[#2E2E2E] tracking-[-0.01em] font-inter">
+            <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
               Log Out
             </span>
           </div>

@@ -44,7 +44,7 @@ const AddressSelector = () => {
 
         {/* Address Text */}
         <div className="flex-1 min-w-0 text-left">
-          <p className="text-[14px] font-semibold leading-none text-[#2E2E2E] truncate">
+          <p className="text-sm font-semibold leading-none text-primary-dark truncate">
             {selectedAddress.address}, {selectedAddress.zipCode}
           </p>
         </div>
