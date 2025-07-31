@@ -25,7 +25,7 @@ const UserDropdown = () => {
   ];
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative cursor-pointer" ref={dropdownRef}>
       <div
         className={`
           flex items-center justify-between bg-white
