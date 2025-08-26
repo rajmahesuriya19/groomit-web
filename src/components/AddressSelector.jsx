@@ -9,7 +9,7 @@ const AddressSelector = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(
-    addresses?.find(addr => addr.is_default) || addresses?.[0] || null
+    addresses?.find(addr => addr?.is_default) || addresses?.[0] || null
   );
   const dropdownRef = useRef(null);
 

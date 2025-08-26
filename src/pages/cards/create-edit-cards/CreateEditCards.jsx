@@ -13,6 +13,7 @@ import { Checkbox } from '@mui/material';
 import { ChevronLeft } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPaymentCard } from '@/utils/store/slices/paymentCards/paymentCardSlice';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
 // ✅ Validation schema
 const schema = yup.object().shape({
@@ -41,6 +42,7 @@ const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 const CreateEditCards = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { showLoader, hideLoader } = useLoader();
     const { id } = useParams();
     const isEdit = Boolean(id);
 
@@ -125,11 +127,11 @@ const CreateEditCards = () => {
     };
 
     const onSubmit = async (formData) => {
-        const [month, year] = formData.expirationDate.split('/')
+        const [month, year] = formData.expirationDate.split("/");
 
         const payload = {
             booking_session_token: "booking_session_6888c7d65d91b1.59307650",
-            cardNumber: formData.cardNumber.replace(/\s/g, ''),
+            cardNumber: formData.cardNumber.replace(/\s/g, ""),
             cardName: formData.cardName,
             expiryMonth: month,
             expiryYear: year,
@@ -139,19 +141,21 @@ const CreateEditCards = () => {
             state: formData.state,
             zip: formData.zip,
             ...(formData.makeDefault && { makeDefault: true }),
-        }
+        };
 
         try {
-            const result = await dispatch(addPaymentCard(payload)).unwrap()
-            // ✅ `unwrap()` lets you throw on reject, return value on success
+            showLoader();
 
-            console.log("Card added:", result)
-            navigate("/user/account")
+            const result = await dispatch(addPaymentCard(payload)).unwrap();
+            console.log("Card added:", result);
 
+            navigate("/user/account");
         } catch (error) {
-            console.error("Failed to add card:", error)
+            console.error("Failed to add card:", error);
+        } finally {
+            hideLoader();
         }
-    }
+    };
 
     return (
         <>

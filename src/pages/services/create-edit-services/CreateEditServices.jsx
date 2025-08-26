@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addAddress, deleteAddress, updateAddress } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
 import AddressInputText from '@/common/AddressInput/AddressInputText';
 import { geocodeByPlaceId } from 'react-google-places-autocomplete';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
 // ✅ Schema
 const schema = yup.object().shape({
@@ -27,6 +28,7 @@ const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 const CreateEditServices = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { showLoader, hideLoader } = useLoader();
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -83,16 +85,28 @@ const CreateEditServices = () => {
             isDefault: formData.isDefault,
         };
 
-        console.log(payload)
-        if (isEdit) {
-            const currentAddress = addresses.find(addr => String(addr.address_id) === String(id));
-            if (currentAddress) {
-                await dispatch(updateAddress({ ...payload, address_id: currentAddress.address_id }));
+        try {
+            showLoader();
+
+            if (isEdit) {
+                const currentAddress = addresses.find(
+                    (addr) => String(addr.address_id) === String(id)
+                );
+                if (currentAddress) {
+                    await dispatch(
+                        updateAddress({ ...payload, address_id: currentAddress.address_id })
+                    ).unwrap();
+                }
+            } else {
+                await dispatch(addAddress(payload)).unwrap();
             }
-        } else {
-            await dispatch(addAddress(payload));
+
+            navigate("/user/account");
+        } catch (err) {
+            console.error("Submit failed:", err);
+        } finally {
+            hideLoader();
         }
-        navigate("/user/account");
     };
 
     const handleDeleteAccount = async () => {
