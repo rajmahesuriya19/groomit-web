@@ -193,7 +193,7 @@ const Account = () => {
 
           {/* Edit Icon */}
           <button
-            onClick={() => navigate(isEditMode ? "/user/account/edit/1" : "/user/account/create")}
+            onClick={() => navigate(isEditMode ? `/user/account/edit/${users?.user_id}` : "/user/account/create")}
           >
             <img
               src={Edit2}
@@ -319,7 +319,7 @@ const Account = () => {
                     <span className="text-sm font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                       {`Ending with ${item.card_number}`}
                     </span>
-                    {item.card_holder ? (
+                    {!item.verified_at ? (
                       <span className="text-sm font-normal text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                         {item.card_holder}
                       </span>

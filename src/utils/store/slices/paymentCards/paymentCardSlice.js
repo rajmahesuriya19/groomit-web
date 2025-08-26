@@ -53,6 +53,11 @@ export const verifyPaymentCard = createAsyncThunk(
         { user_billing_id, amount }
       );
 
+      // ✅ If API says "Card is not verified" treat it as an error
+      if (data?.message && data.message.toLowerCase().includes("not verified")) {
+        return rejectWithValue({ message: data.message });
+      }
+
       return {
         user_billing_id,
         verified_at: data.data.verified_at,
@@ -131,6 +136,22 @@ const paymentCardsSlice = createSlice({
         state.error = action.payload?.message || 'Failed to delete card'
         toast.error(state.error)
       })
+
+      // 🔹 Verify Card
+      .addCase(verifyPaymentCard.fulfilled, (state, action) => {
+        state.loading = false;
+        const card = state.cards.find(c => c.billing_id === action.payload.user_billing_id);
+        if (card) {
+          card.verified_at = action.payload.verified_at;
+        }
+        toast.success('Card verified successfully ✅');
+      })
+      .addCase(verifyPaymentCard.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to verify card';
+        toast.error(state.error);
+      });
+
   },
 })
 

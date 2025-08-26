@@ -68,7 +68,7 @@ const AddressSelector = () => {
       </button>
 
       {/* Dropdown */}
-      {isOpen && (
+      {isOpen && addresses?.length > 1 && (
         <div className="absolute z-50 top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {addresses
             .filter((address) => address.address_id !== selectedAddress?.address_id)

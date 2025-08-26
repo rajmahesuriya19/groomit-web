@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import Location from '../../../assets/icon/location-red.svg';
 import Card from '../../../assets/cards/card-bg.svg';
+import CardVerify from '../../../assets/icon/card-red.svg';
 import Visa from '../../../assets/cards/Visa-light.svg';
 import JCB from '../../../assets/cards/jcb-icon.svg';
 import Fallback from '../../../assets/cards/fall-card.svg';
@@ -12,6 +13,7 @@ import { useNavigate, useParams } from 'react-router';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { deletePaymentCard, verifyPaymentCard } from '@/utils/store/slices/paymentCards/paymentCardSlice';
+import VerifyCardModal from '@/components/Modals/VerifyCardModal';
 
 const cardIcons = {
     visa: Visa,
@@ -24,6 +26,7 @@ const ViewCard = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [verifyModalOpen, setVerifyModalOpen] = useState(false);
     const [card, setCard] = useState(null);
 
     const { cards } = useSelector((state) => state.cards);
@@ -45,18 +48,18 @@ const ViewCard = () => {
         }
     };
 
-    const handleVerifyCard = async () => {
+    const handleVerifyCard = async (amount) => {
         try {
             await dispatch(
                 verifyPaymentCard({
                     user_billing_id: card.billing_id,
-                    amount: "0.12",
+                    amount,
                 })
             ).unwrap();
-
-            alert('Card verified successfully!');
+            setVerifyModalOpen(false);
+            navigate("/user/account")
         } catch (err) {
-            alert(err.message || 'Failed to verify card');
+            toast.error(err.message || "Failed to verify card");
         }
     };
 
@@ -163,7 +166,7 @@ const ViewCard = () => {
             {card.verified_at && <div className="hidden md:flex justify-center items-center py-8">
                 <button
                     type="submit"
-                    onClick={handleVerifyCard}
+                    onClick={() => setVerifyModalOpen(true)}
                     className='w-[193px] h-[48px] rounded-[30px] px-[31px] py-[11px] gap-[10px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] text-center transition-colors duration-200
       bg-primary-dark text-white cursor-pointer'
                 >
@@ -185,7 +188,7 @@ const ViewCard = () => {
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
                 <button
                     type="submit"
-                    onClick={handleVerifyCard}
+                    onClick={() => setVerifyModalOpen(true)}
                     className='w-full h-[48px] rounded-[30px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] transition-colors duration-200
       bg-primary-dark text-white'
                 >
@@ -202,15 +205,16 @@ const ViewCard = () => {
                 title={"Delete Credit Card"}
                 decription={"Are you sure you want to delete this credit card?"}
             />
-            {/* <VerifyCardModal
+            <VerifyCardModal
                 type={'card'}
-                open={isDeleteModalOpen}
-                onClose={() => setIsDeleteModalOpen(false)}
-                onConfirm={handleDeleteAccount}
-                icon={Delete}
-                title={"Delete Credit Card"}
-                decription={"Are you sure you want to delete this credit card?"}
-            /> */}
+                open={verifyModalOpen}
+                onClose={() => setVerifyModalOpen(false)}
+                onConfirm={handleVerifyCard}
+                icon={CardVerify}
+                title={"Verify Your Card"}
+                decription={"Please confirm your card by verifying the small amount charged on your card"}
+                decription1={`**** **** **** ${card?.card_number}`}
+            />
         </div>
     )
 }

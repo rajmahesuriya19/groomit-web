@@ -10,13 +10,17 @@ import editIcon from '../../../assets/icon/fill-edit.svg';
 import userIcon from '../../../assets/icon/user.svg';
 import emailIcon from '../../../assets/icon/sms-red.svg';
 import phoneIcon from '../../../assets/icon/phone-red.svg';
+import Info from '../../../assets/icon/info-circle-yellow.svg';
+import Tick from '../../../assets/icon/tick-green.svg';
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import passwordIcon from '../../../assets/icon/red-lock.svg';
 import CloseIcon from '../../../assets/icon/close-circle-red.svg';
+import CallIcon from '../../../assets/icon/call-green.svg';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
-import { updateUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
+import { getUserInfo, updateUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import VerifyPhoneModal from '@/components/Modals/VerifyPhoneModal';
 
 // ✅ Schema
 const schema = yup.object({
@@ -36,6 +40,7 @@ const CreateEditAccount = () => {
     const { user } = useSelector((state) => state.user);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [verifyPhoneModalOpen, setVerifyPhoneModalOpen] = useState(false);
     const [avatarImage, setAvatarImage] = useState();
     const [avatarFile, setAvatarFile] = useState(null);
 
@@ -93,6 +98,12 @@ const CreateEditAccount = () => {
     const handleDeleteAccount = () => {
         setIsDeleteModalOpen(false);
         alert('Account deleted');
+    };
+
+    const handleVerifyPhone = (otp) => {
+        console.log("Verified OTP:", otp);
+        dispatch(getUserInfo())
+        setVerifyPhoneModalOpen(false);
     };
 
     const handleChangePassword = () => {
@@ -250,27 +261,52 @@ const CreateEditAccount = () => {
                                         placeholder="Email Address"
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base font-inter placeholder:text-gray-300"
                                     />
-                                    <div className="absolute inset-y-0 right-3 flex items-center">
+                                    {!user?.is_phone_verified ? <div className="absolute inset-y-0 right-3 flex items-center">
                                         <img src={emailIcon} alt="Email" className="w-[20px] h-[20px]" />
-                                    </div>
+                                    </div> : <div className="absolute inset-y-0 right-3 flex items-center">
+                                        <img src={Tick} alt="Tick" className="w-[20px] h-[20px]" />
+                                    </div>}
                                 </div>
                                 <div className="text-red-500 text-sm">{errors.email?.message}</div>
                             </div>
 
                             {/* Phone */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-bold text-primary-dark font-inter">Phone Number</label>
+                                <label className="text-sm font-bold text-primary-dark font-inter">
+                                    Phone Number
+                                </label>
+
                                 <div className="relative">
                                     <input
                                         type="text"
                                         {...register('phone')}
                                         placeholder="Phone Number"
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base font-inter placeholder:text-gray-300"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 pr-[110px] py-2 text-base font-inter placeholder:text-gray-300"
                                     />
-                                    <div className="absolute inset-y-0 right-3 flex items-center">
-                                        <img src={phoneIcon} alt="Phone" className="w-[20px] h-[20px]" />
+
+                                    {/* Right-side content inside input */}
+                                    <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+                                        {!user?.is_phone_verified ? (
+                                            <>
+                                                <img src={Info} alt="Info" className="w-[20px] h-[20px]" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setVerifyPhoneModalOpen(true)}
+                                                    className="inline-flex h-[30px] px-3 justify-center items-center gap-1
+                   rounded-[30px] bg-[#2E2E2E] text-white text-sm font-inter"
+                                                >
+                                                    Verify
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <img src={phoneIcon} alt="Phone" className="w-[20px] h-[20px]" />
+                                            </>
+                                        )}
                                     </div>
+
                                 </div>
+                                {/* Error msg */}
                                 <div className="text-red-500 text-sm">{errors.phone?.message}</div>
                             </div>
                         </div>
@@ -322,8 +358,8 @@ const CreateEditAccount = () => {
                             Save Changes
                         </button>
                     </div> */}
-                </form>
-            </div>
+                </form >
+            </div >
 
             <DeleteAccountModal
                 type={'account'}
@@ -333,6 +369,15 @@ const CreateEditAccount = () => {
                 icon={CloseIcon}
                 title={"Are you sure you want to delete your groomit account?"}
                 decription={"Your groomit account and all related data will be deleted."}
+            />
+            <VerifyPhoneModal
+                open={verifyPhoneModalOpen}
+                onClose={() => setVerifyPhoneModalOpen(false)}
+                onConfirm={handleVerifyPhone}
+                icon={CallIcon}
+                title="Verify Phone Number"
+                description={`Verification Code sent to ${user?.phone}`}
+                phone={user?.phone}
             />
         </>
     );

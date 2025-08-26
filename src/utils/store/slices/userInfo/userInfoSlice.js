@@ -33,6 +33,38 @@ export const updateUserInfo = createAsyncThunk(
   }
 );
 
+export const verifyOtp = createAsyncThunk(
+  "user/verifyOtp",
+  async ({ mobile, otp }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post("api/user/booking/start/verify-otp", {
+        mobile,
+        otp,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: "OTP verification failed" });
+    }
+  }
+);
+
+export const sendOtp = createAsyncThunk(
+  "user/sendOtp",
+  async ({ mobile }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post(
+        "api/user/booking/start/send-otp",
+        { mobile }
+      );
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Failed to send OTP" }
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState: {
@@ -76,6 +108,36 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Something went wrong';
         toast.error("Something went wrong");
+      })
+
+      // send otp
+      .addCase(sendOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendOtp.fulfilled, (state) => {
+        state.loading = false;
+        toast.success("OTP sent successfully 📩");
+      })
+      .addCase(sendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to send OTP";
+        toast.error(state.error);
+      })
+
+      // verify otp
+      .addCase(verifyOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyOtp.fulfilled, (state) => {
+        state.loading = false;
+        toast.success("Phone verified successfully 🎉");
+      })
+      .addCase(verifyOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "OTP verification failed";
+        toast.error(state.error);
       });
   },
 });
