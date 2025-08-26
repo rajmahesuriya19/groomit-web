@@ -10,6 +10,7 @@ import CreateEditAccount from './pages/account/create-edit-account/CreateEditAcc
 import CreateEditServices from './pages/services/create-edit-services/CreateEditServices.jsx';
 import CreateEditCards from './pages/cards/create-edit-cards/CreateEditCards.jsx';
 import ViewCard from './pages/cards/view-card/ViewCard.jsx';
+import { ChangePassword } from './pages/auth/change-password/ChangePassword.jsx';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path={RoutePath.ADD_CARD} element={<CreateEditCards />} />
             <Route path={RoutePath.EDIT_CARD} element={<CreateEditCards />} />
             <Route path={RoutePath.VIEW_CARD} element={<ViewCard />} />
+            <Route path={RoutePath.CHANGE_PASSWORD} element={<ChangePassword />} />
             <Route path={RoutePath.DASHBOARD} element={<Dashboard />} />
             <Route path={RoutePath.PAGE_404} element={<Page404/>}/>
             <Route path="*" element={<Navigate to={RoutePath.PAGE_404} replace/>}/>

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
 import Tooltip from "@mui/material/Tooltip";
-import avatar from '../../assets/icon/user-big.svg';
 import Edit2 from '../../assets/icon/edit.svg';
 import Mail from '../../assets/icon/sms-red.svg';
 import Phone from '../../assets/icon/phone-red.svg';
 import Info from '../../assets/icon/info-circle-yellow.svg';
 import infoRed from '../../assets/icon/info-circle.svg';
 import infoGrey from '../../assets/icon/info-circle-grey.svg';
+import heartFilled from '../../assets/icon/heart-fill.svg';
+import heartGrey from '../../assets/icon/heart-grey.svg';
+import blocked from '../../assets/icon/blocked.svg';
 import Message from '../../assets/icon/messages-red.svg';
 import FeedbackIcon from '../../assets/icon/red-star.svg';
 import PasswordIcon from '../../assets/icon/red-lock.svg';
@@ -16,13 +18,22 @@ import LogOut from '../../assets/icon/logout.svg';
 import Add from '../../assets/icon/add-blue.svg';
 import Location from '../../assets/icon/location-red.svg';
 import Card from '../../assets/icon/card-red.svg';
-import StaticUser from '../../assets/icon/sandra-static.svg';
 import FillStar from '../../assets/icon/fill-star.svg';
 import Visa from '../../assets/cards/Visa-light.svg';
+import JCB from '../../assets/cards/jcb-icon.svg';
+import MasterCard from '../../assets/cards/mastercard-icon.svg';
 import Fallback from '../../assets/cards/fall-card.svg';
 import Earn from '../../assets/images/earn-image.svg';
 import { useNavigate } from 'react-router';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
+import { toast } from 'react-toastify';
+import { fetchPaymentCards } from '@/utils/store/slices/paymentCards/paymentCardSlice';
+import { logoutUser } from '@/utils/store/slices/auth/authSlice';
+import { formatPhoneNumber } from '@/common/helpers';
+import { fetchAddresses } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
+import { addGroomerFav, getGroomersList, removeGroomerFav, toggleFavLocal } from '@/utils/store/slices/groomersList/groomersListSlice';
 
 const supportItems = [
   { label: 'FAQs', icon: infoRed },
@@ -32,29 +43,22 @@ const supportItems = [
   { label: 'Change Password', icon: PasswordIcon },
 ];
 
-const addressItems = [
-  { title: 'Health Services 726 Broadway', label: 'New York, NY 10012', selected: 'Yes' },
-  { title: '34 Long address with a lot of characters Kevorkian 50 Washington', label: 'New York, NY 10012' },
-];
-
-const cardsItems = [
-  { name: 'Ending with 0034', label: 'Craig Johnson Shiik', icon: Visa, selected: 'Yes' },
-  { name: 'Ending with 0037', label: 'Craig Johnson Shiik' },
-  { name: 'Ending with 0038', icon: Visa },
-];
-
-const groomersList = [
-  { name: 'Sandra D.', rating: '4.9', review: '127', icon: StaticUser },
-  { name: 'Sandra D.', rating: '4.9', review: '127', icon: StaticUser }
-];
+const cardIcons = {
+  visa: Visa,
+  mastercard: MasterCard,
+  jcb: JCB,
+};
 
 const Account = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showLoader, hideLoader } = useLoader();
-  const [serviceAddressData, setServiceAddressData] = useState();
-  const [cardData, setCardData] = useState();
-  const [groomerExistData, setGroomerExistData] = useState();
   const [tooltipText, setTooltipText] = useState("Click to Copy");
+
+  const users = useSelector((state) => state.user.user);
+  const groomers = useSelector((state) => state.groomers.groomers);
+  const addresses = useSelector((state) => state.addresses.addresses);
+  const cards = useSelector((state) => state.cards.cards);
   const isEditMode = true;
 
   const handleClick = () => {
@@ -66,24 +70,35 @@ const Account = () => {
     }, 2000);
   };
 
-  const fetchData = async () => {
+  const handleFav = (id, isFav) => {
+    dispatch(toggleFavLocal(id));
+
+    if (isFav) {
+      dispatch(removeGroomerFav(id));
+    } else {
+      dispatch(addGroomerFav(id));
+    }
+  };
+
+  const handleLogout = async () => {
+    showLoader();
     try {
-      showLoader();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setServiceAddressData(addressItems)
-      setGroomerExistData(groomersList)
-      setCardData(cardsItems)
+      await dispatch(logoutUser()).unwrap();
+      hideLoader();
+      navigate('/')
+      toast.success('Logout successful 🎉');
     } catch (error) {
-      console.error(error);
-    } finally {
+      console.error('Logout failed:', error.message);
       hideLoader();
     }
   };
 
-
   useEffect(() => {
-    // fetchData();
-  }, [])
+    dispatch(getGroomersList());
+    dispatch(getUserInfo());
+    dispatch(fetchAddresses());
+    dispatch(fetchPaymentCards());
+  }, [dispatch]);
 
 
   return (
@@ -92,7 +107,7 @@ const Account = () => {
       <div className="space-y-4">
         <div>
           <div className="hidden md:flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]">
+            <h2 className="mb-3 text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]">
               My Account
             </h2>
             <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-brand px-3 py-2">
@@ -137,9 +152,9 @@ const Account = () => {
         >
           {/* Avatar */}
           <img
-            src={avatar}
+            src={users?.photo}
             alt="Profile"
-            className="w-[82px] h-[82px]"
+            className="rounded-full w-[82px] h-[82px]"
           />
 
           {/* Profile Text */}
@@ -147,7 +162,7 @@ const Account = () => {
             <h2
               className="text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]"
             >
-              Andrew Smith
+              {users?.name}
             </h2>
             <div className="flex items-center text-sm text-gray-700 space-x-2 mt-1">
               <img
@@ -156,7 +171,7 @@ const Account = () => {
                 className="w-[20px] h-[20px]"
               />
               <span className="text-sm font-normal text-primary-dark leading-[100%] tracking-[-0.01em]">
-                andrewsmith123@mail.com
+                {users?.email}
               </span>
             </div>
             <div className="flex items-center text-sm text-gray-700 space-x-2 mt-1">
@@ -166,13 +181,13 @@ const Account = () => {
                 className="w-[20px] h-[20px]"
               />
               <span className="text-sm font-medium text-primary-dark leading-[100%] tracking-[-0.01em]">
-                +123 456 7890
+                {formatPhoneNumber(users?.phone)}
               </span>
-              <img
+              {users?.is_phone_verified !== true && <img
                 src={Info}
                 alt="Info"
                 className="w-[20px] h-[20px]"
-              />
+              />}
             </div>
           </div>
 
@@ -189,7 +204,7 @@ const Account = () => {
         </div>
 
         {/* Add Service Address */}
-        {serviceAddressData?.length > 0 ? (
+        {addresses?.length > 0 ? (
           // If addresses exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -215,26 +230,26 @@ const Account = () => {
               </button>
             </div>
 
-            {serviceAddressData.map((item, index) => (
+            {addresses.map((item, index) => (
               <div
-                key={item.label}
-                className={`flex justify-between items-start pt-2 ${index !== serviceAddressData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                key={item?.address_id}
+                className={`flex justify-between items-start pt-2 ${index !== addresses.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
-                <div className="flex flex-col w-[220px]">
+                <div className="flex flex-col w-[220px] gap-1">
                   <span className="text-sm font-bold text-primary-dark leading-[18px] font-inter">
-                    {item.title}
+                    {item?.address1} {item?.address2}
                   </span>
                   <span className="text-sm font-normal text-primary-dark leading-[18px] font-inter">
-                    {item.label}
+                    {item?.city}, {item?.state} {item?.zip}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {item?.selected && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
+                  {item?.default_address == "Y" && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
                     Default
                   </div>}
                   <button
-                    onClick={() => navigate("/user/address/edit/1")}
+                    onClick={() => navigate(`/user/address/edit/${item?.address_id}`)}
                   >
                     <ChevronRight size={24} className="text-gray-400" />
                   </button>
@@ -262,7 +277,7 @@ const Account = () => {
 
 
         {/* Add Card */}
-        {cardData?.length > 0 ? (
+        {cards?.length > 0 ? (
           // If Card exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -288,29 +303,25 @@ const Account = () => {
               </button>
             </div>
 
-            {cardData.map((item, index) => (
+            {cards.map((item, index) => (
               <div
                 key={item.label}
-                className={`flex justify-between items-center pt-2 ${index !== cardData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-center pt-2 ${index !== cards.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
                 <div className="flex items-center gap-3 w-full">
-                  {item.icon ? (<img
-                    src={item.icon}
-                    alt={item.name}
+                  <img
+                    src={cardIcons[item.card_provider?.toLowerCase()] || Fallback}
+                    alt={item.card_provider || "Card"}
                     className="w-[47px] h-[28px]"
-                  />) : (<img
-                    src={Fallback}
-                    alt='FallBack Image'
-                    className="w-[47px] h-[28px]"
-                  />)}
+                  />
                   <div className="flex flex-col gap-1 w-[219px]">
                     <span className="text-sm font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
-                      {item.name}
+                      {`Ending with ${item.card_number}`}
                     </span>
-                    {item.label ? (
+                    {item.card_holder ? (
                       <span className="text-sm font-normal text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
-                        {item.label}
+                        {item.card_holder}
                       </span>
                     ) : (
                       <div className="flex items-center gap-1 py-[2px] rounded-[4px] w-fit">
@@ -323,11 +334,11 @@ const Account = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {item?.selected && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
+                  {item?.default_card === "Y" && <div className="bg-[#28B446] text-white text-[10px] font-bold uppercase rounded-full px-[6px] h-[18px] flex items-center justify-center font-inter">
                     Default
                   </div>}
                   <button
-                    onClick={() => navigate(item?.label ? "/user/card/edit/1" : "/user/card/view")}
+                    onClick={() => navigate(!item?.card_holder ? "/user/card/edit/1" : `/user/card/view/${item?.billing_id}`)}
                   >
                     <ChevronRight size={24} className="text-gray-400" />
                   </button>
@@ -355,7 +366,7 @@ const Account = () => {
           </div>)}
 
         {/* Add Groomers List */}
-        {groomerExistData?.length > 0 && (
+        {groomers?.length > 0 && (
           // If Groomer exist
           <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
             <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -366,18 +377,18 @@ const Account = () => {
               </div>
             </div>
 
-            {groomerExistData.map((item, index) => (
+            {groomers.map((item, index) => (
               <div
                 key={item.name}
-                className={`flex justify-between items-center pt-2 ${index !== groomerExistData.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                className={`flex justify-between items-center pt-2 ${index !== groomers.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                   }`}
               >
                 <div className="flex items-center gap-2 w-full">
-                  {item.icon && (
+                  {item.profile_photo_url && (
                     <img
-                      src={item.icon}
+                      src={item.profile_photo_url}
                       alt={item.name}
-                      className="w-[48px] h-[48px]"
+                      className="rounded-full w-[48px] h-[48px]"
                     />
                   )}
                   <div className="flex flex-col gap-1 w-[219px]">
@@ -391,20 +402,47 @@ const Account = () => {
                         className="w-[20px] h-[20px]"
                       />
                     </div>
-                    {item.rating && item.review && (
-                      <div className="flex items-center gap-1 bg-primary-dark rounded-[25px] px-[6px] py-[4px] w-[79px]">
-                        <img src={FillStar} alt="Rating" className="w-[10px] h-[11px]" />
-                        <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
-                          {item.rating}
-                        </span>
-                        <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
-                          ({item.review})
-                        </span>
+                    {(item.rating_avg || item.rating_qty) && (
+                      <div className="flex items-center gap-1 bg-primary-dark rounded-[25px] px-[6px] py-[4px] w-[85px]">
+                        {item.rating_avg && (
+                          <>
+                            <img src={FillStar} alt="Rating" className="w-[10px] h-[11px]" />
+                            <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
+                              {item.rating_avg}
+                            </span>
+                          </>
+                        )}
+
+                        {item.rating_qty && (
+                          <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
+                            {item.rating_avg ? `| ${item.rating_qty}` : item.rating_qty}
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
-                <ChevronRight size={24} className="text-gray-400" />
+                {item.blocked_by ? (
+                  <button className="cursor-pointer">
+                    <img
+                      src={blocked}
+                      alt="Blocked"
+                      className="w-[34px] h-[34px]"
+                    />
+                  </button>
+                ) : (
+                  <button
+                    key={item.groomer_id}
+                    className="cursor-pointer"
+                    onClick={() => handleFav(item.groomer_id, item.is_fav_groomer)}
+                  >
+                    <img
+                      src={!item.is_fav_groomer ? heartGrey : heartFilled}
+                      alt={!item.is_fav_groomer ? "Not Favourite" : "Favourite"}
+                      className="w-[34px] h-[34px]"
+                    />
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -508,7 +546,9 @@ const Account = () => {
               Log Out
             </span>
           </div>
-          <ChevronRight size={24} className="text-gray-400" />
+          <button onClick={handleLogout}>
+            <ChevronRight size={24} className="text-gray-400" />
+          </button>
         </div>
       </div>
     </div>

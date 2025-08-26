@@ -7,7 +7,8 @@ export const RoutePath = {
   EDIT_ACCOUNT: '/user/account/edit/:id',
   EDIT_SERVICE: '/user/address/edit/:id',
   EDIT_CARD: '/user/card/edit/:id',
-  VIEW_CARD: '/user/card/view',
+  VIEW_CARD: '/user/card/view/:id',
+  CHANGE_PASSWORD: 'user/account/password/change',
   DASHBOARD: '/user/dashboard',
   PAGE_404: '/404',
 };

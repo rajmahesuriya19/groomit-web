@@ -1,66 +1,107 @@
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import Delete from '../../../assets/icon/delete-red.svg';
-import { Checkbox } from '@mui/material';
+import { Autocomplete, Checkbox, CircularProgress, TextField } from '@mui/material';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
 import { ChevronLeft } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addAddress, deleteAddress, updateAddress } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
+import AddressInputText from '@/common/AddressInput/AddressInputText';
+import { geocodeByPlaceId } from 'react-google-places-autocomplete';
 
+// ✅ Schema
 const schema = yup.object().shape({
-    address: yup.string().required('Address is required'),
-    apartment: yup.string().required('Apartment or suite number is required'),
+    street: yup.string().required('Address is required'),
     city: yup.string().required('City is required'),
     state: yup.string().required('State is required'),
-    zipCode: yup.string().required('Zip Code is required'),
+    zip: yup.string().required('Zip Code is required'),
 });
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 const CreateEditServices = () => {
-    const { id } = useParams();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { id } = useParams();
     const isEdit = Boolean(id);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const { addresses } = useSelector((state) => state.addresses);
 
     const {
         register,
         handleSubmit,
         formState: { errors, isDirty },
         reset,
+        control,
+        setValue
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
-            address: '',
-            apartment: '',
+            street: '',
+            apartment_number: '',
             city: '',
             state: '',
-            zipCode: '',
+            zip: '',
+            isDefault: false,
         },
     });
 
     useEffect(() => {
-        if (isEdit) {
-            reset({
-                address: '123 Main Street',
-                apartment: 'Apt 204',
-                city: 'New York',
-                state: 'NY',
-                zipCode: '10001',
-            });
-        }
-    }, [isEdit, reset]);
+        if (isEdit && addresses?.length > 0) {
+            const currentAddress = addresses.find(
+                (addr) => String(addr.address_id) === String(id)
+            );
 
-    const onSubmit = (data) => {
-        console.log(isEdit ? 'Updating address:' : 'Creating address:', data);
+            if (currentAddress) {
+                reset({
+                    street: currentAddress.address1 || '',
+                    apartment_number: currentAddress.address2 || '',
+                    city: currentAddress.city || '',
+                    state: currentAddress.state || '',
+                    zip: currentAddress.zip || '',
+                    isDefault: currentAddress.default_address === "Y",
+                });
+            }
+        }
+    }, [isEdit, addresses, id, reset]);
+
+    const onSubmit = async (formData) => {
+        console.log(formData);
+
+        const payload = {
+            street: formData.street,
+            apartment_number: formData.apartment_number || "",
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+            isDefault: formData.isDefault,
+        };
+
+        console.log(payload)
+        if (isEdit) {
+            const currentAddress = addresses.find(addr => String(addr.address_id) === String(id));
+            if (currentAddress) {
+                await dispatch(updateAddress({ ...payload, address_id: currentAddress.address_id }));
+            }
+        } else {
+            await dispatch(addAddress(payload));
+        }
+        navigate("/user/account");
     };
 
-    const handleDeleteAccount = () => {
+    const handleDeleteAccount = async () => {
+        const currentAddress = addresses.find(addr => String(addr.address_id) === String(id));
+        if (!currentAddress) return;
+
+        await dispatch(deleteAddress(currentAddress.address_id));
         setIsDeleteModalOpen(false);
-        alert('Service deleted');
+        navigate("/user/account");
     };
 
     return (
@@ -113,10 +154,58 @@ const CreateEditServices = () => {
                                 <input
                                     type="text"
                                     placeholder="123 Main Street"
-                                    {...register('address')}
+                                    {...register('street')}
                                     className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
-                                <div className="text-red-500 text-sm">{errors.address?.message}</div>
+                                {/* <Controller
+                                    name="street"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <AddressInputText
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="123 Main Street"
+                                            error={errors.street?.message}
+                                            onSelect={async (selected) => {
+                                                if (!selected) return;
+
+                                                field.onChange(selected.label);
+
+                                                try {
+                                                    const results = await geocodeByPlaceId(
+                                                        selected.value?.place_id || selected.value?.placeId
+                                                    );
+                                                    const addrComponents = results[0].address_components;
+
+                                                    const streetNumber =
+                                                        addrComponents.find((c) => c.types.includes("street_number"))
+                                                            ?.long_name || "";
+                                                    const route =
+                                                        addrComponents.find((c) => c.types.includes("route"))?.long_name || "";
+                                                    const city =
+                                                        addrComponents.find((c) => c.types.includes("locality"))?.long_name ||
+                                                        addrComponents.find((c) => c.types.includes("sublocality"))?.long_name ||
+                                                        "";
+                                                    const state =
+                                                        addrComponents.find((c) =>
+                                                            c.types.includes("administrative_area_level_1")
+                                                        )?.short_name || "";
+                                                    const zip =
+                                                        addrComponents.find((c) => c.types.includes("postal_code"))
+                                                            ?.long_name || "";
+
+                                                    setValue("street", `${streetNumber} ${route}`.trim());
+                                                    setValue("city", city);
+                                                    setValue("state", state);
+                                                    setValue("zip", zip);
+                                                } catch (err) {
+                                                    console.error("Geocoding error:", err);
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                /> */}
+                                <div className="text-red-500 text-sm">{errors.street?.message}</div>
                             </div>
 
                             {/* Apartment or suite number */}
@@ -132,10 +221,9 @@ const CreateEditServices = () => {
                                 <input
                                     type="text"
                                     placeholder="Apt 204"
-                                    {...register('apartment')}
+                                    {...register('apartment_number')}
                                     className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
-                                <div className="text-red-500 text-sm">{errors.apartment?.message}</div>
                             </div>
                         </div>
 
@@ -174,34 +262,41 @@ const CreateEditServices = () => {
                                     <input
                                         type="text"
                                         placeholder="10001"
-                                        {...register('zipCode')}
+                                        {...register('zip')}
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
-                                    <div className="text-red-500 text-sm">{errors.zipCode?.message}</div>
+                                    <div className="text-red-500 text-sm">{errors.zip?.message}</div>
                                 </div>
                             </div>
 
                             {/* Default Address Checkbox */}
                             <div className="flex gap-2 items-center">
-                                <Checkbox
-                                    {...label}
-                                    defaultChecked
-                                    disableRipple
-                                    disableFocusRipple
-                                    disableTouchRipple
-                                    sx={{
-                                        padding: 0,
-                                        color: '#7C868A',
-                                        '&.Mui-checked': {
-                                            color: '#FF314A',
-                                        },
-                                        '&:hover': {
-                                            backgroundColor: 'transparent',
-                                        },
-                                        '&.Mui-focusVisible': {
-                                            outline: 'none',
-                                        },
-                                    }}
+                                <Controller
+                                    name="isDefault"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            {...field}
+                                            checked={field.value}
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            disableRipple
+                                            disableFocusRipple
+                                            disableTouchRipple
+                                            sx={{
+                                                padding: 0,
+                                                color: '#7C868A',
+                                                '&.Mui-checked': {
+                                                    color: '#FF314A',
+                                                },
+                                                '&:hover': {
+                                                    backgroundColor: 'transparent',
+                                                },
+                                                '&.Mui-focusVisible': {
+                                                    outline: 'none',
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 />
                                 <span className="font-inter font-normal text-base leading-[21px] tracking-[-0.02em] text-primary-dark">
                                     Make this to default address

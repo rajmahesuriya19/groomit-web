@@ -1,73 +1,157 @@
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
 import backIcon from '../../../assets/icon/arrow-left.svg';
+import Card from '../../../assets/icon/card-red.svg';
+import userIcon from '../../../assets/icon/user.svg';
+import Calender from '../../../assets/icon/red-calendar.svg';
+import Lock from '../../../assets/icon/red-lock2.svg';
+import Location from '../../../assets/icon/location-red.svg';
 import { Checkbox } from '@mui/material';
 import { ChevronLeft } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addPaymentCard } from '@/utils/store/slices/paymentCards/paymentCardSlice';
 
+// ✅ Validation schema
 const schema = yup.object().shape({
-    cardNumber: yup.string().required('Card Number is required'),
-    nameOnCard: yup.string().required('Name on Card is required'),
-    expirationDate: yup.string().required('Expiration Date is required'),
-    cvv: yup.string().required('CVV is required'),
+    cardNumber: yup
+        .string()
+        .matches(/^\d{4}\s\d{4}\s\d{4}\s\d{4}$/, 'Enter a valid 16-digit card number')
+        .required('Card Number is required'),
+    cardName: yup.string().required('Name on Card is required'),
+    expirationDate: yup
+        .string()
+        .matches(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Enter a valid Expiration Date (MM/YY)')
+        .required('Expiration Date is required'),
+    cvv: yup
+        .string()
+        .matches(/^\d{3,4}$/, 'Enter a valid 3 or 4 digit CVV')
+        .required('CVV is required'),
 
     address: yup.string().required('Address is required'),
-    apartment: yup.string().required('Apartment or suite number is required'),
     city: yup.string().required('City is required'),
     state: yup.string().required('State is required'),
-    zipCode: yup.string().required('Zip Code is required'),
+    zip: yup.string().required('Zip Code is required'),
 });
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 const CreateEditCards = () => {
-    const { id } = useParams();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { id } = useParams();
     const isEdit = Boolean(id);
+
+    const { addresses } = useSelector((state) => state.addresses);
+
+    const defaultAddress = addresses.find(addr => addr.default_address === "Y")
+
+    const defaultServiceAddress = {
+        address: defaultAddress?.address1,
+        apartment: defaultAddress?.address2,
+        city: defaultAddress?.city,
+        state: defaultAddress?.state,
+        zip: defaultAddress?.zip,
+    };
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isDirty },
+        formState: { errors },
         reset,
+        setValue,
+        control
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
             cardNumber: '',
-            nameOnCard: '',
+            cardName: '',
             expirationDate: '',
             cvv: '',
+            makeDefault: false,
+
+            isDefaultAddress: false,
             address: '',
             apartment: '',
             city: '',
             state: '',
-            zipCode: '',
+            zip: '',
         },
     });
 
-    useEffect(() => {
-        if (isEdit) {
-            reset({
-                cardNumber: '1234 5678 9222 0034',
-                nameOnCard: 'Craig Jhohnson Shiik',
-                expirationDate: '02/29',
-                cvv: '123',
-
-                address: '123 Main Street',
-                apartment: 'Apt 204',
-                city: 'New York',
-                state: 'NY',
-                zipCode: '10001',
-            });
-        }
-    }, [isEdit, reset]);
-
-    const onSubmit = (data) => {
-        console.log(isEdit ? 'Updating address:' : 'Creating address:', data);
+    // ✅ Format Card Number (#### #### #### ####)
+    const handleCardNumberChange = (e) => {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 16);
+        value = value.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        setValue('cardNumber', value);
     };
+
+    // ✅ Format Expiration Date (MM/YY)
+    const handleExpiryChange = (e) => {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        if (value.length >= 3) {
+            value = value.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+        }
+        setValue('expirationDate', value);
+    };
+
+    // ✅ CVV (only numbers, max 4 digits, hidden as ***)
+    const handleCVVChange = (e) => {
+        let value = e.target.value.replace(/\D/g, '').slice(0, 4);
+        setValue('cvv', value);
+    };
+
+    // ✅ Autofill Billing Address if same as Service Address
+    const handleBillingCheckbox = (e) => {
+        if (e.target.checked) {
+            reset((prev) => ({
+                ...prev,
+                ...defaultServiceAddress,
+                isDefaultAddress: true,
+            }));
+        } else {
+            reset((prev) => ({
+                ...prev,
+                address: "",
+                apartment: "",
+                city: "",
+                state: "",
+                zip: "",
+                isDefaultAddress: false,
+            }));
+        }
+    };
+
+    const onSubmit = async (formData) => {
+        const [month, year] = formData.expirationDate.split('/')
+
+        const payload = {
+            booking_session_token: "booking_session_6888c7d65d91b1.59307650",
+            cardNumber: formData.cardNumber.replace(/\s/g, ''),
+            cardName: formData.cardName,
+            expiryMonth: month,
+            expiryYear: year,
+            cvv: formData.cvv,
+            street: formData.address,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+            ...(formData.makeDefault && { makeDefault: true }),
+        }
+
+        try {
+            const result = await dispatch(addPaymentCard(payload)).unwrap()
+            // ✅ `unwrap()` lets you throw on reject, return value on success
+
+            console.log("Card added:", result)
+            navigate("/user/account")
+
+        } catch (error) {
+            console.error("Failed to add card:", error)
+        }
+    }
 
     return (
         <>
@@ -108,13 +192,20 @@ const CreateEditCards = () => {
                         <div className="flex flex-col gap-4 md:w-1/2">
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-bold text-primary-dark font-inter">Card Number</label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter Card Number"
-                                    {...register('cardNumber')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                />
-                                <div className="text-red-500 text-sm">{errors.cardNumber?.message}</div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        {...register('cardNumber')}
+                                        onChange={handleCardNumberChange}
+                                        maxLength={19}
+                                        placeholder="Enter Card Number"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
+                                    />
+                                    <div className="absolute inset-y-0 right-3 flex items-center">
+                                        <img src={Card} alt="Card" className="w-[24px] h-[24px]" />
+                                    </div>
+                                </div>
+                                <p className="text-red-500 text-sm">{errors.cardNumber?.message}</p>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -123,59 +214,85 @@ const CreateEditCards = () => {
                                         Name on Card
                                     </label>
                                 </div>
-                                <input
-                                    type="text"
-                                    placeholder="Enter Name on Card"
-                                    {...register('nameOnCard')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                />
-                                <div className="text-red-500 text-sm">{errors.nameOnCard?.message}</div>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Name on Card"
+                                        {...register('cardName')}
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
+                                    />
+                                    <div className="absolute inset-y-0 right-3 flex items-center">
+                                        <img src={userIcon} alt="user" className="w-[24px] h-[24px]" />
+                                    </div>
+                                </div>
+                                <p className="text-red-500 text-sm">{errors.cardName?.message}</p>
                             </div>
 
                             <div className="flex gap-2">
                                 <div className="flex-1 flex flex-col gap-2">
                                     <label className="text-sm font-bold text-primary-dark font-inter">Expiration Date</label>
-                                    <input
-                                        type="text"
-                                        placeholder="MM/YY"
-                                        {...register('expirationDate')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                    />
-                                    <div className="text-red-500 text-sm">{errors.expirationDate?.message}</div>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="MM/YY"
+                                            {...register('expirationDate')}
+                                            onChange={handleExpiryChange}
+                                            maxLength={5}
+                                            className="w-full border rounded-md px-4 py-2"
+                                        />
+                                        <div className="absolute inset-y-0 right-3 flex items-center">
+                                            <img src={Calender} alt="Calender" className="w-[24px] h-[24px]" />
+                                        </div>
+                                    </div>
+                                    <p className="text-red-500 text-sm">{errors.expirationDate?.message}</p>
                                 </div>
 
                                 <div className="flex-1 flex flex-col gap-2">
                                     <label className="text-sm font-bold text-primary-dark font-inter">CVV</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Enter CVV"
-                                        {...register('cvv')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                    />
-                                    <div className="text-red-500 text-sm">{errors.cvv?.message}</div>
+                                    <div className="relative">
+                                        <input
+                                            type="password"
+                                            placeholder="***"
+                                            {...register('cvv')}
+                                            onChange={handleCVVChange}
+                                            maxLength={4}
+                                            className="w-full border rounded-md px-4 py-2"
+                                        />
+                                        <div className="absolute inset-y-0 right-3 flex items-center">
+                                            <img src={Lock} alt="Lock" className="w-[24px] h-[24px]" />
+                                        </div>
+                                    </div>
+                                    <p className="text-red-500 text-sm">{errors.cvv?.message}</p>
                                 </div>
                             </div>
 
                             <div className="flex gap-2 items-center">
-                                <Checkbox
-                                    {...label}
-                                    defaultChecked
-                                    disableRipple
-                                    disableFocusRipple
-                                    disableTouchRipple
-                                    sx={{
-                                        padding: 0,
-                                        color: '#7C868A',
-                                        '&.Mui-checked': {
-                                            color: '#FF314A',
-                                        },
-                                        '&:hover': {
-                                            backgroundColor: 'transparent',
-                                        },
-                                        '&.Mui-focusVisible': {
-                                            outline: 'none',
-                                        },
-                                    }}
+                                <Controller
+                                    name="makeDefault"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            {...field}
+                                            checked={field.value}
+                                            onChange={(e) => field.onChange(e.target.checked)}
+                                            disableRipple
+                                            disableFocusRipple
+                                            disableTouchRipple
+                                            sx={{
+                                                padding: 0,
+                                                color: '#7C868A',
+                                                '&.Mui-checked': {
+                                                    color: '#FF314A',
+                                                },
+                                                '&:hover': {
+                                                    backgroundColor: 'transparent',
+                                                },
+                                                '&.Mui-focusVisible': {
+                                                    outline: 'none',
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 />
                                 <span className="font-inter font-normal text-base leading-[21px] tracking-[-0.02em] text-primary-dark">
                                     Make this my default payment method
@@ -192,39 +309,53 @@ const CreateEditCards = () => {
                                 Billing Address
                             </h2>
                             <div className="flex gap-2 items-center">
-                                <Checkbox
-                                    {...label}
-                                    defaultChecked
-                                    disableRipple
-                                    disableFocusRipple
-                                    disableTouchRipple
-                                    sx={{
-                                        padding: 0,
-                                        color: '#7C868A',
-                                        '&.Mui-checked': {
-                                            color: '#FF314A',
-                                        },
-                                        '&:hover': {
-                                            backgroundColor: 'transparent',
-                                        },
-                                        '&.Mui-focusVisible': {
-                                            outline: 'none',
-                                        },
-                                    }}
+                                <Controller
+                                    name="isDefaultAddress"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            {...field}
+                                            checked={field.value}
+                                            onChange={handleBillingCheckbox}
+                                            disableRipple
+                                            disableFocusRipple
+                                            disableTouchRipple
+                                            sx={{
+                                                padding: 0,
+                                                color: '#7C868A',
+                                                '&.Mui-checked': {
+                                                    color: '#FF314A',
+                                                },
+                                                '&:hover': {
+                                                    backgroundColor: 'transparent',
+                                                },
+                                                '&.Mui-focusVisible': {
+                                                    outline: 'none',
+                                                },
+                                            }}
+                                        />
+                                    )}
                                 />
                                 <span className="font-inter font-normal text-base leading-[21px] tracking-[-0.02em] text-primary-dark">
                                     Billing address same as service address
                                 </span>
                             </div>
 
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 min-w-0">
                                 <label className="text-sm font-bold text-primary-dark font-inter">Address</label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter Address"
-                                    {...register('address')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                />
+
+                                <div className="relative min-w-0">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Address"
+                                        {...register('address')}
+                                        title={defaultAddress?.address1}
+                                        className="block w-full min-w-0 truncate pr-10 rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300" />
+                                    <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                        <img src={Location} alt="Location" className="w-[24px] h-[24px]" />
+                                    </div>
+                                </div>
+
                                 <div className="text-red-500 text-sm">{errors.address?.message}</div>
                             </div>
 
@@ -243,7 +374,6 @@ const CreateEditCards = () => {
                                     {...register('apartment')}
                                     className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
-                                <div className="text-red-500 text-sm">{errors.apartment?.message}</div>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -274,10 +404,10 @@ const CreateEditCards = () => {
                                     <input
                                         type="text"
                                         placeholder="Enter Zip"
-                                        {...register('zipCode')}
+                                        {...register('zip')}
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
-                                    <div className="text-red-500 text-sm">{errors.zipCode?.message}</div>
+                                    <div className="text-red-500 text-sm">{errors.zip?.message}</div>
                                 </div>
                             </div>
                         </div>

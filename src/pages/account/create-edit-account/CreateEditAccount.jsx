@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -14,54 +15,88 @@ import passwordIcon from '../../../assets/icon/red-lock.svg';
 import CloseIcon from '../../../assets/icon/close-circle-red.svg';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
+import { updateUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
-const schema = yup.object().shape({
-    firstName: yup.string().required('First name is required'),
-    lastName: yup.string().required('Last name is required'),
-    email: yup.string().email('Invalid email').required('Email is required'),
-    phone: yup.string().required('Phone number is required'),
+// ✅ Schema
+const schema = yup.object({
+    first_name: yup.string().required("First name is required"),
+    last_name: yup.string().required("Last name is required"),
+    email: yup.string().email("Invalid email").required("Email is required"),
+    phone: yup.string().required("Phone number is required"),
 });
 
 const CreateEditAccount = () => {
-    const { id } = useParams();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { id } = useParams();
     const isEdit = Boolean(id);
+    const { showLoader, hideLoader } = useLoader();
+
+    const { user } = useSelector((state) => state.user);
+
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [avatarImage, setAvatarImage] = useState(avatar);
+    const [avatarImage, setAvatarImage] = useState();
+    const [avatarFile, setAvatarFile] = useState(null);
 
     const {
         register,
         handleSubmit,
         formState: { errors, isDirty },
         reset,
+        setValue
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
-            firstName: '',
-            lastName: '',
+            first_name: '',
+            last_name: '',
             email: '',
             phone: '',
         },
     });
 
     useEffect(() => {
-        if (isEdit) {
+        if (isEdit && user) {
             reset({
-                firstName: 'Andrew',
-                lastName: 'Smith',
-                email: 'andrewsmith124@mail.com',
-                phone: '+12345 67890',
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                email: user.email || '',
+                phone: user.phone || '',
             });
+            if (user.photo) setAvatarImage(user.photo);
         }
-    }, [isEdit, reset]);
+    }, [isEdit, user, reset]);
 
-    const onSubmit = (data) => {
-        console.log(isEdit ? 'Updating profile:' : 'Creating profile:', data);
+    const onSubmit = async (data) => {
+        const payload = {
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.email,
+            phone: data.phone,
+            profile_photo: avatarFile,
+        };
+
+        try {
+            showLoader("Updating profile...");
+            const result = await dispatch(updateUserInfo(payload)).unwrap();
+
+            console.log("✅ Profile updated:", result);
+            navigate("/user/account");
+        } catch (error) {
+            console.error("❌ Failed to update profile:", error);
+        } finally {
+            hideLoader();
+        }
     };
+
 
     const handleDeleteAccount = () => {
         setIsDeleteModalOpen(false);
         alert('Account deleted');
+    };
+
+    const handleChangePassword = () => {
+        navigate('/user/account/password/change')
     };
 
     return (
@@ -125,6 +160,8 @@ const CreateEditAccount = () => {
                                                 const reader = new FileReader();
                                                 reader.onload = () => setAvatarImage(reader.result);
                                                 reader.readAsDataURL(file);
+                                                setAvatarFile(file);
+                                                setValue('profile_photo', file);
                                             }
                                         }}
                                     />
@@ -138,58 +175,57 @@ const CreateEditAccount = () => {
                                     <label className="text-sm font-bold text-primary-dark font-inter">Full Name</label>
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            {...register('first_name')}
                                             placeholder="First Name"
-                                            {...register('firstName')}
                                             className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter font-normal text-primary-dark placeholder:text-gray-300"
                                         />
                                         <div className="absolute inset-y-0 right-3 flex items-center">
                                             <img src={userIcon} alt="User" className="w-[20px] h-[20px]" />
                                         </div>
                                     </div>
-                                    <div className="text-red-500 text-sm">{errors.firstName?.message}</div>
+                                    {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
 
                                     <div className="relative">
                                         <input
-                                            type="text"
+                                            {...register('last_name')}
                                             placeholder="Last Name"
-                                            {...register('lastName')}
                                             className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter font-normal text-primary-dark placeholder:text-gray-300"
                                         />
                                         <div className="absolute inset-y-0 right-3 flex items-center">
                                             <img src={userIcon} alt="User" className="w-[20px] h-[20px]" />
                                         </div>
                                     </div>
-                                    <div className="text-red-500 text-sm">{errors.lastName?.message}</div>
+                                    {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
                                 </div>
                             </div>
 
                             {/* Full Name - Mobile: Two inputs in row */}
-                            <div className="flex md:hidden gap-4">
+                            {/* <div className="flex md:hidden gap-4">
                                 <div className="w-1/2 flex flex-col gap-2">
                                     <label className="text-sm font-bold text-primary-dark font-inter">First Name</label>
                                     <input
                                         type="text"
+                                        {...register('first_name')}
                                         placeholder="First Name"
-                                        {...register('firstName')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base font-inter placeholder:text-gray-300"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2"
                                     />
                                 </div>
                                 <div className="w-1/2 flex flex-col gap-2">
                                     <label className="text-sm font-bold text-primary-dark font-inter">Last Name</label>
                                     <input
                                         type="text"
+                                        {...register('last_name')}
                                         placeholder="Last Name"
-                                        {...register('lastName')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base font-inter placeholder:text-gray-300"
+                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2"
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Change Password – only Desktop */}
                             <button
                                 type="button"
                                 className="hidden md:flex items-center justify-between h-[54px] bg-white rounded-[15px] px-[15px] shadow-[0_0_40px_0_rgba(0,0,0,0.1)]"
+                                onClick={handleChangePassword}
                             >
                                 <div className="flex items-center gap-2">
                                     <img src={passwordIcon} alt="Lock" className="w-[24px] h-[24px]" />
@@ -210,8 +246,8 @@ const CreateEditAccount = () => {
                                 <div className="relative">
                                     <input
                                         type="email"
+                                        {...register('email')}
                                         placeholder="Email Address"
-                                        {...register("email")}
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base font-inter placeholder:text-gray-300"
                                     />
                                     <div className="absolute inset-y-0 right-3 flex items-center">
@@ -227,8 +263,8 @@ const CreateEditAccount = () => {
                                 <div className="relative">
                                     <input
                                         type="text"
-                                        placeholder="Phone Number"
                                         {...register('phone')}
+                                        placeholder="Phone Number"
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 pr-10 py-2 text-base font-inter placeholder:text-gray-300"
                                     />
                                     <div className="absolute inset-y-0 right-3 flex items-center">
@@ -241,7 +277,7 @@ const CreateEditAccount = () => {
                     </div>
 
                     {/* Change Password (Mobile only) */}
-                    <div className="md:hidden pt-6">
+                    {/* <div className="md:hidden pt-6">
                         <button
                             type="button"
                             className="w-full h-[54px] bg-white rounded-[15px] px-[15px] shadow-md flex items-center justify-between"
@@ -252,40 +288,40 @@ const CreateEditAccount = () => {
                             </div>
                             <ChevronRight size={24} className="text-gray-400" />
                         </button>
-                    </div>
+                    </div> */}
 
                     <div className="hidden md:flex justify-center items-center py-8">
                         <button
                             type="submit"
                             disabled={!!id && !isDirty}
                             className={`w-[193px] h-[48px] rounded-[30px] px-[31px] py-[11px] gap-[10px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] text-center transition-colors duration-200
-              ${!id || isDirty ? 'bg-brand text-white cursor-pointer' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
+    ${!id || isDirty ? 'bg-brand text-white cursor-pointer' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
                         >
                             Save Changes
                         </button>
                     </div>
 
                     {/* Delete My Account - Mobile only */}
-                    <div className="md:hidden px-5 pt-4 text-center mb-28">
+                    {/* <div className="md:hidden px-5 pt-4 text-center mb-28">
                         <button
                             onClick={() => setIsDeleteModalOpen(true)}
                             className="text-[#EB5757] underline text-base"
                         >
                             Delete My account
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Sticky Save Button - Mobile only */}
-                    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+                    {/* <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
                         <button
                             type="submit"
                             disabled={!!id && !isDirty}
                             className={`w-full h-[48px] rounded-[30px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] transition-colors duration-200
-      ${!id || isDirty ? 'bg-brand text-white' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
+                            ${!id || isDirty ? 'bg-brand text-white' : 'bg-[#BEC3C5] text-white cursor-not-allowed'}`}
                         >
                             Save Changes
                         </button>
-                    </div>
+                    </div> */}
                 </form>
             </div>
 

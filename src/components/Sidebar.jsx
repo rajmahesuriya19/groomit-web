@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 // SVG Icons
 import Home from '../assets/icon/home.svg';
@@ -17,29 +17,43 @@ import Youtube from '../assets/social/you-tube.svg';
 import Linkedin from '../assets/social/linkdein.svg';
 import Twitter from '../assets/social/x.svg';
 import Facebook from '../assets/social/fb.svg';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '@/utils/store/slices/auth/authSlice';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { toast } from 'react-toastify';
 
-// Reusable Sidebar Item
-const SidebarItem = ({ iconImg, label, href, active }) => (
-  <Link to={href}>
-    <div
-      className={`group flex items-center space-x-3 px-4 py-2 rounded-lg cursor-pointer transition-colors 
-        ${active ? 'text-brand' : 'text-primary-dark hover:text-brand'}
+const SidebarItem = ({ iconImg, label, href, active, onClick }) => {
+  const isInteractive = active !== undefined;
+
+  return (
+    <Link to={href}>
+      <div
+        onClick={onClick}
+        className={`group flex items-center space-x-3 px-4 py-2 rounded-lg cursor-pointer transition-colors
+        ${isInteractive ? (active ? 'text-brand' : 'text-primary-dark hover:text-brand') : 'text-primary-dark'}
       `}
-    >
-      <img
-        src={iconImg}
-        alt={`${label} Icon`}
-        className="w-6 h-6 transition-all group-hover:brightness-0 group-hover:invert-[27%] group-hover:sepia-[70%] group-hover:saturate-[700%] group-hover:hue-rotate-[330deg]"
-      />
-      <span className="text-lg font-medium font-inter transition-colors">
-        {label}
-      </span>
-    </div>
-  </Link>
-);
+      >
+        <img
+          src={iconImg}
+          alt={`${label} Icon`}
+          className={`w-6 h-6 transition-all ${isInteractive
+            ? 'group-hover:brightness-0 group-hover:invert-[27%] group-hover:sepia-[70%] group-hover:saturate-[700%] group-hover:hue-rotate-[330deg]'
+            : ''
+            }`}
+        />
+        <span className="text-lg font-medium font-inter transition-colors">
+          {label}
+        </span>
+      </div>
+    </Link>
+  );
+};
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showLoader, hideLoader } = useLoader();
 
   const socialIcons = {
     instagram: Instagram,
@@ -58,17 +72,30 @@ export default function Sidebar() {
   ];
 
   const secondaryMenu = [
-    { label: 'Review Us', href: '#/', iconImg: Star },
-    { label: 'How It Works', href: '#/', iconImg: HelpCircle },
+    { label: 'Review Us', iconImg: Star },
+    { label: 'How It Works', iconImg: HelpCircle },
   ];
 
   const logoutMenu = [
-    { label: 'Logout', href: '#/', iconImg: LogOut },
+    { label: 'Logout', iconImg: LogOut },
   ];
+
+  const handleLogout = async () => {
+    showLoader();
+    try {
+      await dispatch(logoutUser()).unwrap();
+      hideLoader();
+      navigate('/')
+      toast.success('Logout successful 🎉');
+    } catch (error) {
+      hideLoader();
+      console.error('Logout failed:', error.message);
+    }
+  };
 
   return (
     <div className="hidden md:flex px-6 py-8">
-      <div className="w-[265px] bg-white shadow-2xl rounded-3xl flex flex-col justify-between px-4 py-6">
+      <div className="w-[265px] bg-white shadow-2xl rounded-3xl flex flex-col px-4 py-6 h-fit">
 
         {/* Menu Section */}
         <div className="flex flex-col space-y-6 w-full">
@@ -97,7 +124,6 @@ export default function Sidebar() {
               <SidebarItem
                 key={item.label}
                 {...item}
-                active={location.pathname === item.href}
               />
             ))}
           </div>
@@ -108,7 +134,7 @@ export default function Sidebar() {
               <SidebarItem
                 key={item.label}
                 {...item}
-                active={location.pathname === item.href}
+                onClick={handleLogout}
               />
             ))}
           </div>

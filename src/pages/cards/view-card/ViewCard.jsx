@@ -1,21 +1,72 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import Location from '../../../assets/icon/location-red.svg';
 import Card from '../../../assets/cards/card-bg.svg';
 import Visa from '../../../assets/cards/Visa-light.svg';
+import JCB from '../../../assets/cards/jcb-icon.svg';
+import Fallback from '../../../assets/cards/fall-card.svg';
+import MasterCard from '../../../assets/cards/mastercard-icon.svg';
 import Delete from '../../../assets/icon/delete-red.svg';
 import { ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { deletePaymentCard, verifyPaymentCard } from '@/utils/store/slices/paymentCards/paymentCardSlice';
+
+const cardIcons = {
+    visa: Visa,
+    mastercard: MasterCard,
+    jcb: JCB,
+};
 
 const ViewCard = () => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { id } = useParams();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [card, setCard] = useState(null);
 
-    const handleDeleteAccount = () => {
+    const { cards } = useSelector((state) => state.cards);
+
+    useEffect(() => {
+        if (cards?.length) {
+            const selectedCard = cards.find((c) => c.billing_id === id || c.billing_id === Number(id));
+            setCard(selectedCard);
+        }
+    }, [cards, id]);
+
+    const handleDeleteAccount = async () => {
         setIsDeleteModalOpen(false);
-        alert('Card deleted');
+        try {
+            await dispatch(deletePaymentCard({ cardId: card.billing_id })).unwrap();
+            navigate('/user/account');
+        } catch (err) {
+            alert(err.message || 'Failed to delete card');
+        }
     };
+
+    const handleVerifyCard = async () => {
+        try {
+            await dispatch(
+                verifyPaymentCard({
+                    user_billing_id: card.billing_id,
+                    amount: "0.12",
+                })
+            ).unwrap();
+
+            alert('Card verified successfully!');
+        } catch (err) {
+            alert(err.message || 'Failed to verify card');
+        }
+    };
+
+    if (!card) {
+        return (
+            <div className="w-full px-4 md:px-8 py-6 text-center text-gray-500">
+                Loading card details...
+            </div>
+        );
+    }
 
     return (
         <div className="w-full px-4 md:px-8 py-6">
@@ -64,22 +115,26 @@ const ViewCard = () => {
 
                     <div className="absolute top-4 left-5 text-white">
                         <div className="flex items-start gap-3">
-                            <img src={Visa} alt="Visa" className="w-12 h-7 object-contain" />
+                            <img
+                                src={cardIcons[card.card_provider?.toLowerCase()] || Fallback}
+                                alt={card.card_provider || "Card"}
+                                className="w-12 h-7 object-contain"
+                            />
                             <div className="flex flex-col">
                                 <span className="text-[8px] uppercase font-medium tracking-wider">Number</span>
-                                <span className="text-lg font-bold tracking-widest leading-tight">**** **** 0222 0034</span>
+                                <span className="text-lg font-bold tracking-widest leading-tight">**** **** **** {card.card_number}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="absolute bottom-4 left-5 text-white">
                         <div className="text-[8px] font-medium uppercase tracking-wide">Name</div>
-                        <div className="text-sm font-semibold tracking-wider mt-1 leading-tight">CRAIG JOHNSON SHIIK</div>
+                        <div className="text-sm font-semibold tracking-wider mt-1 leading-tight">{card.card_holder}</div>
                     </div>
 
                     <div className="absolute bottom-4 right-4 md:right-[70px] text-white text-right">
                         <div className="text-[8px] font-medium uppercase tracking-wide">End Date</div>
-                        <div className="text-base font-bold mt-1 leading-tight">12/29</div>
+                        <div className="text-base font-bold mt-1 leading-tight">{card.expire_mm}/{card.expire_yy}</div>
                     </div>
                 </div>
 
@@ -93,27 +148,28 @@ const ViewCard = () => {
                         <h2 className="text-base font-bold text-primary-dark">Billing Address</h2>
                     </div>
 
-                    <div className="flex flex-col gap-1">
+                    <div className="flex flex-col">
                         <h2 className="text-sm font-bold text-primary-dark">
-                            34 Long address with a lot of characters Kevorkian 50 Washington Square S,
+                            {card.address1}
                         </h2>
                         <h2 className="text-base font-normal text-primary-dark">
-                            New York, NY 10012
+                            {card.city}, {card.state} {card.zip}
                         </h2>
                     </div>
                 </div>
             </div>
 
-            {/* Desktop Submit Button */}
-            <div className="hidden md:flex justify-center items-center py-8">
+            {/* Desktop Verify Button */}
+            {card.verified_at && <div className="hidden md:flex justify-center items-center py-8">
                 <button
                     type="submit"
+                    onClick={handleVerifyCard}
                     className='w-[193px] h-[48px] rounded-[30px] px-[31px] py-[11px] gap-[10px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] text-center transition-colors duration-200
       bg-primary-dark text-white cursor-pointer'
                 >
                     Verify Card
                 </button>
-            </div>
+            </div>}
 
             {/* Mobile Delete Button */}
             <div className="md:hidden px-5 pt-4 text-center mb-28">
@@ -125,10 +181,11 @@ const ViewCard = () => {
                 </button>
             </div>
 
-            {/* Sticky Mobile Save Button */}
+            {/* Sticky Mobile Verify Button */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
                 <button
                     type="submit"
+                    onClick={handleVerifyCard}
                     className='w-full h-[48px] rounded-[30px] flex items-center justify-center text-base font-semibold font-inter leading-[18px] transition-colors duration-200
       bg-primary-dark text-white'
                 >
@@ -145,6 +202,15 @@ const ViewCard = () => {
                 title={"Delete Credit Card"}
                 decription={"Are you sure you want to delete this credit card?"}
             />
+            {/* <VerifyCardModal
+                type={'card'}
+                open={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteAccount}
+                icon={Delete}
+                title={"Delete Credit Card"}
+                decription={"Are you sure you want to delete this credit card?"}
+            /> */}
         </div>
     )
 }

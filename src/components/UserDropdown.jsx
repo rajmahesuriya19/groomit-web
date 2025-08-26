@@ -1,11 +1,39 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import notificationIcon from '../assets/icon/notification.svg';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '@/utils/store/slices/auth/authSlice';
+import { toast } from 'react-toastify';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { persistor } from '@/utils/store';
 
 const UserDropdown = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoader();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const { user } = useSelector((state) => state.user);
+
+  const handleLogout = async () => {
+    showLoader();
+    try {
+      await dispatch(logoutUser()).unwrap();
+
+      localStorage.clear();
+      sessionStorage.clear();
+      persistor.purge();
+
+      hideLoader();
+      navigate('/');
+      toast.success('Logout successful 🎉');
+    } catch (error) {
+      console.error('Logout failed:', error.message);
+      hideLoader();
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -21,7 +49,7 @@ const UserDropdown = () => {
   const menuItems = [
     { label: 'My Account', href: '/user/account' },
     { label: 'Dashboard', href: '/user/dashboard' },
-    { label: 'Log Out', href: '/user/logout' },
+    { label: 'Log Out', onClick: handleLogout },
   ];
 
   return (
@@ -66,11 +94,15 @@ const UserDropdown = () => {
           className="flex items-center justify-center rounded-full overflow-hidden"
           style={{ width: '28px', height: '28px' }}
         >
-          <img
+          {user?.photo ? <img
+            src={user?.photo}
+            alt={user.name}
+            className="object-cover w-full h-full"
+          /> : <img
             src="https://randomuser.me/api/portraits/men/75.jpg"
             alt="User Avatar"
             className="object-cover w-full h-full"
-          />
+          />}
         </div>
       </div>
 
@@ -79,17 +111,27 @@ const UserDropdown = () => {
         <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
           {menuItems.map((item, index) => (
             <div key={item.label}>
-              <Link
-                to={item.href}
-                onClick={() => setIsOpen(false)}
-                className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
-              >
-                <span>{item.label}</span>
-                <ChevronDown size={14} className="text-gray-400 -rotate-90" />
-              </Link>
-              {index < menuItems.length - 1 && (
-                <hr className="border-gray-100" />
+              {item.onClick ? (
+                <button
+                  onClick={() => {
+                    item.onClick();
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <span>{item.label}</span>
+                </button>
+              ) : (
+                <Link
+                  to={item.href}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
+                >
+                  <span>{item.label}</span>
+                  <ChevronDown size={14} className="text-gray-400 -rotate-90" />
+                </Link>
               )}
+              {index < menuItems.length - 1 && <hr className="border-gray-100" />}
             </div>
           ))}
         </div>
