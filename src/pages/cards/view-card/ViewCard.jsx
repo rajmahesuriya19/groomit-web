@@ -25,6 +25,7 @@ const ViewCard = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams();
+    const { showLoader, hideLoader } = useLoader();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [verifyModalOpen, setVerifyModalOpen] = useState(false);
     const [card, setCard] = useState(null);
@@ -39,12 +40,15 @@ const ViewCard = () => {
     }, [cards, id]);
 
     const handleDeleteAccount = async () => {
-        setIsDeleteModalOpen(false);
+        showLoader();
         try {
             await dispatch(deletePaymentCard({ cardId: card.billing_id })).unwrap();
+            setIsDeleteModalOpen(false);
+            hideLoader();
             navigate('/user/account');
         } catch (err) {
             alert(err.message || 'Failed to delete card');
+            hideLoader();
         }
     };
 

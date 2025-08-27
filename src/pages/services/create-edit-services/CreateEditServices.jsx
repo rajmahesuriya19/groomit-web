@@ -113,9 +113,17 @@ const CreateEditServices = () => {
         const currentAddress = addresses.find(addr => String(addr.address_id) === String(id));
         if (!currentAddress) return;
 
-        await dispatch(deleteAddress(currentAddress.address_id));
-        setIsDeleteModalOpen(false);
-        navigate("/user/account");
+        try {
+            showLoader();
+            await dispatch(deleteAddress(currentAddress.address_id)).unwrap();
+            setIsDeleteModalOpen(false);
+            navigate("/user/account");
+        } catch (error) {
+            console.error("Failed to delete address:", error);
+            // toast.error("Failed to delete account");
+        } finally {
+            hideLoader();
+        }
     };
 
     return (

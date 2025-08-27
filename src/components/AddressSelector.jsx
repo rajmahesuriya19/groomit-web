@@ -76,10 +76,11 @@ const AddressSelector = () => {
               <button
                 key={address.address_id}
                 onClick={() => handleAddressSelect(address)}
-                className={`w-full px-4 py-3 text-left text-sm border-b last:border-b-0 hover:bg-gray-50 transition-colors
-                ${selectedAddress?.address_id === address.address_id
-                    ? 'bg-red-50 text-red-900'
-                    : 'text-gray-700'}`}
+                className={`w-full px-4 py-3 text-left text-sm border-b last:border-b-0 transition-all duration-200
+    ${selectedAddress?.address_id === address.address_id
+                    ? 'bg-red-50 text-red-900 border-l-[3px] border-[#FF314A]'
+                    : 'text-gray-700 hover:bg-gray-50 hover:border-l-[3px] hover:border-[#FF314A]'
+                  }`}
               >
                 {address.address1}, {address.zip}
               </button>
