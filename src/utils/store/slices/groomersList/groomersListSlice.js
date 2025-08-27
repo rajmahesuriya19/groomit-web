@@ -48,7 +48,9 @@ const groomersSlice = createSlice({
     reducers: {
         toggleFavLocal: (state, action) => {
             state.groomers = state.groomers.map((g) =>
-                g.groomer_id === action.payload ? { ...g, is_fav_groomer: !g.is_fav_groomer } : g
+                g.groomer_id === action.payload
+                    ? { ...g, is_fav_groomer: !g.is_fav_groomer }
+                    : g
             );
         },
     },
