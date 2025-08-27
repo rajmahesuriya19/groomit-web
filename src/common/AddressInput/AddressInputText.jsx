@@ -1,9 +1,15 @@
-import React, { useState } from "react";
-import { CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 
 const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => {
     const [internalValue, setInternalValue] = useState(null);
+
+    // 🔄 Sync when RHF gives us a plain string (edit mode)
+    useEffect(() => {
+        if (typeof value === "string" && value.trim() !== "") {
+            setInternalValue({ label: value, value });
+        }
+    }, [value]);
 
     return (
         <div className="relative w-full">
@@ -13,14 +19,10 @@ const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => 
                     value: internalValue,
                     onChange: (selected) => {
                         setInternalValue(selected);
-                        console.log(selected);
-
                         onChange(selected?.label || "");
                         onSelect?.(selected);
                     },
                     placeholder: placeholder || "123 Main Street",
-                    inputValue: value || "",
-                    onInputChange: (inputValue) => onChange(inputValue),
                     options: { componentRestrictions: { country: "us" } },
                     components: { DropdownIndicator: null, IndicatorSeparator: null },
                     styles: {

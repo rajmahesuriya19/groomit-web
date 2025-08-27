@@ -173,15 +173,16 @@ const CreateEditServices = () => {
                             {/* Address */}
                             <div className="flex flex-col gap-2">
                                 <label className="text-sm font-bold text-primary-dark font-inter">Address</label>
-                                <input
+                                {/* <input
                                     type="text"
                                     placeholder="123 Main Street"
                                     {...register('street')}
                                     className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
-                                />
-                                {/* <Controller
+                                /> */}
+                                <Controller
                                     name="street"
                                     control={control}
+                                    rules={{ required: "Address is required" }}
                                     render={({ field }) => (
                                         <AddressInputText
                                             value={field.value}
@@ -191,17 +192,21 @@ const CreateEditServices = () => {
                                             onSelect={async (selected) => {
                                                 if (!selected) return;
 
-                                                field.onChange(selected.label);
-
                                                 try {
-                                                    const results = await geocodeByPlaceId(
-                                                        selected.value?.place_id || selected.value?.placeId
-                                                    );
+                                                    const placeId = selected.value?.place_id || selected.value?.placeId;
+
+                                                    if (!placeId) {
+                                                        console.error("No place_id found:", selected);
+                                                        return;
+                                                    }
+
+                                                    const results = await geocodeByPlaceId(placeId);
+                                                    if (!results.length) return;
+
                                                     const addrComponents = results[0].address_components;
 
                                                     const streetNumber =
-                                                        addrComponents.find((c) => c.types.includes("street_number"))
-                                                            ?.long_name || "";
+                                                        addrComponents.find((c) => c.types.includes("street_number"))?.long_name || "";
                                                     const route =
                                                         addrComponents.find((c) => c.types.includes("route"))?.long_name || "";
                                                     const city =
@@ -213,20 +218,20 @@ const CreateEditServices = () => {
                                                             c.types.includes("administrative_area_level_1")
                                                         )?.short_name || "";
                                                     const zip =
-                                                        addrComponents.find((c) => c.types.includes("postal_code"))
-                                                            ?.long_name || "";
+                                                        addrComponents.find((c) => c.types.includes("postal_code"))?.long_name || "";
 
-                                                    setValue("street", `${streetNumber} ${route}`.trim());
-                                                    setValue("city", city);
-                                                    setValue("state", state);
-                                                    setValue("zip", zip);
+                                                    field.onChange(`${streetNumber} ${route}`.trim());
+                                                    setValue("street", `${streetNumber} ${route}`.trim(), { shouldValidate: true });
+                                                    setValue("city", city, { shouldValidate: true });
+                                                    setValue("state", state, { shouldValidate: true });
+                                                    setValue("zip", zip, { shouldValidate: true });
                                                 } catch (err) {
                                                     console.error("Geocoding error:", err);
                                                 }
                                             }}
                                         />
                                     )}
-                                /> */}
+                                />
                                 <div className="text-red-500 text-sm">{errors.street?.message}</div>
                             </div>
 
