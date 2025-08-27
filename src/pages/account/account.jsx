@@ -242,8 +242,9 @@ const Account = () => {
               {addresses.map((item, index) => (
                 <div
                   key={item?.address_id}
-                  className={`flex justify-between items-start pt-2 ${index !== addresses.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                  className={`flex cursor-pointer justify-between items-start pt-2 ${index !== addresses.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                     }`}
+                  onClick={() => navigate(`/user/address/edit/${item?.address_id}`)}
                 >
                   <div className="flex flex-col w-[220px] gap-1">
                     <span className="text-sm font-bold text-primary-dark leading-[18px] font-inter">
@@ -315,8 +316,9 @@ const Account = () => {
               {cards.map((item, index) => (
                 <div
                   key={item.label}
-                  className={`flex justify-between items-center pt-2 ${index !== cards.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
+                  className={`flex cursor-pointer justify-between items-center pt-2 ${index !== cards.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                     }`}
+                  onClick={() => navigate(!item?.card_holder ? `/user/card/edit/${item?.billing_id}` : `/user/card/view/${item?.billing_id}`)}
                 >
                   <div className="flex items-center gap-3 w-full">
                     <img
@@ -347,7 +349,7 @@ const Account = () => {
                       Default
                     </div>}
                     <button
-                      onClick={() => navigate(!item?.card_holder ? "/user/card/edit/1" : `/user/card/view/${item?.billing_id}`)}
+                      onClick={() => navigate(!item?.card_holder ? `/user/card/edit/${item?.billing_id}` : `/user/card/view/${item?.billing_id}`)}
                     >
                       <ChevronRight size={24} className="text-gray-400" />
                     </button>

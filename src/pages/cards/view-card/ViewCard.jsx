@@ -14,6 +14,7 @@ import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
 import { useDispatch, useSelector } from 'react-redux';
 import { deletePaymentCard, verifyPaymentCard } from '@/utils/store/slices/paymentCards/paymentCardSlice';
 import VerifyCardModal from '@/components/Modals/VerifyCardModal';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
 const cardIcons = {
     visa: Visa,
