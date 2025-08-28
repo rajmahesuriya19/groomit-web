@@ -79,6 +79,13 @@ const CreateEditServices = () => {
                     zip: currentAddress.zip || '',
                     isDefault: currentAddress.default_address === "Y",
                 });
+
+                // ✅ Lock city, state, zip if they exist (Edit mode)
+                setAutoFilled({
+                    city: !!currentAddress.city,
+                    state: !!currentAddress.state,
+                    zip: !!currentAddress.zip,
+                });
             }
         }
     }, [isEdit, addresses, id, reset]);
