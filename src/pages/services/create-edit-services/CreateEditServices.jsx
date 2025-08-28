@@ -6,14 +6,16 @@ import * as yup from 'yup';
 
 import backIcon from '../../../assets/icon/arrow-left.svg';
 import Delete from '../../../assets/icon/delete-red.svg';
+import Location from '../../../assets/icon/location.svg';
 import { Autocomplete, Checkbox, CircularProgress, TextField } from '@mui/material';
 import DeleteAccountModal from '@/components/Modals/DeleteAccountModal';
 import { ChevronLeft } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addAddress, deleteAddress, updateAddress } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
+import { addAddress, deleteAddress, joinWaitlist, updateAddress } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
 import AddressInputText from '@/common/AddressInput/AddressInputText';
 import { geocodeByPlaceId } from 'react-google-places-autocomplete';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import VerifyServiceArea from '@/components/Modals/VerifyServiceArea';
 
 // ✅ Schema
 const schema = yup.object().shape({
@@ -32,8 +34,15 @@ const CreateEditServices = () => {
     const { id } = useParams();
     const isEdit = Boolean(id);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [verifyService, setVerifyService] = useState(false);
+    const [autoFilled, setAutoFilled] = useState({
+        city: false,
+        state: false,
+        zip: false,
+    });
 
     const { addresses } = useSelector((state) => state.addresses);
+    const { user } = useSelector((state) => state.user);
 
     const {
         register,
@@ -41,7 +50,8 @@ const CreateEditServices = () => {
         formState: { errors, isDirty },
         reset,
         control,
-        setValue
+        setValue,
+        getValues
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
@@ -101,9 +111,12 @@ const CreateEditServices = () => {
                 await dispatch(addAddress(payload)).unwrap();
             }
 
+            // ✅ navigate only if success
             navigate("/user/account");
         } catch (err) {
-            console.error("Submit failed:", err);
+            if (err?.isZipNotExists) {
+                setVerifyService(true);
+            }
         } finally {
             hideLoader();
         }
@@ -123,6 +136,31 @@ const CreateEditServices = () => {
             // toast.error("Failed to delete account");
         } finally {
             hideLoader();
+        }
+    };
+
+    const handleJoinWaitlist = async () => {
+        try {
+            const payload = {
+                first_name: user?.first_name,
+                last_name: user?.last_name,
+                email: user?.email,
+                zip: getValues("zip"),
+            };
+
+            await dispatch(joinWaitlist(payload)).unwrap();
+
+            setVerifyService(false);
+            reset({
+                street: '',
+                apartment_number: '',
+                city: '',
+                state: '',
+                zip: '',
+                isDefault: false,
+            });
+        } catch (err) {
+            console.error("Join waitlist failed:", err);
         }
     };
 
@@ -191,14 +229,9 @@ const CreateEditServices = () => {
                                             error={errors.street?.message}
                                             onSelect={async (selected) => {
                                                 if (!selected) return;
-
                                                 try {
                                                     const placeId = selected.value?.place_id || selected.value?.placeId;
-
-                                                    if (!placeId) {
-                                                        console.error("No place_id found:", selected);
-                                                        return;
-                                                    }
+                                                    if (!placeId) return;
 
                                                     const results = await geocodeByPlaceId(placeId);
                                                     if (!results.length) return;
@@ -220,11 +253,19 @@ const CreateEditServices = () => {
                                                     const zip =
                                                         addrComponents.find((c) => c.types.includes("postal_code"))?.long_name || "";
 
-                                                    field.onChange(`${streetNumber} ${route}`.trim());
-                                                    setValue("street", `${streetNumber} ${route}`.trim(), { shouldValidate: true });
+                                                    // ✅ Set values
+                                                    const streetValue = `${streetNumber} ${route}`.trim();
+                                                    setValue("street", streetValue.length > 0 ? streetValue : "", { shouldValidate: true });
                                                     setValue("city", city, { shouldValidate: true });
                                                     setValue("state", state, { shouldValidate: true });
                                                     setValue("zip", zip, { shouldValidate: true });
+
+                                                    // ✅ Lock only if autofilled
+                                                    setAutoFilled({
+                                                        city: !!city,
+                                                        state: !!state,
+                                                        zip: !!zip,
+                                                    });
                                                 } catch (err) {
                                                     console.error("Geocoding error:", err);
                                                 }
@@ -265,8 +306,11 @@ const CreateEditServices = () => {
                                 <input
                                     type="text"
                                     placeholder="New York"
-                                    {...register('city')}
-                                    className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
+                                    {...register("city")}
+                                    disabled={autoFilled.city}
+                                    className={`w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] 
+    tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
+    ${autoFilled.city ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                 />
                                 <div className="text-red-500 text-sm">{errors.city?.message}</div>
                             </div>
@@ -278,8 +322,11 @@ const CreateEditServices = () => {
                                     <input
                                         type="text"
                                         placeholder="NY"
-                                        {...register('state')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
+                                        {...register("state")}
+                                        disabled={autoFilled.state}
+                                        className={`w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] 
+    tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
+    ${autoFilled.state ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                     />
                                     <div className="text-red-500 text-sm">{errors.state?.message}</div>
                                 </div>
@@ -289,8 +336,11 @@ const CreateEditServices = () => {
                                     <input
                                         type="text"
                                         placeholder="10001"
-                                        {...register('zip')}
-                                        className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
+                                        {...register("zip")}
+                                        disabled={autoFilled.zip}
+                                        className={`w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] 
+    tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
+    ${autoFilled.zip ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                     />
                                     <div className="text-red-500 text-sm">{errors.zip?.message}</div>
                                 </div>
@@ -376,6 +426,23 @@ const CreateEditServices = () => {
                 icon={Delete}
                 title={"Delete Service Address"}
                 decription={"Are you sure you want to delete this service address?"}
+            />
+            <VerifyServiceArea
+                type={'service'}
+                open={verifyService}
+                onClose={() => setVerifyService(false)}
+                onReset={() => reset({
+                    street: '',
+                    apartment_number: '',
+                    city: '',
+                    state: '',
+                    zip: '',
+                    isDefault: false,
+                })}
+                onConfirm={handleJoinWaitlist}
+                icon={Location}
+                title={"Address"}
+                description={"Sorry! We are not currently in your area but we will notify you once we are there"}
             />
         </>
     );

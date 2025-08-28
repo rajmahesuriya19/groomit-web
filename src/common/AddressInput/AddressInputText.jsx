@@ -4,10 +4,12 @@ import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => {
     const [internalValue, setInternalValue] = useState(null);
 
-    // 🔄 Sync when RHF gives us a plain string (edit mode)
+    // 🔄 Sync internalValue whenever RHF value changes
     useEffect(() => {
         if (typeof value === "string" && value.trim() !== "") {
             setInternalValue({ label: value, value });
+        } else {
+            setInternalValue(null);
         }
     }, [value]);
 
@@ -18,8 +20,14 @@ const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => 
                 selectProps={{
                     value: internalValue,
                     onChange: (selected) => {
+                        if (!selected) {
+                            setInternalValue(null);
+                            onChange("");
+                            return;
+                        }
+
                         setInternalValue(selected);
-                        onChange(selected?.label || "");
+                        onChange(selected.label || "");
                         onSelect?.(selected);
                     },
                     placeholder: placeholder || "123 Main Street",

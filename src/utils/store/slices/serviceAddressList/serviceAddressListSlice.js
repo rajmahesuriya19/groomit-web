@@ -21,6 +21,14 @@ export const addAddress = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const { data } = await axiosInstance.post('api/user/address/add', payload)
+
+      if (!data.success) {
+        return rejectWithValue({
+          message: data.message || "Failed to update address ❌",
+          ...data
+        })
+      }
+
       return data.data.address
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to add address' })
@@ -34,6 +42,11 @@ export const updateAddress = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const { data } = await axiosInstance.post('api/user/address/update', payload)
+
+      if (!data.success) {
+        return rejectWithValue(data)
+      }
+      console.log(data)
       return data.data.address
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to update address' })
@@ -63,6 +76,27 @@ export const deleteAddress = createAsyncThunk(
       return address_id
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to delete address' })
+    }
+  }
+)
+
+// 🔹 Join Waitlist
+export const joinWaitlist = createAsyncThunk(
+  'addresses/joinWaitlist',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post('api/user/booking/join-wait-list', payload)
+
+      if (!data.success) {
+        return rejectWithValue({
+          message: data.message || "Failed to join waitlist ❌",
+          ...data
+        })
+      }
+
+      return data
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to join waitlist' })
     }
   }
 )
@@ -136,6 +170,14 @@ const addressSlice = createSlice({
       })
       .addCase(setDefaultAddress.rejected, (state, action) => {
         toast.error(action.payload?.message || "Failed to update default address ❌")
+      })
+
+      // 🔹 Join Waitlist
+      .addCase(joinWaitlist.fulfilled, (state, action) => {
+        toast.success("We’ll notify you when service is available in your area! ✅")
+      })
+      .addCase(joinWaitlist.rejected, (state, action) => {
+        toast.error(action.payload?.message || "Failed to join waitlist ❌")
       })
   },
 })
