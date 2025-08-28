@@ -330,7 +330,7 @@ const Account = () => {
                       <span className="text-sm font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                         {`Ending with ${item.card_number}`}
                       </span>
-                      {!item.verified_at ? (
+                      {item?.status === "A" ? (
                         <span className="text-sm font-normal text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                           {item.card_holder}
                         </span>

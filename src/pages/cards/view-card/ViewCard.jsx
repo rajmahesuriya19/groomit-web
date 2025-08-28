@@ -168,7 +168,7 @@ const ViewCard = () => {
             </div>
 
             {/* Desktop Verify Button */}
-            {card.verified_at && <div className="hidden md:flex justify-center items-center py-8">
+            {card?.status === "P" && <div className="hidden md:flex justify-center items-center py-8">
                 <button
                     type="submit"
                     onClick={() => setVerifyModalOpen(true)}
@@ -190,7 +190,7 @@ const ViewCard = () => {
             </div>
 
             {/* Sticky Mobile Verify Button */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+            {card?.status === "P" && <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
                 <button
                     type="submit"
                     onClick={() => setVerifyModalOpen(true)}
@@ -199,7 +199,7 @@ const ViewCard = () => {
                 >
                     Verify Card
                 </button>
-            </div>
+            </div>}
 
             <DeleteAccountModal
                 type={'card'}
