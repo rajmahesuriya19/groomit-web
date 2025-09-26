@@ -11,6 +11,10 @@ import CreateEditServices from './pages/services/create-edit-services/CreateEdit
 import CreateEditCards from './pages/cards/create-edit-cards/CreateEditCards.jsx';
 import ViewCard from './pages/cards/view-card/ViewCard.jsx';
 import { ChangePassword } from './pages/auth/change-password/ChangePassword.jsx';
+import Pets from './pages/my-pets/pets.jsx';
+import PetDetails from './pages/my-pets/pet-details/pet-details.jsx';
+import AddUpdateCat from './pages/my-pets/add-update-cat/AddUpdateCat.jsx';
+import AddUpdateDog from './pages/my-pets/add-update-dog/AddUpdateDog.jsx';
 
 function App() {
   return (
@@ -29,8 +33,14 @@ function App() {
             <Route path={RoutePath.VIEW_CARD} element={<ViewCard />} />
             <Route path={RoutePath.CHANGE_PASSWORD} element={<ChangePassword />} />
             <Route path={RoutePath.DASHBOARD} element={<Dashboard />} />
-            <Route path={RoutePath.PAGE_404} element={<Page404/>}/>
-            <Route path="*" element={<Navigate to={RoutePath.PAGE_404} replace/>}/>
+            <Route path={RoutePath.PETS} element={<Pets />} />
+            <Route path={RoutePath.PET_DETAILS} element={<PetDetails />} />
+            <Route path={RoutePath.ADD_DOG} element={<AddUpdateDog />} />
+            <Route path={RoutePath.ADD_CAT} element={<AddUpdateCat />} />
+            <Route path={RoutePath.EDIT_DOG} element={<AddUpdateDog />} />
+            <Route path={RoutePath.EDIT_CAT} element={<AddUpdateCat />} />
+            <Route path={RoutePath.PAGE_404} element={<Page404 />} />
+            <Route path="*" element={<Navigate to={RoutePath.PAGE_404} replace />} />
           </Routes>
         </Layout>
       </BrowserRouter>

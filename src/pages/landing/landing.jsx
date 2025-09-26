@@ -9,8 +9,8 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const email = 'raj@groomit.me';
-    const password = 'Password@19';
+    const email = 'nitesh111@groomit.me';
+    const password = 'Nitesh99';
 
     try {
       const result = await dispatch(loginUser({ email, password }));

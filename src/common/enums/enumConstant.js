@@ -10,5 +10,11 @@ export const RoutePath = {
   VIEW_CARD: '/user/card/view/:id',
   CHANGE_PASSWORD: 'user/account/password/change',
   DASHBOARD: '/user/dashboard',
+  PETS: '/user/pet/list',
+  PET_DETAILS: '/user/pet/details/:id',
+  ADD_DOG: '/user/pet/add/dog',
+  ADD_CAT: '/user/pet/add/cat',
+  EDIT_DOG: '/user/pet/edit/dog/:id',
+  EDIT_CAT: '/user/pet/edit/cat/:id',
   PAGE_404: '/404',
 };

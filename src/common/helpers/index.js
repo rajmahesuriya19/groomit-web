@@ -12,3 +12,13 @@ export const formatPhoneNumber = (phone) => {
 
     return phone;
 };
+
+export const formatDate = (dateString) => {
+    if (!dateString) return "--";
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const d = new Date(dateString);
+    return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
+};
+

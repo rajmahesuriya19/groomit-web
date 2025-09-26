@@ -4,6 +4,7 @@ import userReducer from './slices/userInfo/userInfoSlice';
 import paymentCardReducer from './slices/paymentCards/paymentCardSlice';
 import addressReducer from './slices/serviceAddressList/serviceAddressListSlice';
 import groomersReducer from './slices/groomersList/groomersListSlice';
+import petsReducer from './slices/petList/petListSlice';
 
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -13,7 +14,7 @@ import thunk from 'redux-thunk';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'user', 'cards', 'addresses', 'groomers'],
+  whitelist: ['auth', 'user', 'cards', 'addresses', 'groomers', 'pets'],
 };
 
 const appReducer = combineReducers({
@@ -22,6 +23,7 @@ const appReducer = combineReducers({
   cards: paymentCardReducer,
   groomers: groomersReducer,
   addresses: addressReducer,
+  pets: petsReducer,
 });
 
 // ✅ root reducer with reset logic

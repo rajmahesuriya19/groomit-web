@@ -25,6 +25,7 @@ import JCB from '../../assets/cards/jcb-icon.svg';
 import MasterCard from '../../assets/cards/mastercard-icon.svg';
 import Fallback from '../../assets/cards/fall-card.svg';
 import Earn from '../../assets/images/earn-image.svg';
+import FallbackGroomer from '../../assets/icon/user-photo-image.png';
 import { useNavigate } from 'react-router';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { useDispatch, useSelector } from 'react-redux';
@@ -119,14 +120,6 @@ const Account = () => {
               <h2 className="mb-3 text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]">
                 My Account
               </h2>
-              <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-brand px-3 py-2">
-                <p className="text-[10px] font-bold text-white leading-none tracking-normal">
-                  CREDITS
-                </p>
-                <p className="text-lg font-bold text-white leading-none tracking-[-0.01em]">
-                  $518
-                </p>
-              </div>
             </div>
 
             <div className="md:mx-0 -mx-4 -my-4 mb-6">
@@ -395,9 +388,15 @@ const Account = () => {
                     }`}
                 >
                   <div className="flex items-center gap-2 w-full">
-                    {item.profile_photo_url && (
+                    {item.profile_photo_url ? (
                       <img
                         src={item.profile_photo_url}
+                        alt={item.name}
+                        className="rounded-full w-[48px] h-[48px]"
+                      />
+                    ) : (
+                      <img
+                        src={FallbackGroomer}
                         alt={item.name}
                         className="rounded-full w-[48px] h-[48px]"
                       />
@@ -420,9 +419,9 @@ const Account = () => {
                           />
                         </button>
                       </div>
-                      {(item.rating_avg || item.rating_qty) && (
+                      {((item.rating_avg > 0) || (item.rating_qty > 0)) && (
                         <div className="flex items-center gap-1 bg-primary-dark rounded-[25px] px-[6px] py-[4px] w-[85px]">
-                          {item.rating_avg && (
+                          {item.rating_avg > 0 && (
                             <>
                               <img src={FillStar} alt="Rating" className="w-[10px] h-[11px]" />
                               <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
@@ -431,9 +430,9 @@ const Account = () => {
                             </>
                           )}
 
-                          {item.rating_qty && (
+                          {item.rating_qty > 0 && (
                             <span className="text-xs font-bold text-white leading-[11px] tracking-[0]">
-                              {item.rating_avg ? `| ${item.rating_qty}` : item.rating_qty}
+                              {item.rating_avg > 0 ? `| ${item.rating_qty}` : item.rating_qty}
                             </span>
                           )}
                         </div>

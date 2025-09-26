@@ -5,7 +5,7 @@ import { useDispatch } from 'react-redux';
 import heartFilled from '../../assets/icon/fav-yes.png';
 import heartGrey from '../../assets/icon/fav-no.png';
 import blocked from '../../assets/icon/blocked.svg';
-
+import FallbackGroomer from '../../assets/icon/user-photo-empty.jpg';
 import StarGray from '../../assets/icon/star-gray.svg';
 import Location from '../../assets/icon/location.svg';
 import Scissor from '../../assets/icon/scissor-black.svg';
@@ -54,9 +54,15 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
 
                 <div className="flex justify-between items-center py-6">
                     <div className="flex items-center gap-4 w-full">
-                        {groomer?.profile_photo_url && (
+                        {groomer?.profile_photo_url ? (
                             <img
                                 src={groomer?.profile_photo_url}
+                                alt={groomer?.name}
+                                className="rounded-md w-[50px] h-[50px]"
+                            />
+                        ) : (
+                            <img
+                                src={FallbackGroomer}
                                 alt={groomer?.name}
                                 className="rounded-md w-[50px] h-[50px]"
                             />
