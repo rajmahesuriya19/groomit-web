@@ -47,7 +47,7 @@ export const addUpdatePet = createAsyncThunk(
             formData.append('is_mixed', is_mixed ? 1 : 0);
             formData.append('size_id', size_id);
             if (pet_id) formData.append('pet_id', pet_id);
-            if (vaccinated_exp_date) formData.append('vaccinated_exp_date', vaccinated_exp_date);
+            if (vaccinated_exp_date) formData.append('vaccinate_date', vaccinated_exp_date);
             if (profile_photo instanceof File) {
                 formData.append('profile_picture', profile_photo);
             }
