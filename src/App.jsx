@@ -15,11 +15,13 @@ import Pets from './pages/my-pets/pets.jsx';
 import PetDetails from './pages/my-pets/pet-details/pet-details.jsx';
 import AddUpdateCat from './pages/my-pets/add-update-cat/AddUpdateCat.jsx';
 import AddUpdateDog from './pages/my-pets/add-update-dog/AddUpdateDog.jsx';
+import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 
 function App() {
   return (
     <div>
       <BrowserRouter>
+        <ScrollToTop />
         <Layout>
           <Routes>
             <Route path={RoutePath.HOME} element={<Landing />} />
