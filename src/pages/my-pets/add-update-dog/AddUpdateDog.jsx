@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, Calendar, Search } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,10 +12,11 @@ import Paw from '../../../assets/icon/pet-paw.svg';
 import FallbackDog from '../../../assets/icon/dog-avatar.jpg';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { addUpdatePet, getPetProfileID, updatePetStatus } from '@/utils/store/slices/petList/petListSlice';
+import { addUpdatePet, getBookingPetBreeds, getPetProfileID, updatePetStatus } from '@/utils/store/slices/petList/petListSlice';
 import DeleteDogModal from '@/components/Modals/DeleteDogModal';
 import MemorialiseModal from '@/components/Modals/MemorialiseModal';
 import { toast } from 'react-toastify';
+import BreedModal from '@/components/Modals/BreedModal';
 
 // ✅ Schema
 const schema = yup.object().shape({
@@ -63,7 +64,12 @@ const AddUpdateDog = () => {
     const isEdit = Boolean(id)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [memorialiseOpen, setMemorialiseOpen] = useState(false);
+    const [breedModalOpen, setBreedModalOpen] = useState(false);
+    const [breedListModalOpen, setBreedListModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedBreedName, setSelectedBreedName] = useState("");
 
+    const { petBreeds } = useSelector((state) => state.pets);
     const { pet: selectedPet, loading } = useSelector((state) => state.pets.selectedPet || {});
 
     const {
@@ -91,10 +97,24 @@ const AddUpdateDog = () => {
         },
     })
 
+    // Filter breeds by search
+    const filteredBreeds = useMemo(() => {
+        if (!searchTerm) return petBreeds;
+        return petBreeds.filter((b) =>
+            b.breed_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [searchTerm, petBreeds]);
+
     // 🐶 Load Pet Profile for Edit Mode
     useEffect(() => {
         if (isEdit) {
             showLoader()
+            if (!petBreeds) {
+                dispatch(getBookingPetBreeds({
+                    bookingId: 17600 || selectedPet?.pet_id,
+                }));
+            }
+
             dispatch(getPetProfileID(id)).finally(() => hideLoader())
         }
     }, [id, dispatch, isEdit])
@@ -115,8 +135,16 @@ const AddUpdateDog = () => {
                 profile_photo: selectedPet?.photo_url || selectedPet?.profilePicture?.path || "",
                 vaccinated_image_url: selectedPet.vaccinated_image_url || '',
             })
+
+            // ✅ Auto-set selected breed name if breed exists
+            if (selectedPet.breed?.breed_id) {
+                const found = petBreeds.find(
+                    (b) => b.breed_id.toString() === selectedPet.breed?.breed_id?.toString()
+                );
+                if (found) setSelectedBreedName(found.breed_name);
+            }
         }
-    }, [selectedPet, reset, isEdit])
+    }, [selectedPet, reset, isEdit, petBreeds]);
 
     // 📝 Handle Submit
     const onSubmit = (formData) => {
@@ -143,19 +171,12 @@ const AddUpdateDog = () => {
         // boolean conversion
         payload.is_mixed = formData.is_mixed ? 1 : 0;
 
-        // ✅ Handle profile photo correctly
-        if (formData.profile_photo instanceof File) {
-            payload.profile_photo = formData.profile_photo; // new file
-        } else {
-            payload.profile_photo = selectedPet?.profilePicture?.path || selectedPet?.photo_url || null;
-        }
-
         // ✅ Handle rabies certificate
-        if (formData.vaccinated_image_url instanceof File) {
-            payload.vaccinated_image_url = formData.vaccinated_image_url;
-        } else {
-            payload.vaccinated_image_url = selectedPet?.vaccinated_image_url || null;
-        }
+        // if (formData.vaccinated_image_url instanceof File) {
+        //     payload.vaccinated_image_url = formData.vaccinated_image_url;
+        // } else {
+        //     payload.vaccinated_image_url = selectedPet?.vaccinated_image_url || null;
+        // }
 
         console.log("🚀 Final Payload", payload);
 
@@ -335,7 +356,14 @@ const AddUpdateDog = () => {
                                                             type="button"
                                                             role="switch"
                                                             aria-checked={field.value}
-                                                            onClick={() => field.onChange(!field.value)}
+                                                            onClick={() => {
+                                                                const newValue = !field.value;
+                                                                field.onChange(newValue);
+
+                                                                if (newValue) {
+                                                                    setBreedModalOpen(true);
+                                                                }
+                                                            }}
                                                             className={`relative inline-flex h-5 w-10 items-center rounded-full transition-colors ${field.value ? "bg-brand" : "bg-gray-300"
                                                                 }`}
                                                         >
@@ -352,10 +380,12 @@ const AddUpdateDog = () => {
 
                                     <div className="relative mb-3 mt-2">
                                         <input
-                                            {...register("breed_id")}
                                             type="text"
+                                            value={selectedBreedName}
                                             placeholder="Type Breed"
-                                            className="w-full border rounded-lg px-3 py-2 pr-10"
+                                            readOnly
+                                            onClick={() => setBreedListModalOpen(true)}
+                                            className="w-full border rounded-lg px-3 py-2 pr-10 cursor-pointer"
                                         />
                                         <Search
                                             size={18}
@@ -369,6 +399,63 @@ const AddUpdateDog = () => {
                                         </p>
                                     )}
                                 </div>
+
+                                {breedListModalOpen && (
+                                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+                                        <div className="bg-white rounded-xl p-4 w-full max-w-md">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h2 className="font-bold text-lg">Select Breed</h2>
+                                                <button
+                                                    onClick={() => setBreedListModalOpen(false)}
+                                                    className="text-gray-500"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+
+                                            {/* Search Box */}
+                                            <div className="relative mb-3">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search breed..."
+                                                    value={searchTerm}
+                                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                                    className="w-full border rounded-lg px-3 py-2 pr-10"
+                                                />
+                                                <Search
+                                                    size={18}
+                                                    className="absolute right-3 top-2.5 text-gray-400"
+                                                />
+                                            </div>
+
+                                            {/* Breed List */}
+                                            <div className="max-h-64 overflow-y-auto">
+                                                {filteredBreeds.length > 0 ? (
+                                                    filteredBreeds.map((breed) => (
+                                                        <div
+                                                            key={breed?.breed_id}
+                                                            onClick={() => {
+                                                                setValue("breed_id", breed?.breed_id);
+                                                                setSelectedBreedName(breed?.breed_name);
+                                                                setBreedListModalOpen(false);
+                                                                setSearchTerm("")
+                                                            }}
+                                                            className={`px-3 py-2 cursor-pointer rounded 
+                                                                    ${watch("breed_id") == breed?.breed_id
+                                                                    ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90"
+                                                                    : "hover:bg-gray-100"
+                                                                }`}
+                                                        >
+                                                            {breed?.breed_name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-gray-500 text-sm">No breeds found</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
 
 
                                 {/* Sizes */}
@@ -506,25 +593,28 @@ const AddUpdateDog = () => {
                                                         type="file"
                                                         accept="image/*,.pdf"
                                                         className="hidden"
+                                                        // onChange={(e) => {
+                                                        //     const file = e.target.files?.[0];
+                                                        //     if (file) {
+                                                        //         const today = new Date();
+                                                        //         const dateStr = `${today
+                                                        //             .getDate()
+                                                        //             .toString()
+                                                        //             .padStart(2, "0")}-${(today.getMonth() + 1)
+                                                        //                 .toString()
+                                                        //                 .padStart(2, "0")}-${today.getFullYear()}`;
+
+                                                        //         const renamedFile = new File([file], `Proof-of-vaccination_Added-${dateStr}${file.name.substring(file.name.lastIndexOf("."))}`, {
+                                                        //             type: file.type,
+                                                        //         });
+
+                                                        //         setValue("vaccinated_image_url", renamedFile);
+                                                        //     }
+                                                        // }}
                                                         onChange={(e) => {
                                                             const file = e.target.files?.[0];
                                                             if (file) {
-                                                                const today = new Date();
-                                                                const dateStr = `${today
-                                                                    .getDate()
-                                                                    .toString()
-                                                                    .padStart(2, "0")}-${(today.getMonth() + 1)
-                                                                        .toString()
-                                                                        .padStart(2, "0")}-${today.getFullYear()}`;
-
-                                                                const renamedFile = {
-                                                                    ...file,
-                                                                    displayName: `Proof-of-vaccination_Added-${dateStr}${file.name.substring(
-                                                                        file.name.lastIndexOf(".")
-                                                                    )}`,
-                                                                };
-
-                                                                setValue("vaccinated_image_url", renamedFile);
+                                                                setValue("vaccinated_image_url", file);
                                                             }
                                                         }}
                                                     />
@@ -620,6 +710,13 @@ const AddUpdateDog = () => {
                 icon={Paw}
                 title={`Memorialise ${selectedPet?.name}`}
                 decription={"We will keep your pets records and history"}
+            />
+            <BreedModal
+                open={breedModalOpen}
+                onClose={() => setBreedModalOpen(false)}
+                onConfirm={() => setBreedModalOpen(false)}
+                title={`Mixed breed selected`}
+                decription={"To help our groomer prepare, ensure you select the primary breed type as breed"}
             />
         </>
     )

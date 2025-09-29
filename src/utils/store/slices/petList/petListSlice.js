@@ -48,8 +48,14 @@ export const addUpdatePet = createAsyncThunk(
             formData.append('size_id', size_id);
             if (pet_id) formData.append('pet_id', pet_id);
             if (vaccinated_exp_date) formData.append('vaccinated_exp_date', vaccinated_exp_date);
-            if (profile_photo) formData.append('profile_photo', profile_photo);
-            if (vaccinated_image_url) formData.append('vaccinated_image_url', vaccinated_image_url?.displayName);
+            if (profile_photo instanceof File) {
+                formData.append('profile_picture', profile_photo);
+            }
+            if (vaccinated_image_url instanceof File) {
+                formData.append('vaccinate_certificate', vaccinated_image_url, vaccinated_image_url?.name || vaccinated_image_url?.displayName);
+            }
+            // if (profile_photo) formData.append('profile_picture', profile_photo);
+            // if (vaccinated_image_url) formData.append('vaccinate_certificate', vaccinated_image_url?.displayName);
 
             const { data } = await axiosInstance.post('api/user/pet/save', formData);
             return data.data?.pet;
@@ -75,10 +81,31 @@ export const updatePetStatus = createAsyncThunk(
     }
 );
 
+// Fetch pet breeds for booking
+export const getBookingPetBreeds = createAsyncThunk(
+    'pets/getBookingPetBreeds',
+    async ({ bookingId }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/get/${bookingId}`,
+                {
+                    "booking_session_token": "booking_session_6888c7d65d91b1.59307650"
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.data?.pet_breeds || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
 const petsSlice = createSlice({
     name: 'pets',
     initialState: {
         pets: [],
+        petBreeds: [],
         selectedPet: null,
         loading: false,
         error: null,
@@ -169,6 +196,21 @@ const petsSlice = createSlice({
                 }
             })
             .addCase(updatePetStatus.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Booking Pet Breeds
+            .addCase(getBookingPetBreeds.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookingPetBreeds.fulfilled, (state, action) => {
+                state.loading = false;
+                state.petBreeds = action.payload;
+            })
+            .addCase(getBookingPetBreeds.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);
