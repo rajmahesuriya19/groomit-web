@@ -5,6 +5,7 @@ import Message from '../../../assets/icon/messages-red.svg';
 import FeedbackIcon from '../../../assets/icon/red-star.svg';
 import Edit2 from '../../../assets/icon/edit-2.svg';
 import Delete from '../../../assets/icon/trash.svg';
+import Close from '../../../assets/icon/close.svg';
 import { useNavigate, useParams } from 'react-router';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,6 +29,10 @@ const PetDetails = () => {
     const { showLoader, hideLoader } = useLoader();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [memorialiseOpen, setMemorialiseOpen] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
+
 
     const { pet, loading, error } = useSelector((state) => state.pets.selectedPet || {});
 
@@ -185,11 +190,49 @@ const PetDetails = () => {
                                             <div className='font-normal text-primary-light text-sm'>{formatDate(pet?.dob)}</div>
                                         </div>
 
-                                        <div className='flex justify-center items-center font-bold text-base h-[38px] px-4 py-2 border border-primary-dark rounded-[30px]'>
+                                        <div className='flex justify-center items-center font-bold text-base h-[38px] px-4 py-2 border border-primary-dark rounded-[30px] cursor-pointer' onClick={() => {
+                                            setSelectedImage(pet?.vaccinated_image_url);
+                                            setShowModal(true);
+                                        }}>
                                             View Certificate
                                         </div>
                                     </div>
                                 </div>
+
+                                {showModal && (
+                                    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50 animate-fadeIn">
+                                        <div className="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-2xl relative animate-scaleIn">
+
+                                            {/* Header */}
+                                            <div className="flex items-center justify-center mb-4 pb-3">
+                                                <h2 className="font-semibold md:text-xl text-center text-gray-800 text-lg w-full">
+                                                    View Certificate
+                                                </h2>
+                                                <button
+                                                    onClick={() => setShowModal(false)}
+                                                    className="text-gray-400 hover:text-gray-600 transition"
+                                                >
+                                                    <img src={Close} alt="Close" />
+                                                </button>
+                                            </div>
+
+                                            {/* Image / Content */}
+                                            <div className="flex justify-center items-center">
+                                                {selectedImage ? (
+                                                    <div className="w-full h-[300px] md:h-[450px] flex justify-center items-center rounded-lg">
+                                                        <img
+                                                            src={selectedImage}
+                                                            alt="Rabies Certificate"
+                                                            className="max-h-full max-w-full object-contain rounded-md"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-gray-500">No certificate uploaded</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </>
                         )}
                     </div>

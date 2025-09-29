@@ -147,7 +147,7 @@ const AddUpdateDog = () => {
     }, [selectedPet, reset, isEdit, petBreeds]);
 
     // 📝 Handle Submit
-    const onSubmit = (formData) => {
+    const onSubmit = async (formData) => {
         const certificate = formData.vaccinated_image_url;
         const expiration = formData.vaccinated_exp_date;
 
@@ -157,11 +157,13 @@ const AddUpdateDog = () => {
             return;
         }
 
+        showLoader();
+
         const payload = {
             ...formData,
             petType: 'dog',
             pet_id: isEdit ? id : undefined,
-            gender: formData?.gender === 'm' ? 'M' : 'F'
+            gender: (formData?.gender == 'm' || formData?.gender == 'M') ? 'M' : 'F'
         };
 
         // convert MM/YYYY -> YYYY-MM-DD for backend
@@ -180,9 +182,14 @@ const AddUpdateDog = () => {
 
         console.log("🚀 Final Payload", payload);
 
-        dispatch(addUpdatePet(payload)).then((res) => {
-            if (!res.error) navigate('/user/pet/list')
-        })
+        try {
+            const res = await dispatch(addUpdatePet(payload));
+            if (!res.error) {
+                navigate('/user/pet/list');
+            }
+        } finally {
+            hideLoader();
+        }
     };
 
     const handleDeletePet = async () => {

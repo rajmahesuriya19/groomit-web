@@ -110,7 +110,7 @@ const AddUpdateCat = () => {
     }, [selectedPet, reset, isEdit])
 
     // 📝 Handle Submit
-    const onSubmit = (formData) => {
+    const onSubmit = async (formData) => {
         const certificate = formData.vaccinated_image_url;
         const expiration = formData.vaccinated_exp_date;
 
@@ -120,11 +120,13 @@ const AddUpdateCat = () => {
             return;
         }
 
+        showLoader();
+
         const payload = {
             ...formData,
             petType: 'cat',
             pet_id: isEdit ? id : undefined,
-            gender: formData?.gender === 'm' ? 'M' : 'F'
+            gender: (formData?.gender == 'm' || formData?.gender == 'M') ? 'M' : 'F'
         }
 
         // convert MM/YYYY -> YYYY-MM-DD for backend
@@ -148,9 +150,14 @@ const AddUpdateCat = () => {
 
         console.log("🚀 Final Payload", payload)
 
-        dispatch(addUpdatePet(payload)).then((res) => {
-            if (!res.error) navigate('/user/pet/list')
-        })
+        try {
+            const res = await dispatch(addUpdatePet(payload));
+            if (!res.error) {
+                navigate('/user/pet/list');
+            }
+        } finally {
+            hideLoader();
+        }
     }
 
     const handleDeletePet = async () => {
@@ -318,7 +325,7 @@ const AddUpdateCat = () => {
                                                     : 'bg-white border-[#BEC3C5]'
                                                     }`}
                                             >
-                                                {gender === 'M' ? 'Male' : 'Female'}
+                                                {(gender === 'M' || gender === "m") ? 'Male' : 'Female'}
                                             </button>
                                         ))}
                                     </div>
@@ -404,25 +411,31 @@ const AddUpdateCat = () => {
                                                         type="file"
                                                         accept="image/*,.pdf"
                                                         className="hidden"
+                                                        // onChange={(e) => {
+                                                        //     const file = e.target.files?.[0];
+                                                        //     if (file) {
+                                                        //         const today = new Date();
+                                                        //         const dateStr = `${today
+                                                        //             .getDate()
+                                                        //             .toString()
+                                                        //             .padStart(2, "0")}-${(today.getMonth() + 1)
+                                                        //                 .toString()
+                                                        //                 .padStart(2, "0")}-${today.getFullYear()}`;
+
+                                                        //         const renamedFile = {
+                                                        //             ...file,
+                                                        //             displayName: `Proof-of-vaccination_Added-${dateStr}${file.name.substring(
+                                                        //                 file.name.lastIndexOf(".")
+                                                        //             )}`,
+                                                        //         };
+
+                                                        //         setValue("vaccinated_image_url", renamedFile);
+                                                        //     }
+                                                        // }}
                                                         onChange={(e) => {
                                                             const file = e.target.files?.[0];
                                                             if (file) {
-                                                                const today = new Date();
-                                                                const dateStr = `${today
-                                                                    .getDate()
-                                                                    .toString()
-                                                                    .padStart(2, "0")}-${(today.getMonth() + 1)
-                                                                        .toString()
-                                                                        .padStart(2, "0")}-${today.getFullYear()}`;
-
-                                                                const renamedFile = {
-                                                                    ...file,
-                                                                    displayName: `Proof-of-vaccination_Added-${dateStr}${file.name.substring(
-                                                                        file.name.lastIndexOf(".")
-                                                                    )}`,
-                                                                };
-
-                                                                setValue("vaccinated_image_url", renamedFile);
+                                                                setValue("vaccinated_image_url", file);
                                                             }
                                                         }}
                                                     />
