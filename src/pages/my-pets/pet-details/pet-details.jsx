@@ -159,17 +159,28 @@ const PetDetails = () => {
                             <PetDetailItem label="Temperament" value={pet?.temperament} />
                         </div>
 
-                        {pet?.memorialized_at ? "" : !pet?.special_note ? <InfoCard
-                            title="Additional Information"
-                            subtitle="Tell us more about your pet"
-                            onClick={() => handleNavigate(pet?.type, pet?.pet_id)}
-                        /> : (
-                            <>
+                        {pet?.memorialized_at ? (
+                            // Memorialized pets
+                            pet?.special_note && (
                                 <div className='mt-3'>
                                     <div className='font-bold text-base'>Additional Information</div>
                                     <div className='font-normal text-sm'>{pet?.special_note}</div>
                                 </div>
-                            </>
+                            )
+                        ) : (
+                            // Non-memorialized pets
+                            !pet?.special_note ? (
+                                <InfoCard
+                                    title="Additional Information"
+                                    subtitle="Tell us more about your pet"
+                                    onClick={() => handleNavigate(pet?.type, pet?.pet_id)}
+                                />
+                            ) : (
+                                <div className='mt-3'>
+                                    <div className='font-bold text-base'>Additional Information</div>
+                                    <div className='font-normal text-sm'>{pet?.special_note}</div>
+                                </div>
+                            )
                         )}
 
                         {pet?.vaccinated_image_url && pet?.special_note && (
