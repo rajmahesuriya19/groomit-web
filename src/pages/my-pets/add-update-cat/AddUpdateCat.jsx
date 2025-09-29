@@ -124,6 +124,7 @@ const AddUpdateCat = () => {
             ...formData,
             petType: 'cat',
             pet_id: isEdit ? id : undefined,
+            gender: formData?.gender === 'm' ? 'M' : 'F'
         }
 
         // convert MM/YYYY -> YYYY-MM-DD for backend
@@ -307,12 +308,12 @@ const AddUpdateCat = () => {
                                         Select Gender
                                     </label>
                                     <div className="flex gap-2">
-                                        {['M', 'F'].map((gender) => (
+                                        {['m', 'f'].map((gender) => (
                                             <button
                                                 type="button"
                                                 key={gender}
                                                 onClick={() => setValue('gender', gender)}
-                                                className={`px-3.5 py-3 border rounded-[10px] ${selectedGender === gender
+                                                className={`px-3.5 py-3 border rounded-[10px] ${selectedGender?.toLowerCase() === gender
                                                     ? 'bg-brand text-white'
                                                     : 'bg-white border-[#BEC3C5]'
                                                     }`}
