@@ -20,6 +20,7 @@ module.exports = {
     extend: {
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        filson: ['"Filson Soft"', 'sans-serif'],
       },
       colors: {
         brand: '#FF314A',

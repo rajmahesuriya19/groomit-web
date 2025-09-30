@@ -1,44 +1,57 @@
-import React from 'react'
+import React, { useState } from 'react'
 import SupportItems from '@/common/SupportItems/SupportItems'
 import { ChevronRight } from 'lucide-react'
 
 // icons
 import RecurringIcon from '../../assets/icon/white-groomit.png';
-import Copy from '../../assets/icon/copyy.svg';
+import CopyIcon from '../../assets/icon/copyy.svg';
 import Home from '../../assets/icon/home-selection-a.svg';
 import Paw from '../../assets/icon/pet.svg';
 import Location from '../../assets/icon/location.svg';
+import Share from '../../assets/icon/share-white.svg';
 import Calender from '../../assets/icon/calendar-black.svg';
 import Scissor from '../../assets/menu-new/scissor-a.svg';
 import CatAnimation from '../../assets/animation/Cat Animation.gif';
 import DogAnimation from '../../assets/animation/Dog Animation.gif';
 import { useSelector } from 'react-redux';
+import DashboardCarousel from '@/common/DashboardCarousel/DashboardCarousel';
+import { Tooltip } from '@mui/material';
 
 const dashboard = () => {
+  const [tooltip, setTooltip] = useState('Click to copy');
+  const appointmentID = '#1234567';
   const { user } = useSelector((state) => state.user || {});
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(appointmentID);
+    setTooltip('ID Copied!');
+    setTimeout(() => setTooltip('Click to copy'), 2000);
+  };
 
   return (
     <>
-      <div className='w-full'>
-        <div className='bg-white py-[10px] px-[20px]'>
+      <div className='w-full overflow-hidden'>
+        <div className='bg-white py-2 px-5 w-full'>
           <div className='font-inter font-bold text-xl text-primary-dark'>{`Hi, ${user?.first_name}`}</div>
           <div className='font-inter font-normal text-sm text-primary-dark'>Ready to pamper your pets?</div>
         </div>
 
-        <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px]'>
-          <div className='flex items-center gap-2'>
-            <img src={RecurringIcon} alt="Dog" className="w-6 h-6" />
-            <div className='font-inter font-bold text-sm text-white'>Recurring Plan (Next Billing: 14 July)</div>
+        <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px] w-full'>
+          <div className='flex items-center gap-2 flex-1 min-w-0'>
+            <img src={RecurringIcon} alt="Recurring" className="w-6 h-6 flex-shrink-0" />
+            <div className='font-inter font-bold text-sm text-white truncate'>Recurring Plan (Next Billing: 14 July)</div>
           </div>
 
-          <div>
+          <div className='flex-shrink-0'>
             <ChevronRight size={24} className="text-white" />
           </div>
         </div>
       </div>
 
-      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[1.25fr_auto_1fr] gap-8">
+      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-4 md:gap-8">
         <div className="space-y-4">
+          <DashboardCarousel />
+
           {/* First Appointment Card */}
           <div className="rounded-2xl p-1 bg-white shadow-md">
             <div className="bg-[#F2F2F2] rounded-xl py-4 px-6">
@@ -164,11 +177,37 @@ const dashboard = () => {
 
             <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#438B53] transition hover:shadow-lg">
               <div className="flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide">
-                    #1234567
-                    <img src={Copy} className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition" alt="Copy" />
-                  </div>
+                <div className='cursor-pointer' onClick={handleCopy}>
+                  <Tooltip
+                    title={tooltip}
+                    arrow
+                    placement="top"
+                    componentsProps={{
+                      tooltip: {
+                        sx: {
+                          backgroundColor: "black",
+                          color: "white",
+                          fontSize: 12,
+                          padding: "6px 12px",
+                          borderRadius: "4px",
+                        },
+                      },
+                      arrow: {
+                        sx: {
+                          color: "black",
+                        },
+                      },
+                    }}
+                  >
+                    <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
+                      {appointmentID}
+                      <img
+                        src={CopyIcon}
+                        alt="Copy"
+                        className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                      />
+                    </div>
+                  </Tooltip>
                   <p className="font-inter font-bold text-base text-gray-800 mt-1">
                     Appointment Completed
                   </p>
@@ -233,7 +272,7 @@ const dashboard = () => {
         </div>
 
         {/* Right Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 w-full min-w-0">
           <SupportItems />
         </div>
       </div>
