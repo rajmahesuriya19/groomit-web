@@ -1,53 +1,40 @@
-import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { logoutUser } from "@/utils/store/slices/auth/authSlice";
+import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 
-// SVG Icons
-import Home from '../assets/icon/home.svg';
-import Calendar from '../assets/icon/calendar.svg';
-import PawPrint from '../assets/icon/pet-paw.svg';
-import Inbox from '../assets/icon/inbox.svg';
-import User from '../assets/icon/user.svg';
-import LogOut from '../assets/icon/logout.svg';
-import HelpCircle from '../assets/icon/info-blue.svg';
-import Star from '../assets/icon/star.svg';
-import PlayStore from '../assets/images/play-store.svg';
-import AppStore from '../assets/images/app-store.svg';
-import Instagram from '../assets/social/instagram.svg';
-import Youtube from '../assets/social/you-tube.svg';
-import Linkedin from '../assets/social/linkdein.svg';
-import Twitter from '../assets/social/x.svg';
-import Facebook from '../assets/social/fb.svg';
-import { useDispatch } from 'react-redux';
-import { logoutUser } from '@/utils/store/slices/auth/authSlice';
-import { useLoader } from '@/contexts/loaderContext/LoaderContext';
-import { toast } from 'react-toastify';
+// Icons
+import Home from "../assets/menu-new/home.svg";
+import RedHome from "../assets/menu-new/home-a.svg";
+import Calendar from "../assets/menu-new/calendar.svg";
+import RedCalendar from "../assets/menu-new/calendar-a.svg";
+import Inbox from "../assets/menu-new/message.svg";
+import RedInbox from "../assets/menu-new/message-a.svg";
+import Scissor from "../assets/menu-new/scissor.svg";
+import RedScissor from "../assets/menu-new/scissor-a.svg";
+import User from "../assets/menu-new/user.svg";
+import RedUser from "../assets/icon/user.svg";
+import LogOut from "../assets/icon/logout.svg";
+import HelpCircle from "../assets/icon/info-circle-black.svg";
+import Star from "../assets/icon/star-gray.svg";
+import PlayStore from "../assets/menu-new/play-store.svg";
+import AppStore from "../assets/menu-new/app-store.svg";
 
-const SidebarItem = ({ iconImg, label, href, active, onClick }) => {
-  const isInteractive = active !== undefined;
-
-  return (
-    <Link to={href}>
-      <div
-        onClick={onClick}
-        className={`group flex items-center space-x-3 px-4 py-2 rounded-lg cursor-pointer transition-colors
-        ${isInteractive ? (active ? 'text-brand' : 'text-primary-dark hover:text-brand') : 'text-primary-dark'}
-      `}
-      >
-        <img
-          src={iconImg}
-          alt={`${label} Icon`}
-          className={`w-6 h-6 transition-all ${isInteractive
-            ? 'group-hover:brightness-0 group-hover:invert-[27%] group-hover:sepia-[70%] group-hover:saturate-[700%] group-hover:hue-rotate-[330deg]'
-            : ''
-            }`}
-        />
-        <span className="text-lg font-medium font-inter transition-colors">
-          {label}
-        </span>
-      </div>
-    </Link>
-  );
-};
+// Sidebar item component
+const SidebarItem = ({ label, href, icon, activeIcon, active, onClick }) => (
+  <Link to={href || "#"} onClick={onClick} className={`flex items-center space-x-3 mt-[30px] cursor-pointer ${active ? 'text-brand border-r-[2px] border-brand' : 'text-primary-dark'}`}>
+    <img
+      src={active ? activeIcon || icon : icon}
+      alt={`${label} Icon`}
+      className="w-6 h-6 transition-all"
+    />
+    <span className={`text-lg font-bold font-inter ${active ? "text-brand" : "text-primary-dark"}`}>
+      {label}
+    </span>
+  </Link>
+);
 
 export default function Sidebar() {
   const location = useLocation();
@@ -55,125 +42,74 @@ export default function Sidebar() {
   const dispatch = useDispatch();
   const { showLoader, hideLoader } = useLoader();
 
-  const socialIcons = {
-    instagram: Instagram,
-    youtube: Youtube,
-    linkedin: Linkedin,
-    x: Twitter,
-    facebook: Facebook,
-  };
-
   const mainMenu = [
-    { label: 'Dashboard', href: '/user/dashboard', iconImg: Home },
-    { label: 'My Pets', href: '/user/pet/list', iconImg: PawPrint },
-    { label: 'Appointments', href: '/user/appointments', iconImg: Calendar },
-    { label: 'Inbox', href: '/user/inbox', iconImg: Inbox },
-    { label: 'My Account', href: '/user/account', iconImg: User },
+    { label: "Home", href: "/user/dashboard", icon: Home, activeIcon: RedHome },
+    { label: "Appointments", href: "/user/appointments", icon: Calendar, activeIcon: RedCalendar },
+    // { label: "Groomers", href: "/user/groomers", icon: Scissor, activeIcon: RedScissor },
+    { label: "My Pets", href: "/user/pet/list", icon: Scissor, activeIcon: RedScissor },
+    { label: "Inbox", href: "/user/inbox", icon: Inbox, activeIcon: RedInbox },
+    { label: "My Account", href: "/user/account", icon: User, activeIcon: RedUser },
   ];
 
   const secondaryMenu = [
-    { label: 'Review Us', iconImg: Star },
-    { label: 'How It Works', iconImg: HelpCircle },
-  ];
-
-  const logoutMenu = [
-    { label: 'Logout', iconImg: LogOut },
+    { label: "How It Works", icon: HelpCircle },
+    { label: "Review Us", icon: Star },
   ];
 
   const handleLogout = async () => {
     showLoader();
     try {
       await dispatch(logoutUser()).unwrap();
-      hideLoader();
-      navigate('/')
-      toast.success('Logout successful 🎉');
+      toast.success("Logout successful 🎉");
+      navigate("/");
     } catch (error) {
+      console.error("Logout failed:", error.message);
+    } finally {
       hideLoader();
-      console.error('Logout failed:', error.message);
     }
   };
 
   return (
-    <div className="hidden md:flex px-6 py-8">
-      <div className="w-[265px] bg-white shadow-2xl rounded-3xl flex flex-col px-4 py-6 h-fit">
+    <div className="hidden md:flex">
+      <div className="w-[265px] bg-white border-r border-[#BEC3C5] flex flex-col h-full pl-8 pb-6">
 
-        {/* Menu Section */}
-        <div className="flex flex-col space-y-6 w-full">
-
-          {/* Main Menu */}
-          <div className="space-y-2">
-            {mainMenu.map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-                active={location.pathname === item.href}
-              />
-            ))}
-          </div>
-
-          {/* Book Appointment */}
-          <div>
-            <button className="w-full bg-brand text-white py-2 text-sm font-medium rounded-full hover:bg-brand transition">
-              Book Appointment
-            </button>
-          </div>
-
-          {/* Secondary Menu */}
-          <div className="space-y-2 border-t pt-4">
-            {secondaryMenu.map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-              />
-            ))}
-          </div>
-
-          {/* Logout */}
-          <div className="space-y-2 border-t pt-4">
-            {logoutMenu.map((item) => (
-              <SidebarItem
-                key={item.label}
-                {...item}
-                onClick={handleLogout}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* App Download Section */}
-        <div className="mt-6 pt-6 border-t">
-          <p className="font-inter font-semibold text-xs text-primary-light tracking-[0.15em] leading-[100%] text-center uppercase mb-3">
-            Download the App
-          </p>
-          <div className="flex justify-center gap-3">
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <img
-                src={PlayStore}
-                alt="Google Play"
-                className="w-[94px]"
-              />
-            </a>
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <img
-                src={AppStore}
-                alt="App Store"
-                className="w-[94px]"
-              />
-            </a>
-          </div>
-        </div>
-
-        {/* Social Icons */}
-        <div className="flex justify-center gap-4 mt-5">
-          {Object.entries(socialIcons).map(([key, icon]) => (
-            <a href="#" key={key} target="_blank" rel="noopener noreferrer">
-              <img
-                src={icon}
-                alt={key}
-                className="h-[25px] w-[25px] opacity-80 hover:opacity-100 transition"
-              />
-            </a>
+        {/* Main Menu */}
+        <div className="flex flex-col">
+          {mainMenu.map((item) => (
+            <SidebarItem
+              key={item.label}
+              {...item}
+              active={location.pathname === item.href}
+            />
           ))}
+        </div>
+
+        {/* Divider */}
+        <div className="mt-8 border-t border-[#E4E4E4] w-full"></div>
+
+        {/* Secondary Menu */}
+        <div className="flex flex-col">
+          {secondaryMenu.map((item) => (
+            <SidebarItem key={item.label} label={item.label} icon={item.icon} />
+          ))}
+        </div>
+
+        {/* App Downloads */}
+        <div className="space-y-4 pt-6">
+          <p className="font-inter font-normal text-sm text-primary-dark mb-3">Download the App</p>
+          <div className="flex flex-col gap-3">
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              <img src={PlayStore} alt="Google Play" className="h-[36px]" />
+            </a>
+            <a href="#" target="_blank" rel="noopener noreferrer">
+              <img src={AppStore} alt="App Store" className="h-[36px]" />
+            </a>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div>
+          <SidebarItem label="Logout" icon={LogOut} onClick={handleLogout} />
         </div>
       </div>
     </div>

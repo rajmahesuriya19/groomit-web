@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronRight, ChevronLeft, PlusIcon } from 'lucide-react';
-import infoRed from '../../assets/icon/info-circle.svg';
-import Message from '../../assets/icon/messages-red.svg';
-import FeedbackIcon from '../../assets/icon/red-star.svg';
+import { ChevronLeft, PlusIcon } from 'lucide-react';
 import AddDog from '../../assets/icon/add-dog.svg';
 import AddCat from '../../assets/icon/add-cat.svg';
 import FallbackDog from '../../assets/icon/dog-avatar.jpg';
@@ -12,13 +9,7 @@ import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { useDispatch, useSelector } from 'react-redux';
 import { getPetList } from '@/utils/store/slices/petList/petListSlice';
 import AddPetsModal from '@/components/Modals/AddPetsModal';
-
-const supportItems = [
-    { label: 'How Groomit Works', icon: infoRed },
-    { label: 'Cancelation Policy', icon: infoRed },
-    { label: 'Live Chat', icon: Message },
-    { label: 'Give us feedback', icon: FeedbackIcon },
-];
+import SupportItems from '@/common/SupportItems/SupportItems';
 
 const PetCard = ({ type, pet, onDetails, showBook = true }) => {
     // pick the right image with fallback
@@ -108,7 +99,7 @@ const Pets = () => {
 
     return (
         <>
-            <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto]">
+            <div className="px-5 py-6 grid grid-cols-1 md:grid-cols-[1.25fr_auto_1fr] gap-8">
                 {/* Left Section */}
                 <div className="space-y-6">
                     {/* Header */}
@@ -315,29 +306,7 @@ const Pets = () => {
 
                 {/* Right Section */}
                 <div className="space-y-4">
-                    <div className="p-4">
-                        <div className="flex justify-between items-center pb-4">
-                            <h3 className="text-base font-bold text-primary-dark">Support</h3>
-                            <span className="text-sm text-primary-light">Have Questions?</span>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            {supportItems.map((item) => (
-                                <div
-                                    key={item.label}
-                                    className="bg-white rounded-[20px] flex justify-between items-center cursor-pointer px-4 py-3"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <img src={item.icon} alt={item.label} className="w-6 h-6" />
-                                        <span className="text-sm font-bold text-primary-dark font-inter">
-                                            {item.label}
-                                        </span>
-                                    </div>
-                                    <ChevronRight size={24} className="text-gray-400" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                    <SupportItems />
                 </div>
             </div>
 

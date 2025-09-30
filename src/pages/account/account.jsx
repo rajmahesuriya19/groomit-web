@@ -5,13 +5,10 @@ import Edit2 from '../../assets/icon/edit.svg';
 import Mail from '../../assets/icon/sms-red.svg';
 import Phone from '../../assets/icon/phone-red.svg';
 import Info from '../../assets/icon/info-circle-yellow.svg';
-import infoRed from '../../assets/icon/info-circle.svg';
 import infoGrey from '../../assets/icon/info-circle-grey.svg';
 import heartFilled from '../../assets/icon/heart-fill.svg';
 import heartGrey from '../../assets/icon/heart-grey.svg';
 import blocked from '../../assets/icon/blocked.svg';
-import Message from '../../assets/icon/messages-red.svg';
-import FeedbackIcon from '../../assets/icon/red-star.svg';
 import PasswordIcon from '../../assets/icon/red-lock.svg';
 import Notification from '../../assets/icon/notification-red.svg';
 import Share from '../../assets/icon/share.svg';
@@ -37,13 +34,7 @@ import { formatPhoneNumber } from '@/common/helpers';
 import { fetchAddresses } from '@/utils/store/slices/serviceAddressList/serviceAddressListSlice';
 import { addGroomerFav, getGroomersList, removeGroomerFav, toggleFavLocal } from '@/utils/store/slices/groomersList/groomersListSlice';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
-
-const supportItems = [
-  { label: 'FAQs', icon: infoRed },
-  { label: 'Cancelation Policy', icon: infoRed },
-  { label: 'Live Chat', icon: Message },
-  { label: 'Give us feedback', icon: FeedbackIcon },
-];
+import SupportItems from '@/common/SupportItems/SupportItems';
 
 const settingItems = [
   { label: 'Notification', icon: Notification },
@@ -308,7 +299,7 @@ const Account = () => {
 
               {cards.map((item, index) => (
                 <div
-                  key={item.label}
+                  key={index}
                   className={`flex cursor-pointer justify-between items-center pt-2 ${index !== cards.length - 1 ? 'pb-2 border-b border-[#F2F2F2]' : 'pb-0'
                     }`}
                   onClick={() => navigate(!item?.card_holder ? `/user/card/edit/${item?.billing_id}` : `/user/card/view/${item?.billing_id}`)}
@@ -483,7 +474,7 @@ const Account = () => {
 
             {settingItems.map((item, index) => (
               <div
-                key={item.label}
+                key={index}
                 className={`flex justify-between items-center cursor-pointer pt-3 ${index !== settingItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'}`}
               >
                 <div className="flex items-center gap-2">
@@ -498,31 +489,7 @@ const Account = () => {
           </div>
 
           {/* Support List */}
-          <div className="bg-white rounded-2xl p-4 shadow-md">
-            <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
-              <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
-                Support
-              </h3>
-              <span className="text-sm font-normal text-right text-primary-light leading-[100%] tracking-[-0.01em]">
-                Have Questions?
-              </span>
-            </div>
-
-            {supportItems.map((item, index) => (
-              <div
-                key={item.label}
-                className={`flex justify-between items-center cursor-pointer pt-3 ${index !== supportItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <img src={item.icon} alt={item.label} className="w-6 h-6" />
-                  <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
-                    {item.label}
-                  </span>
-                </div>
-                <ChevronRight size={24} className="text-gray-400" />
-              </div>
-            ))}
-          </div>
+          <SupportItems />
 
           {/* Share & Earn */}
           <div className="bg-white rounded-2xl p-4 shadow-md flex md:flex-row items-center justify-between gap-4">
