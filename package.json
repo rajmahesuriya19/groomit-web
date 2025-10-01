@@ -12,6 +12,7 @@
     "format": "prettier --write \"**/*.+(js|jsx|ts|tsx|json|css|scss)\""
   },
   "dependencies": {
+    "@babel/runtime": "^7.28.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.1.1",
