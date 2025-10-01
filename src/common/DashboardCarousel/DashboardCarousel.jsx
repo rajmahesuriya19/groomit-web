@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import SwipeableViews from 'react-swipeable-views';
-import { autoPlay } from 'react-swipeable-views-utils';
+import React, { useEffect, useState } from 'react';
+import SwipeableViews from 'react-swipeable-views-react-18-fix';
 import { Box } from '@mui/material';
 import Share from '../../assets/icon/share-white.svg';
 
@@ -19,28 +18,6 @@ const slides = [
     },
 ];
 
-const styles = {
-    root: {
-        position: 'relative',
-    },
-    slide: {
-        padding: 15,
-        minHeight: 100,
-        color: '#fff',
-    },
-    slide1: {
-        backgroundColor: '#FEA900',
-    },
-    slide2: {
-        backgroundColor: '#B3DC4A',
-    },
-    slide3: {
-        backgroundColor: '#6AC0FF',
-    },
-};
-
-const AutoPlaySwipeableViews = autoPlay(SwipeableViews);
-
 const DashboardCarousel = () => {
     const [activeStep, setActiveStep] = useState(0);
 
@@ -48,10 +25,17 @@ const DashboardCarousel = () => {
         setActiveStep(step);
     };
 
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveStep((prev) => (prev + 1) % slides.length);
+        }, 4000);
+        return () => clearInterval(timer);
+    }, []);
+
     return (
         <>
             <Box className="rounded-2xl p-1 bg-white shadow-md overflow-hidden relative">
-                <AutoPlaySwipeableViews index={activeStep} onChangeIndex={handleStepChange} enableMouseEvents animateTransitions={true}
+                <SwipeableViews index={activeStep} onChangeIndex={handleStepChange} enableMouseEvents animateTransitions={true}
                     springConfig={{
                         duration: '1s',
                         easeFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
@@ -141,7 +125,7 @@ const DashboardCarousel = () => {
                             )}
                         </Box>
                     ))}
-                </AutoPlaySwipeableViews>
+                </SwipeableViews>
             </Box>
 
             {/* Dots */}
