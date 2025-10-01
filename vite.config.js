@@ -8,7 +8,13 @@ dotenv.config();
 
 export default defineConfig({
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: [
+          ['@babel/plugin-transform-runtime', { regenerator: true }]
+        ]
+      }
+    }),
     jsconfigPaths()
   ],
   define: {
@@ -18,15 +24,6 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src')
     }
-  },
-  optimizeDeps: {
-    include: [
-      '@babel/runtime/helpers/createSuper',
-      '@babel/runtime/helpers/extends',
-      '@babel/runtime/helpers/classCallCheck',
-      '@babel/runtime/helpers/inherits',
-      '@babel/runtime/helpers/interopRequireDefault'
-    ]
   },
   server: {
     port: 5173
