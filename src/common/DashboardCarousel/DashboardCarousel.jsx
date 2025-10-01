@@ -135,8 +135,8 @@ const DashboardCarousel = () => {
                         key={index}
                         onClick={() => setActiveStep(index)}
                         className={`mx-1 cursor-pointer transition-all duration-300 ${index === activeStep
-                            ? 'w-4 bg-primary-dark rounded-full scale-110'
-                            : 'w-[6px] h-[6px] bg-gray-300 rounded-full'
+                            ? 'w-[22px] h-2 bg-primary-dark rounded-full scale-110'
+                            : 'w-2 h-2 bg-gray-300 rounded-full'
                             }`}
                     />
                 ))}

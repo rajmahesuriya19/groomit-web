@@ -31,9 +31,19 @@ const dashboard = () => {
   return (
     <>
       <div className='w-full overflow-hidden'>
-        <div className='bg-white py-2 px-5 w-full'>
+        <div className='bg-white py-2 px-5 w-full hidden md:block'>
           <div className='font-inter font-bold text-xl text-primary-dark'>{`Hi, ${user?.first_name}`}</div>
           <div className='font-inter font-normal text-sm text-primary-dark'>Ready to pamper your pets?</div>
+        </div>
+
+        <div className='bg-white py-2 px-5 w-full block md:hidden'>
+          <div className='flex items-center gap-2'>
+            <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
+            <div>
+              <div className='font-inter font-bold text-lg text-primary-dark'>{`Hi, ${user?.first_name}`}</div>
+              <div className='font-inter font-normal text-xs text-primary-dark'>Ready to pamper your pets?</div>
+            </div>
+          </div>
         </div>
 
         <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px] w-full'>
@@ -48,7 +58,7 @@ const dashboard = () => {
         </div>
       </div>
 
-      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-4 md:gap-8">
+      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
         <div className="space-y-4">
           <DashboardCarousel />
 
@@ -272,7 +282,7 @@ const dashboard = () => {
         </div>
 
         {/* Right Section */}
-        <div className="space-y-4 w-full min-w-0">
+        <div className="space-y-4 w-full min-w-0 hidden md:block">
           <SupportItems />
         </div>
       </div>
