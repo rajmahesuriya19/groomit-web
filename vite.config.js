@@ -22,7 +22,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
+      '@babel/runtime': resolve(__dirname, 'node_modules/@babel/runtime')
     }
   },
   server: {
