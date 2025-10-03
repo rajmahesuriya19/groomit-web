@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import dashboardReducer from './slices/dashboard/dashboardSlice';
 import authReducer from './slices/auth/authSlice';
 import userReducer from './slices/userInfo/userInfoSlice';
 import paymentCardReducer from './slices/paymentCards/paymentCardSlice';
@@ -14,10 +15,11 @@ import thunk from 'redux-thunk';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth', 'user', 'cards', 'addresses', 'groomers', 'pets'],
+  whitelist: ['dashboard', 'auth', 'user', 'cards', 'addresses', 'groomers', 'pets'],
 };
 
 const appReducer = combineReducers({
+  dashboard: dashboardReducer,
   auth: authReducer,
   user: userReducer,
   cards: paymentCardReducer,

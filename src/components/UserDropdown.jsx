@@ -15,7 +15,8 @@ const UserDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { user } = useSelector((state) => state.user);
+  const { dashboard } = useSelector((state) => state.dashboard);
+  const { user } = dashboard;
 
   const handleLogout = async () => {
     showLoader();

@@ -109,10 +109,40 @@ const AddUpdateCat = () => {
         }
     }, [selectedPet, reset, isEdit])
 
+    const dateOfBirth = watch("date_of_birth");
+
+    useEffect(() => {
+        if (!dateOfBirth) return;
+
+        const dob = parseMMYYYY(dateOfBirth);
+        const dobDate = new Date(dob);
+        const now = new Date();
+
+        const diffMonths = (now.getFullYear() - dobDate.getFullYear()) * 12 + (now.getMonth() - dobDate.getMonth());
+
+        if (diffMonths < 3) {
+            toast.error("Pets must be a minimum of 3 months old for grooming.");
+        }
+    }, [dateOfBirth]);
+
+
     // 📝 Handle Submit
     const onSubmit = async (formData) => {
         const certificate = formData.vaccinated_image_url;
         const expiration = formData.vaccinated_exp_date;
+
+        if (formData.date_of_birth) {
+            const dob = parseMMYYYY(formData.date_of_birth);
+            const dobDate = new Date(dob);
+            const now = new Date();
+
+            const diffMonths = (now.getFullYear() - dobDate.getFullYear()) * 12 + (now.getMonth() - dobDate.getMonth());
+
+            if (diffMonths < 3) {
+                toast.error("Pets must be a minimum of 3 months old for grooming.");
+                return;
+            }
+        }
 
         // ✅ Validation: If certificate uploaded, expiration date must exist
         if (certificate && !expiration) {

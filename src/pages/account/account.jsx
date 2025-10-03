@@ -94,12 +94,25 @@ const Account = () => {
   };
 
   useEffect(() => {
-    dispatch(getGroomersList());
-    dispatch(getUserInfo());
-    dispatch(fetchAddresses());
-    dispatch(fetchPaymentCards());
-  }, [dispatch]);
+    const fetchData = async () => {
+      try {
+        showLoader();
 
+        await Promise.all([
+          dispatch(getGroomersList()),
+          dispatch(getUserInfo()),
+          dispatch(fetchAddresses()),
+          dispatch(fetchPaymentCards()),
+        ]);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        hideLoader();
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
 
   return (
     <>
@@ -144,11 +157,15 @@ const Account = () => {
             style={{ height: '113px' }}
           >
             {/* Avatar */}
-            <img
+            {users?.photo ? (<img
               src={users?.photo}
               alt="Profile"
               className="rounded-full w-[82px] h-[82px]"
-            />
+            />) : (<img
+              src='https://dev.groomit.me/v6/images/profile-avatar.svg'
+              alt="Profile"
+              className="rounded-full w-[82px] h-[82px]"
+            />)}
 
             {/* Profile Text */}
             <div className="flex-1 ml-4 flex flex-col gap-[4px]">

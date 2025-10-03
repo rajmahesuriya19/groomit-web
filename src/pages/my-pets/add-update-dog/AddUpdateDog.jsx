@@ -107,14 +107,11 @@ const AddUpdateDog = () => {
 
     // 🐶 Load Pet Profile for Edit Mode
     useEffect(() => {
+        dispatch(getBookingPetBreeds({
+            bookingId: 17600 || selectedPet?.pet_id,
+        }));
         if (isEdit) {
             showLoader()
-            if (!petBreeds) {
-                dispatch(getBookingPetBreeds({
-                    bookingId: 17600 || selectedPet?.pet_id,
-                }));
-            }
-
             dispatch(getPetProfileID(id)).finally(() => hideLoader())
         }
     }, [id, dispatch, isEdit])
@@ -146,10 +143,39 @@ const AddUpdateDog = () => {
         }
     }, [selectedPet, reset, isEdit, petBreeds]);
 
+    const dateOfBirth = watch("date_of_birth");
+
+    useEffect(() => {
+        if (!dateOfBirth) return;
+
+        const dob = parseMMYYYY(dateOfBirth);
+        const dobDate = new Date(dob);
+        const now = new Date();
+
+        const diffMonths = (now.getFullYear() - dobDate.getFullYear()) * 12 + (now.getMonth() - dobDate.getMonth());
+
+        if (diffMonths < 3) {
+            toast.error("Pets must be a minimum of 3 months old for grooming.");
+        }
+    }, [dateOfBirth]);
+
     // 📝 Handle Submit
     const onSubmit = async (formData) => {
         const certificate = formData.vaccinated_image_url;
         const expiration = formData.vaccinated_exp_date;
+
+        if (formData.date_of_birth) {
+            const dob = parseMMYYYY(formData.date_of_birth);
+            const dobDate = new Date(dob);
+            const now = new Date();
+
+            const diffMonths = (now.getFullYear() - dobDate.getFullYear()) * 12 + (now.getMonth() - dobDate.getMonth());
+
+            if (diffMonths < 3) {
+                toast.error("Pets must be a minimum of 3 months old for grooming.");
+                return;
+            }
+        }
 
         // ✅ Validation: If certificate uploaded, expiration date must exist
         if (certificate && !expiration) {
@@ -169,16 +195,7 @@ const AddUpdateDog = () => {
         // convert MM/YYYY -> YYYY-MM-DD for backend
         payload.date_of_birth = parseMMYYYY(formData.date_of_birth);
         payload.vaccinated_exp_date = parseMMYYYY(formData.vaccinated_exp_date);
-
-        // boolean conversion
         payload.is_mixed = formData.is_mixed ? 1 : 0;
-
-        // ✅ Handle rabies certificate
-        // if (formData.vaccinated_image_url instanceof File) {
-        //     payload.vaccinated_image_url = formData.vaccinated_image_url;
-        // } else {
-        //     payload.vaccinated_image_url = selectedPet?.vaccinated_image_url || null;
-        // }
 
         console.log("🚀 Final Payload", payload);
 

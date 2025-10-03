@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SupportItems from '@/common/SupportItems/SupportItems'
 import { ChevronRight } from 'lucide-react'
 
@@ -8,25 +8,49 @@ import CopyIcon from '../../assets/icon/copyy.svg';
 import Home from '../../assets/icon/home-selection-a.svg';
 import Paw from '../../assets/icon/pet.svg';
 import Location from '../../assets/icon/location.svg';
-import Share from '../../assets/icon/share-white.svg';
+import FallbackDog from '../../assets/icon/dog-avatar.jpg';
+import FallbackCat from '../../assets/icon/cat-avatar.jpg';
+import Message from '../../assets/icon/message-blue.svg';
+import Call from '../../assets/icon/call-green.svg';
+import Star from '../../assets/icon/star.svg';
+import Tip from '../../assets/icon/tip.svg';
 import Calender from '../../assets/icon/calendar-black.svg';
 import Scissor from '../../assets/menu-new/scissor-a.svg';
 import CatAnimation from '../../assets/animation/Cat Animation.gif';
 import DogAnimation from '../../assets/animation/Dog Animation.gif';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import DashboardCarousel from '@/common/DashboardCarousel/DashboardCarousel';
 import { Tooltip } from '@mui/material';
+import { useNavigate } from 'react-router';
+import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
 const dashboard = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { showLoader, hideLoader } = useLoader();
   const [tooltip, setTooltip] = useState('Click to copy');
-  const appointmentID = '#1234567';
-  const { user } = useSelector((state) => state.user || {});
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(appointmentID);
+  const { dashboard } = useSelector((state) => state.dashboard);
+  const { user, catPets = [], dogPets = [], upcoming_appts = [], recurring_appts = [], rebook_requests = [], completed_appts = [] } = dashboard;
+  console.log(dashboard);
+
+  const hasAnyPet =
+    dogPets?.length > 0 ||
+    catPets?.length > 0 || [];
+
+  const allPets = [...dogPets, ...catPets];
+
+  const handleCopy = (appointmentID) => {
+    navigator.clipboard.writeText(`#${appointmentID}`);
     setTooltip('ID Copied!');
     setTimeout(() => setTooltip('Click to copy'), 2000);
   };
+
+  useEffect(() => {
+    showLoader();
+    dispatch(getDashboardData()).finally(() => hideLoader());
+  }, [dispatch]);
 
   return (
     <>
@@ -46,7 +70,7 @@ const dashboard = () => {
           </div>
         </div>
 
-        <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px] w-full'>
+        {(hasAnyPet && (recurring_appts.length > 0)) && <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px] w-full'>
           <div className='flex items-center gap-2 flex-1 min-w-0'>
             <img src={RecurringIcon} alt="Recurring" className="w-6 h-6 flex-shrink-0" />
             <div className='font-inter font-bold text-sm text-white truncate'>Recurring Plan (Next Billing: 14 July)</div>
@@ -55,15 +79,295 @@ const dashboard = () => {
           <div className='flex-shrink-0'>
             <ChevronRight size={24} className="text-white" />
           </div>
-        </div>
+        </div>}
       </div>
 
       <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
         <div className="space-y-4">
+
+          {/* If Upcoming Appointments are available */}
+          {upcoming_appts?.length > 0 && (
+            <div>
+              {upcoming_appts.map((appt) => (
+                <>
+                  <div key={appt?.appointment_id} className="mb-4 px-3">
+                    <h3 className="font-inter font-bold text-xl text-primary-dark">{appt?.appointment_status ? 'Upcoming Appointment' : 'Last Appointment'}</h3>
+                  </div>
+                  <div
+                    key={appt?.appointment_id}
+                    className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#FFBF00] transition hover:shadow-lg"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="cursor-pointer" onClick={() => handleCopy(appt?.appointment_id)}>
+                        <Tooltip
+                          title={tooltip}
+                          arrow
+                          placement="top"
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "black",
+                                color: "white",
+                                fontSize: 12,
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                              },
+                            },
+                            arrow: {
+                              sx: { color: "black" },
+                            },
+                          }}
+                        >
+                          <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
+                            #{appt?.appointment_id}
+                            <img
+                              src={CopyIcon}
+                              alt="Copy"
+                              className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                            />
+                          </div>
+                        </Tooltip>
+                        <p className="font-inter font-bold text-base text-gray-800 mt-1">
+                          {appt.appointment_status_label || "Appointment Completed"}
+                        </p>
+                      </div>
+                      <ChevronRight size={24} className="text-primary-dark" />
+                    </div>
+
+                    {/* Requested Time */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Calender} alt="Calendar" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {new Date(appt.ap_date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric"
+                          })} | ETA {appt.display_time.replace("ETA ", "")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
+                      </div>
+                    </div>
+
+                    {/* Service Type */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Home} alt="Home" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.inhome_mv == "InHome" ? "In Home" : "Mobile Van"}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Type</p>
+                      </div>
+                    </div>
+
+                    {/* Pets */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Paw} alt="Pets" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.pets?.map((pet) => pet.name).join(", ")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Pets to be Groomed</p>
+                      </div>
+                    </div>
+
+                    {/* Service Address */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Location} alt="Location" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.addressInfo?.address1}, {appt.addressInfo?.city}, {appt.addressInfo?.state}, {appt.addressInfo?.zip}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Address</p>
+                      </div>
+                    </div>
+
+                    {/* Preferred Groomer */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="flex justify-center items-center rounded-lg">
+                          <img
+                            src={appt?.groomer?.profile_photo_url}
+                            alt={appt?.groomer?.first_name}
+                            className="object-cover rounded-md w-[40px] h-[40px]"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <p className="font-inter font-bold text-primary-dark text-sm">
+                            {appt?.groomer?.first_name} {appt?.groomer?.last_name?.[0]}.
+                          </p>
+                          <p className="font-inter text-xs text-gray-500 mt-1">Preferred Groomer</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ))}
+            </div>
+          )}
+
+          {/* If Rebook Appointments are available */}
+          {rebook_requests?.length > 0 && (
+            <div>
+              <div className="mb-4 px-3">
+                <h3 className="font-inter font-bold text-xl text-primary-dark">Rebooking Request</h3>
+              </div>
+              {rebook_requests.map((appt, index) => (
+                <>
+                  <div
+                    key={index}
+                    className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#FFBF00] transition hover:shadow-lg"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="cursor-pointer" onClick={() => handleCopy(appt?.address?.booking_session_id)}>
+                        <Tooltip
+                          title={tooltip}
+                          arrow
+                          placement="top"
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "black",
+                                color: "white",
+                                fontSize: 12,
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                              },
+                            },
+                            arrow: {
+                              sx: { color: "black" },
+                            },
+                          }}
+                        >
+                          <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
+                            #{appt?.address?.booking_session_id}
+                            <img
+                              src={CopyIcon}
+                              alt="Copy"
+                              className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                            />
+                          </div>
+                        </Tooltip>
+                        <p className="font-inter font-bold text-base text-gray-800 mt-1">
+                          {`Rebooking suggested by ${appt?.rebook_groomer?.first_name}`}
+                        </p>
+                      </div>
+                      <ChevronRight size={24} className="text-primary-dark" />
+                    </div>
+
+                    {/* Requested Time */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Calender} alt="Calendar" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt?.display_date} | {appt?.display_time}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
+                      </div>
+                    </div>
+
+                    {/* Service Type */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Home} alt="Home" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {(appt.service_type == "InHome" || appt.service_type == "in-home") ? "In Home" : "Mobile Van"}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Type</p>
+                      </div>
+                    </div>
+
+                    {/* Pets */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Paw} alt="Pets" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.pets?.map((pet) => pet.name).join(", ")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Pets to be Groomed</p>
+                      </div>
+                    </div>
+
+                    {/* Service Address */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Location} alt="Location" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.address?.street}, {appt.address?.city}, {appt.address?.state}, {appt.address?.zip}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Address</p>
+                      </div>
+                    </div>
+
+                    {/* Preferred Groomer */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="flex justify-center items-center rounded-lg">
+                          <img
+                            src={appt?.rebook_groomer?.profile_photo_url}
+                            alt={appt?.rebook_groomer?.first_name}
+                            className="object-cover rounded-md w-[40px] h-[40px]"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <p className="font-inter font-bold text-primary-dark text-sm">
+                            {appt?.rebook_groomer?.first_name} {appt?.rebook_groomer?.last_name?.[0]}.
+                          </p>
+                          <p className="font-inter text-xs text-gray-500 mt-1">Preferred Groomer</p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center border border-line justify-center rounded-[10px] w-[40px] h-[40px]">
+                            <img src={Message} alt="Message" className="w-6 h-6" />
+                          </div>
+                          <div className="flex items-center border border-line justify-center rounded-[10px] w-[40px] h-[40px]">
+                            <img src={Call} alt="Call" className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="mt-2 font-inter font-normal text-xs text-gray-600">
+                        Calling is available only through the app
+                      </p>
+                    </div>
+
+                    {/* Change Date/Time and Confirm Buttons */}
+                    <div>
+                      <div className="flex items-start mt-4 pt-3 border-t border-gray-200 gap-3">
+                        <button className='font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-gray-200'>Change Date/Time</button>
+                        <button className='font-inter bg-primary-dark font-bold text-base text-white w-full h-[38px] rounded-[10px] border border-gray-200'>Confirm</button>
+                      </div>
+
+                      <div className='mt-4 text-center font-inter font-normal text-sm underline text-[#3064A3]'>Reject Request</div>
+                    </div>
+                  </div>
+                </>
+              ))}
+            </div>
+          )}
+
           <DashboardCarousel />
 
           {/* First Appointment Card */}
-          <div className="rounded-2xl p-1 bg-white shadow-md">
+          {!upcoming_appts?.length && <div className="rounded-2xl p-1 bg-white shadow-md">
             <div className="bg-[#F2F2F2] rounded-xl py-4 px-6">
               <h3 className="flex items-center font-inter font-bold text-xl">
                 <img src={Scissor} className="mr-2 w-6 h-6" alt="Scissor" />
@@ -79,10 +383,10 @@ const dashboard = () => {
                 It only takes a few seconds to book ✨
               </p>
             </div>
-          </div>
+          </div>}
 
           {/* Reminder Card */}
-          <div className="rounded-2xl p-1 bg-white shadow-md">
+          {(hasAnyPet) && <div className="rounded-2xl p-1 bg-white shadow-md">
             <div className="bg-[#FFF6DB] rounded-xl py-4 px-6">
               <h3 className="text-center font-inter font-bold text-xl">
                 Time for Bruno’s Next Grooming!
@@ -104,9 +408,9 @@ const dashboard = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div>}
 
-          <div className="rounded-2xl p-1 bg-white shadow-md">
+          {!hasAnyPet && <div className="rounded-2xl p-1 bg-white shadow-md">
             <div className="py-3 px-3">
               <h3 className="font-inter font-bold text-base">Add Your Pets</h3>
               <p className="font-inter text-sm text-gray-600 mt-1">
@@ -135,145 +439,179 @@ const dashboard = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div>}
 
-          <div>
-            <div className="mb-1 py-3 px-3">
-              <div className='flex items-center justify-between'>
-                <h3 className="font-inter font-bold text-xl">My Pets</h3>
-                <p className="flex items-center justify-center font-inter font-normal text-sm text-[#3064A3]">
-                  View <ChevronRight size={16} className="text-[#3064A3]" />
-                </p>
-              </div>
-            </div>
-
-            <div className='mb-3 p-4 bg-white rounded-2xl shadow-md'>
-              <div className='flex justify-between items-center'>
-                <div className='flex gap-3 items-center'>
-                  <img src="https://dev.groomit.me/v7/images/sample-up.jpg" className="w-9 h-9 object-cover rounded-[10px] cursor-pointer" alt="Pet Profile"></img>
-                  <div>
-                    <h4 className="font-inter font-bold text-base cursor-pointer">Bruno</h4>
-                    <div className="font-inter font-normal text-sm">Golden Retriever, Large</div>
-                  </div>
+          {(!upcoming_appts && allPets.length > 0) && (
+            <div>
+              <div className="mb-1 py-3 px-3">
+                <div className='flex items-center justify-between'>
+                  <h3 className="font-inter font-bold text-xl">My Pets</h3>
+                  <p className="cursor-pointer flex items-center justify-center font-inter font-normal text-sm text-[#3064A3]" onClick={() => navigate("/user/pet/list")}>
+                    View <ChevronRight size={16} className="text-[#3064A3]" />
+                  </p>
                 </div>
-
-                <button className="px-4 py-2 border border-primary-dark rounded-[10px] text-primary-dark font-inter font-bold text-base">
-                  Book
-                </button>
               </div>
-            </div>
 
-            <div className='mb-3 p-4 bg-white rounded-2xl shadow-md'>
-              <div className='flex justify-between items-center'>
-                <div className='flex gap-3 items-center'>
-                  <img src="https://dev.groomit.me/v7/images/sample-up.jpg" className="w-9 h-9 object-cover rounded-[10px] cursor-pointer" alt="Pet Profile"></img>
-                  <div>
-                    <h4 className="font-inter font-bold text-base cursor-pointer">Bruno</h4>
-                    <div className="font-inter font-normal text-sm">Golden Retriever, Large</div>
-                  </div>
-                </div>
-
-                <button className="px-4 py-2 border border-primary-dark rounded-[10px] text-primary-dark font-inter font-bold text-base">
-                  Book
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-4 px-3">
-              <h3 className="font-inter font-bold text-xl text-primary-dark">Last Appointment</h3>
-            </div>
-
-            <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#438B53] transition hover:shadow-lg">
-              <div className="flex justify-between items-center">
-                <div className='cursor-pointer' onClick={handleCopy}>
-                  <Tooltip
-                    title={tooltip}
-                    arrow
-                    placement="top"
-                    componentsProps={{
-                      tooltip: {
-                        sx: {
-                          backgroundColor: "black",
-                          color: "white",
-                          fontSize: 12,
-                          padding: "6px 12px",
-                          borderRadius: "4px",
-                        },
-                      },
-                      arrow: {
-                        sx: {
-                          color: "black",
-                        },
-                      },
-                    }}
-                  >
-                    <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
-                      {appointmentID}
+              {allPets.slice(0, 2).map((pet, index) => (
+                <div key={index} className='mb-3 p-4 bg-white rounded-2xl shadow-md'>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex gap-3 items-center'>
                       <img
-                        src={CopyIcon}
-                        alt="Copy"
-                        className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                        src={pet?.profilePicture?.path || pet?.photo_url || (pet?.type === "dog" ? FallbackDog : FallbackCat)}
+                        className="w-9 h-9 object-cover rounded-[10px] cursor-pointer"
+                        alt="Pet Profile"
                       />
+                      <div>
+                        <h4 className="font-inter font-bold text-base cursor-pointer">{pet.name}</h4>
+                        {pet?.type === "dog" ? (<div className="font-inter font-normal text-sm">
+                          {[pet?.breed_name, pet?.size?.size_name].filter(Boolean).join(', ')}
+                        </div>) : (<div className="font-inter font-normal text-sm">
+                          {pet?.age}
+                        </div>)}
+                      </div>
                     </div>
-                  </Tooltip>
-                  <p className="font-inter font-bold text-base text-gray-800 mt-1">
-                    Appointment Completed
-                  </p>
-                </div>
-                <ChevronRight size={24} className="text-primary-dark" />
-              </div>
 
-              <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                  <img src={Calender} alt="Calendar" className="w-5 h-5" />
+                    <button className="px-4 py-2 border border-primary-dark rounded-[10px] text-primary-dark font-inter font-bold text-base">
+                      Book
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-inter font-bold text-primary-dark text-sm">
-                    Thu, Jan 23 ETA 3:30 PM – 4:30 PM
-                  </p>
-                  <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
-                </div>
-              </div>
-
-              <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                  <img src={Home} alt="Calendar" className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-inter font-bold text-primary-dark text-sm">
-                    In Home
-                  </p>
-                  <p className="font-inter text-xs text-gray-500 mt-1">Service Type</p>
-                </div>
-              </div>
-
-              <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                  <img src={Paw} alt="Calendar" className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-inter font-bold text-primary-dark text-sm">
-                    scooby, oiioii
-                  </p>
-                  <p className="font-inter text-xs text-gray-500 mt-1">Pets to be Groomed</p>
-                </div>
-              </div>
-
-              <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                  <img src={Location} alt="Calendar" className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-inter font-bold text-primary-dark text-sm">
-                    11 West 42nd Street, New York, NY, USA, New York
-                  </p>
-                  <p className="font-inter text-xs text-gray-500 mt-1">Service Address</p>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+          )}
+
+          {/* If Completed Appointments are available */}
+          {completed_appts?.length > 0 && (
+            <div>
+              <div className="mb-4 px-3">
+                <h3 className="font-inter font-bold text-xl text-primary-dark">
+                  Last Appointment
+                </h3>
+              </div>
+
+              {completed_appts.map((appt, index) => {
+                const isCanceled = appt?.appointment_status_label === "Canceled by you";
+                const isCompleted = appt?.appointment_status_label === "Appointment completed";
+
+                const formattedDate = new Date(appt.ap_date).toLocaleDateString("en-US", {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                });
+
+                return (
+                  <div
+                    key={index}
+                    className={`mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] ${isCanceled ? "border-[#EB5757]" : "border-[#438B53]"
+                      } transition hover:shadow-lg`}
+                  >
+                    {/* Appointment ID + Status */}
+                    <div className="flex justify-between items-center">
+                      <div className="cursor-pointer" onClick={() => handleCopy(appt?.appointment_id)}>
+                        <Tooltip
+                          title={tooltip}
+                          arrow
+                          placement="top"
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "black",
+                                color: "white",
+                                fontSize: 12,
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                              },
+                            },
+                            arrow: { sx: { color: "black" } },
+                          }}
+                        >
+                          <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
+                            #{appt?.appointment_id}
+                            <img
+                              src={CopyIcon}
+                              alt="Copy"
+                              className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                            />
+                          </div>
+                        </Tooltip>
+
+                        <p className="font-inter font-bold text-base text-gray-800 mt-1">
+                          {appt?.appointment_status_label}
+                        </p>
+                      </div>
+
+                      <ChevronRight size={24} className="text-primary-dark" />
+                    </div>
+
+                    {/* Requested Time */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Calender} alt="Calendar" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {formattedDate} | ETA {appt.display_time.replace("ETA ", "")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
+                      </div>
+                    </div>
+
+                    {/* Preferred Groomer */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="flex justify-center items-center rounded-lg">
+                          <img
+                            src={appt?.groomer?.profile_photo_url}
+                            alt={appt?.groomer?.first_name}
+                            className="object-cover rounded-md w-[40px] h-[40px]"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <p className="font-inter font-bold text-primary-dark text-sm">
+                            {appt?.groomer?.first_name} {appt?.groomer?.last_name?.[0]}.
+                          </p>
+                          <p className="font-inter text-xs text-gray-500 mt-1">Preferred Groomer</p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center border border-line justify-center rounded-[10px] w-[40px] h-[40px]">
+                            <img src={Message} alt="Message" className="w-6 h-6" />
+                          </div>
+                          <div className="flex items-center border border-line justify-center rounded-[10px] w-[40px] h-[40px]">
+                            <img src={Call} alt="Call" className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <p className="mt-2 font-inter font-normal text-xs text-gray-600">
+                        Calling is available only through the app
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200 gap-3">
+                      {isCanceled && (
+                        <button className="flex justify-center items-center gap-2 font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-gray-200">
+                          <img src={Star} alt="Star" className="w-6 h-6" /> Rate Service
+                        </button>
+                      )}
+
+                      {isCompleted && (
+                        <button className="flex justify-center items-center gap-2 font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-gray-200">
+                          <img src={Tip} alt="Tip" className="w-6 h-6" /> Give Tip
+                        </button>
+                      )}
+
+                      <button className="font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-brand text-brand">
+                        Rebook
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Divider */}
