@@ -13,6 +13,13 @@ export const formatPhoneNumber = (phone) => {
     return phone;
 };
 
+export const formatAppointmentDate = (dateString) => {
+    if (!dateString) return '';
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+};
+
 export const formatDate = (dateString) => {
     if (!dateString) return "--";
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",

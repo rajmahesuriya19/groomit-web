@@ -1,6 +1,8 @@
 export const RoutePath = {
   HOME: '/',
   ACCOUNT: '/user/account',
+  APPOINTMENTS: '/user/appointments',
+  APPOINTMENT_DETAIL: '/user/appointment/:id',
   CREATE_ACCOUNT: '/user/account/create',
   ADD_SERVICE: '/user/address/add',
   ADD_CARD: '/user/card/add',

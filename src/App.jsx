@@ -4,6 +4,7 @@ import { RoutePath } from './common/enums/enumConstant.js';
 import Layout from './components/Layout.jsx';
 import Landing from './pages/landing/landing.jsx';
 import Account from './pages/account/account.jsx';
+import Appointments from './pages/appointments/appointments.jsx';
 import Dashboard from './pages/dashboard/dashboard.jsx';
 import Page404 from './pages/page404/index.jsx';
 import CreateEditAccount from './pages/account/create-edit-account/CreateEditAccount.jsx';
@@ -16,6 +17,7 @@ import PetDetails from './pages/my-pets/pet-details/pet-details.jsx';
 import AddUpdateCat from './pages/my-pets/add-update-cat/AddUpdateCat.jsx';
 import AddUpdateDog from './pages/my-pets/add-update-dog/AddUpdateDog.jsx';
 import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
+import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Routes>
             <Route path={RoutePath.HOME} element={<Landing />} />
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
+            <Route path={RoutePath.APPOINTMENTS} element={<Appointments />} />
+            <Route path={RoutePath.APPOINTMENT_DETAIL} element={<AppointmentDetail />} />
             <Route path={RoutePath.CREATE_ACCOUNT} element={<CreateEditAccount />} />
             <Route path={RoutePath.EDIT_ACCOUNT} element={<CreateEditAccount />} />
             <Route path={RoutePath.ADD_SERVICE} element={<CreateEditServices />} />
