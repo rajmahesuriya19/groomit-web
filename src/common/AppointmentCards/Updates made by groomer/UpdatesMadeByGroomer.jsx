@@ -1,27 +1,20 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calender from '../../assets/icon/calendar-black.svg';
-import Home from '../../assets/icon/home-selection-a.svg';
-import Paw from '../../assets/icon/pet.svg';
-import Location from '../../assets/icon/location.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
+import Calendar from '../../../assets/icon/calendar-black.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
+import Star from '../../../assets/icon/star.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
-const GroomingInProgress = ({ appointment }) => {
+const UpdatesMadeByGroomer = ({ appointment }) => {
     const navigate = useNavigate();
-
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
-    const pets = appointment?.pets?.map((pet) => pet.name).join(', ') || 'N/A';
-    const address = appointment?.addressInfo
-        ? `${appointment.addressInfo.address1}, ${appointment.addressInfo.city}, ${appointment.addressInfo.state}, ${appointment.addressInfo.zip}`
-        : 'N/A';
 
     return (
         <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FF8A00] hover:shadow-lg transition-all duration-200">
@@ -38,7 +31,7 @@ const GroomingInProgress = ({ appointment }) => {
                             />
                         </div>
                         <p className="font-inter font-bold text-base text-gray-800 mt-1">{appointment_status_label}</p>
-                        <p className="font-inter text-xs mt-1">{appointment?.grooming_started_at}</p>
+                        <p className="font-inter text-xs mt-1">Requested at 5:10PM</p>
                     </div>
                 </CopyTooltip>
 
@@ -47,23 +40,20 @@ const GroomingInProgress = ({ appointment }) => {
                 </div>
             </div>
 
-            {/* Appointment Details */}
-            <AppointmentInfo icon={Calender} title={`${formatAppointmentDate(appointment?.ap_date)} | ${appointment?.display_time}`} subtitle="Requested Time" />
-            <AppointmentInfo
-                icon={Home}
-                title={appointment?.inhome_mv === "InHome" ? 'In Home' : 'Mobile Van'}
-                subtitle="Service Type"
-            />
-            <AppointmentInfo icon={Paw} title={pets} subtitle="Pets to be Groomed" />
-            <AppointmentInfo icon={Location} title={address} subtitle="Service Address" />
-
             {/* Groomer Info */}
             <PreferredGroomer groomer={groomer} />
+
+            {/* Actions */}
+            <div className="mt-4 flex flex-col gap-3">
+                <div className="flex gap-3">
+                    <ActionButton label="View Updates" />
+                </div>
+            </div>
         </div>
     );
 };
 
-export default GroomingInProgress;
+export default UpdatesMadeByGroomer;
 
 const PreferredGroomer = ({ groomer }) => {
     if (!groomer) return null;
@@ -107,6 +97,27 @@ const PreferredGroomer = ({ groomer }) => {
                 Calling is available only through the app
             </p>
         </div>
+    );
+};
+
+// 🧩 Generic text button (e.g. Rate Service, Refund Status, Rebook)
+const ActionButton = ({ label, icon, variant = 'default' }) => {
+    const baseStyle =
+        'flex-1 h-[40px] rounded-xl border font-inter font-bold text-base flex items-center justify-center gap-2 transition-all duration-200';
+    const variants = {
+        default: `${baseStyle} border-gray-200 text-gray-800 hover:bg-gray-50`,
+        brand: `${baseStyle} py-2 border-brand text-brand hover:bg-brand/10`,
+    };
+
+    return (
+        <button className={variants[variant]}>
+            {icon && <img
+                src={icon}
+                alt='Star'
+                className="w-[22px] h-[22px] flex items-center"
+            />}
+            <span>{label}</span>
+        </button>
     );
 };
 

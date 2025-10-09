@@ -1,20 +1,20 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calender from '../../assets/icon/calendar-black.svg';
-import Home from '../../assets/icon/home-selection-a.svg';
-import Paw from '../../assets/icon/pet.svg';
-import Location from '../../assets/icon/location.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
+import Calender from '../../../assets/icon/calendar-black.svg';
+import Home from '../../../assets/icon/home-selection-a.svg';
+import Paw from '../../../assets/icon/pet.svg';
+import Location from '../../../assets/icon/location.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
-const GroomerConfirmed = ({ appointment }) => {
+const GroomingInProgress = ({ appointment }) => {
     const navigate = useNavigate();
 
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
@@ -24,7 +24,7 @@ const GroomerConfirmed = ({ appointment }) => {
         : 'N/A';
 
     return (
-        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#28B446] hover:shadow-lg transition-all duration-200">
+        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FF8A00] hover:shadow-lg transition-all duration-200">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <CopyTooltip textToCopy={`#${appointment_id}`}>
@@ -38,6 +38,7 @@ const GroomerConfirmed = ({ appointment }) => {
                             />
                         </div>
                         <p className="font-inter font-bold text-base text-gray-800 mt-1">{appointment_status_label}</p>
+                        <p className="font-inter text-xs mt-1">{appointment?.grooming_started_at}</p>
                     </div>
                 </CopyTooltip>
 
@@ -62,7 +63,7 @@ const GroomerConfirmed = ({ appointment }) => {
     );
 };
 
-export default GroomerConfirmed;
+export default GroomingInProgress;
 
 const PreferredGroomer = ({ groomer }) => {
     if (!groomer) return null;

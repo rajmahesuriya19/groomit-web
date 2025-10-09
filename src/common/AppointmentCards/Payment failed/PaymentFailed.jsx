@@ -1,12 +1,12 @@
 import { Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 
-import Calender from '../../assets/icon/calendar-black.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
+import Calender from '../../../assets/icon/calendar-black.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
 import { ChevronRight } from 'lucide-react';
-import { formatAppointmentDate } from '../helpers';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
+import { formatAppointmentDate } from '../../helpers';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
 import { useNavigate } from 'react-router';
 
 const PaymentFailed = ({ appointment }) => {

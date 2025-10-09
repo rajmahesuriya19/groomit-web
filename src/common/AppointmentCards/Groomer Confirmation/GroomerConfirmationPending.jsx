@@ -1,23 +1,31 @@
 import { Tooltip } from '@mui/material';
 import React, { useState } from 'react';
 
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
+import Calender from '../../../assets/icon/calendar-black.svg';
+import Home from '../../../assets/icon/home-selection-a.svg';
+import Paw from '../../../assets/icon/pet.svg';
+import Location from '../../../assets/icon/location.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
 import { ChevronRight } from 'lucide-react';
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
+import { formatAppointmentDate } from '../../helpers';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
 import { useNavigate } from 'react-router';
 
-const ShaveDownRequest = ({ appointment }) => {
+const GroomerConfirmationPending = ({ appointment }) => {
     const navigate = useNavigate();
-    const pet = appointment?.pets.find(
-        (p) => p?.pet_id == appointment?.pet_id_requested_for_shave_down
-    );
+
+    const pets = appointment?.pets?.map((pet) => pet.name).join(', ') || 'N/A';
+    const address = appointment?.addressInfo
+        ? `${appointment.addressInfo.address1}, ${appointment.addressInfo.city}, ${appointment.addressInfo.state}, ${appointment.addressInfo.zip}`
+        : 'N/A';
 
     return (
-        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FF8A00] hover:shadow-lg transition">
+        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FFBF00] hover:shadow-lg transition">
 
-            {/* Header: ID & Status */}
+            {/* Header */}
             <div className="flex justify-between items-center">
                 <div className="cursor-pointer">
                     <CopyTooltip textToCopy={`#${appointment?.appointment_id}`}>
@@ -34,29 +42,24 @@ const ShaveDownRequest = ({ appointment }) => {
                     <p className="font-inter font-bold text-base text-gray-800 mt-1">
                         {appointment.appointment_status_label}
                     </p>
-                    <p className="font-inter text-xs mt-1">Requested at 5:10PM</p>
                 </div>
-
                 <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appointment?.appointment_id}`)}>
                     <ChevronRight size={24} className="text-primary-dark" />
                 </div>
             </div>
 
+            {/* Appointment Details */}
+            <AppointmentInfo icon={Calender} title={`${formatAppointmentDate(appointment?.ap_date)} | ${appointment?.display_time}`} subtitle="Requested Time" />
+            <AppointmentInfo
+                icon={Home}
+                title={appointment?.inhome_mv === "InHome" ? 'In Home' : 'Mobile Van'}
+                subtitle="Service Type"
+            />
+            <AppointmentInfo icon={Paw} title={pets} subtitle="Pets to be Groomed" />
+            <AppointmentInfo icon={Location} title={address} subtitle="Service Address" />
+
             {/* Preferred Groomer */}
             <PreferredGroomer groomer={appointment?.groomer} />
-
-            {/* Shave-Down Actions */}
-            <div className="flex flex-col gap-3 mt-4 pt-3 border-t border-gray-200">
-                <p className="font-inter text-sm">{`Shave-Down for ${pet?.name ?? 'N/A'}`}</p>
-                <div className="flex gap-3">
-                    <button className="w-full h-[38px] rounded-[10px] border border-gray-200 font-inter font-bold text-base">
-                        Don’t Approve
-                    </button>
-                    <button className="w-full h-[38px] rounded-[10px] border border-gray-200 bg-primary-dark font-inter font-bold text-base text-white">
-                        Approve
-                    </button>
-                </div>
-            </div>
         </div>
     );
 };
@@ -80,13 +83,13 @@ const PreferredGroomer = ({ groomer }) => {
                 </div>
 
                 <div className="flex gap-2">
-                    <ActionButton icon={groomer.isAllowedMessage ? Message : 'https://dev.groomit.me/v7/images/webapp/icons/message-gray.svg'} />
-                    <ActionButton icon={groomer.isAllowedCall ? Call : 'https://dev.groomit.me/v7/images/webapp/icons/call-gray.svg'} />
+                    {groomer.isAllowedMessage && <ActionButton icon={Message} />}
+                    {groomer.isAllowedCall && <ActionButton icon={Call} />}
                 </div>
             </div>
-            <p className="mt-2 font-inter text-xs text-gray-600">
+            {groomer.isAllowedMessage && groomer.isAllowedCall && <p className="mt-2 font-inter text-xs text-gray-600">
                 Calling is available only through the app
-            </p>
+            </p>}
         </div>
     );
 };
@@ -97,4 +100,4 @@ const ActionButton = ({ icon }) => (
     </div>
 );
 
-export default ShaveDownRequest;
+export default GroomerConfirmationPending;

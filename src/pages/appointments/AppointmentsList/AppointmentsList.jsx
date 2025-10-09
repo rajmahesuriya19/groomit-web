@@ -1,35 +1,20 @@
-import { Tooltip } from '@mui/material';
-import React, { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router';
-
 // Icons
-import CopyIcon from '../../../assets/icon/copyy.svg';
-import Calender from '../../../assets/icon/calendar-black.svg';
-import Home from '../../../assets/icon/home-selection-a.svg';
-import Paw from '../../../assets/icon/pet.svg';
-import Location from '../../../assets/icon/location.svg';
-import Message from '../../../assets/icon/message-blue.svg';
-import Call from '../../../assets/icon/call-green.svg';
-import ShaveDownRequest from '@/common/AppointmentCards/ShaveDownRequest';
-import GroomerConfirmationPending from '@/common/AppointmentCards/GroomerConfirmationPending';
-import GroomerMatchInProgress from '@/common/AppointmentCards/GroomerMatchInProgress';
-import PaymentFailed from '@/common/AppointmentCards/PaymentFailed';
-import SelectedGroomerNotAvailable from '@/common/AppointmentCards/SelectedGroomerNotAvailable';
-import CanceledByGroomer from '@/common/AppointmentCards/CanceledByGroomer';
-import UpdatesMadeByGroomer from '@/common/AppointmentCards/UpdatesMadeByGroomer';
-import GroomerConfirmed from '@/common/AppointmentCards/GroomerConfirmed';
-import GroomingInProgress from '@/common/AppointmentCards/GroomingInProgress';
-import GroomerOnWay from '@/common/AppointmentCards/GroomerOnWay';
-import GroomerArrived from '@/common/AppointmentCards/GroomerArrived';
-import CanceledByYou from '@/common/AppointmentCards/CanceledByYou';
-import AppointmentCompleted from '@/common/AppointmentCards/AppointmentCompleted';
-import Canceled from '@/common/AppointmentCards/Canceled';
+import ShaveDownRequest from '@/common/AppointmentCards/ShaveDown/ShaveDownRequest';
+import GroomerConfirmationPending from '@/common/AppointmentCards/Groomer Confirmation/GroomerConfirmationPending';
+import GroomerMatchInProgress from '@/common/AppointmentCards/Groomer Match In/GroomerMatchInProgress';
+import PaymentFailed from '@/common/AppointmentCards/Payment failed/PaymentFailed';
+import SelectedGroomerNotAvailable from '@/common/AppointmentCards/Selected Groomer Not Available/SelectedGroomerNotAvailable';
+import CanceledByGroomer from '@/common/AppointmentCards/Canceled By Groomer/CanceledByGroomer';
+import UpdatesMadeByGroomer from '@/common/AppointmentCards/Updates made by groomer/UpdatesMadeByGroomer';
+import GroomerConfirmed from '@/common/AppointmentCards/Groomer confirmed/GroomerConfirmed';
+import GroomingInProgress from '@/common/AppointmentCards/Grooming in progress/GroomingInProgress';
+import GroomerOnWay from '@/common/AppointmentCards/Groomer on the way/GroomerOnWay';
+import GroomerArrived from '@/common/AppointmentCards/Groomer arrived/GroomerArrived';
+import CanceledByYou from '@/common/AppointmentCards/Canceled By You/CanceledByYou';
+import AppointmentCompleted from '@/common/AppointmentCards/Appointment completed/AppointmentCompleted';
+import Canceled from '@/common/AppointmentCards/Canceled/Canceled';
 
 const AppointmentsList = ({ data = [] }) => {
-    const uniqueStatusLabels = [...new Set(data.map(a => a.appointment_status_label))];
-    console.log(uniqueStatusLabels);
-
     return (
         <div className="space-y-4">
             {data?.map((appt) => (

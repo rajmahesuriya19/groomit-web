@@ -1,7 +1,7 @@
 import React from 'react'
 
-const AppointmentInfo = ({ icon, title, subtitle }) => (
-    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+const AppointmentInfo = ({ type, icon, title, subtitle }) => (
+    <div className={`flex items-start ${type ? '' : 'mt-4 pt-3 border-t border-gray-200'}`}>
         <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
             <img src={icon} alt={subtitle} className="w-5 h-5" />
         </div>

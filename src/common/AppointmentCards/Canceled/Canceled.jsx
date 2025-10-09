@@ -1,23 +1,23 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calendar from '../../assets/icon/calendar-black.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
-import Star from '../../assets/icon/star.svg';
+import Calendar from '../../../assets/icon/calendar-black.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
+import Star from '../../../assets/icon/star.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
-const UpdatesMadeByGroomer = ({ appointment }) => {
+const Canceled = ({ appointment }) => {
     const navigate = useNavigate();
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
 
     return (
-        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FF8A00] hover:shadow-lg transition-all duration-200">
+        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#EB5757] hover:shadow-lg transition-all duration-200">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <CopyTooltip textToCopy={`#${appointment_id}`}>
@@ -31,7 +31,6 @@ const UpdatesMadeByGroomer = ({ appointment }) => {
                             />
                         </div>
                         <p className="font-inter font-bold text-base text-gray-800 mt-1">{appointment_status_label}</p>
-                        <p className="font-inter text-xs mt-1">Requested at 5:10PM</p>
                     </div>
                 </CopyTooltip>
 
@@ -40,20 +39,29 @@ const UpdatesMadeByGroomer = ({ appointment }) => {
                 </div>
             </div>
 
+            {/* Appointment Info */}
+            <AppointmentInfo
+                icon={Calendar}
+                title={`${formatAppointmentDate(ap_date)} | ${display_time}`}
+                subtitle="Requested Time"
+            />
+
             {/* Groomer Info */}
             <PreferredGroomer groomer={groomer} />
 
             {/* Actions */}
-            <div className="mt-4 flex flex-col gap-3">
-                <div className="flex gap-3">
-                    <ActionButton label="View Updates" />
-                </div>
+            <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
+                {/* <div className="flex gap-3">
+                    <ActionButton label="Rate Service" icon={Star} />
+                    <ActionButton label="Refund Status" />
+                </div> */}
+                <ActionButton label="Rebook" variant="brand" />
             </div>
         </div>
     );
 };
 
-export default UpdatesMadeByGroomer;
+export default Canceled;
 
 const PreferredGroomer = ({ groomer }) => {
     if (!groomer) return null;

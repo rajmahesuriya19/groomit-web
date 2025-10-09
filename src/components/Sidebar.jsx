@@ -75,13 +75,31 @@ export default function Sidebar() {
 
         {/* Main Menu */}
         <div className="flex flex-col">
-          {mainMenu.map((item) => (
-            <SidebarItem
-              key={item.label}
-              {...item}
-              active={location.pathname === item.href}
-            />
-          ))}
+          {mainMenu.map((item) => {
+            let isActive = location.pathname === item.href;
+
+            if (item.label === "Appointments") {
+              isActive =
+                location.pathname.startsWith("/user/appointments") ||
+                location.pathname.startsWith("/user/appointment/");
+            }
+
+            if (item.label === "My Pets") {
+              isActive = location.pathname.startsWith("/user/pet/");
+            }
+
+            if (item.label === "My Account") {
+              isActive = location.pathname.startsWith("/user/account");
+            }
+
+            return (
+              <SidebarItem
+                key={item.label}
+                {...item}
+                active={isActive}
+              />
+            );
+          })}
         </div>
 
         {/* Divider */}

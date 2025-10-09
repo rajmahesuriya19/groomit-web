@@ -1,18 +1,18 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calendar from '../../assets/icon/calendar-black.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
-import Star from '../../assets/icon/star.svg';
+import Calendar from '../../../assets/icon/calendar-black.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
+import Star from '../../../assets/icon/star.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
-const CanceledByYou = ({ appointment }) => {
+const CanceledByGroomer = ({ appointment }) => {
     const navigate = useNavigate();
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
 
@@ -61,7 +61,7 @@ const CanceledByYou = ({ appointment }) => {
     );
 };
 
-export default CanceledByYou;
+export default CanceledByGroomer;
 
 const PreferredGroomer = ({ groomer }) => {
     if (!groomer) return null;

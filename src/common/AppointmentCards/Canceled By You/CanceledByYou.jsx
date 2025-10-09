@@ -1,24 +1,23 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calendar from '../../assets/icon/calendar-black.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
-import Star from '../../assets/icon/star.svg';
-import Tip from '../../assets/icon/tip.svg';
+import Calendar from '../../../assets/icon/calendar-black.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
+import Star from '../../../assets/icon/star.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
-const AppointmentCompleted = ({ appointment }) => {
+const CanceledByYou = ({ appointment }) => {
     const navigate = useNavigate();
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
 
     return (
-        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#438B53] hover:shadow-lg transition-all duration-200">
+        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#EB5757] hover:shadow-lg transition-all duration-200">
             {/* Header */}
             <div className="flex justify-between items-center">
                 <CopyTooltip textToCopy={`#${appointment_id}`}>
@@ -54,7 +53,7 @@ const AppointmentCompleted = ({ appointment }) => {
             <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
                 <div className="flex gap-3">
                     <ActionButton label="Rate Service" icon={Star} />
-                    <ActionButton label="Give Tip" icon={Tip} />
+                    <ActionButton label="Refund Status" />
                 </div>
                 <ActionButton label="Rebook" variant="brand" />
             </div>
@@ -62,7 +61,7 @@ const AppointmentCompleted = ({ appointment }) => {
     );
 };
 
-export default AppointmentCompleted;
+export default CanceledByYou;
 
 const PreferredGroomer = ({ groomer }) => {
     if (!groomer) return null;

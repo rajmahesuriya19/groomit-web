@@ -1,17 +1,17 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 
-import Calender from '../../assets/icon/calendar-black.svg';
-import Home from '../../assets/icon/home-selection-a.svg';
-import Paw from '../../assets/icon/pet.svg';
-import Location from '../../assets/icon/location.svg';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
+import Calender from '../../../assets/icon/calendar-black.svg';
+import Home from '../../../assets/icon/home-selection-a.svg';
+import Paw from '../../../assets/icon/pet.svg';
+import Location from '../../../assets/icon/location.svg';
+import CopyIcon from '../../../assets/icon/copyy.svg';
+import Message from '../../../assets/icon/message-blue.svg';
+import Call from '../../../assets/icon/call-green.svg';
 
-import CopyTooltip from '../CopyTooltip/CopyTooltip';
-import AppointmentInfo from '../AppointmentCard/AppointmentInfo';
-import { formatAppointmentDate } from '../helpers';
+import CopyTooltip from '../../CopyTooltip/CopyTooltip';
+import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
+import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 
 const GroomerOnWay = ({ appointment }) => {
