@@ -38,10 +38,10 @@ const Appointments = () => {
 
     const { appointments } = useSelector((state) => state.appointments);
 
-    // useEffect(() => {
-    //     showLoader();
-    //     dispatch(getAppointments()).finally(() => hideLoader());
-    // }, [dispatch]);
+    useEffect(() => {
+        showLoader();
+        dispatch(getAppointments()).finally(() => hideLoader());
+    }, [dispatch]);
 
     const tabs = [
         { label: 'Upcoming', type: 'upcoming' },
