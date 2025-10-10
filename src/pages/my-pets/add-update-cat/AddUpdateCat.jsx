@@ -178,8 +178,6 @@ const AddUpdateCat = () => {
         //     payload.vaccinated_image_url = selectedPet?.vaccinated_image_url || null;
         // }
 
-        console.log("🚀 Final Payload", payload)
-
         try {
             const res = await dispatch(addUpdatePet(payload));
             if (!res.error) {

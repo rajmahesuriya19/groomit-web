@@ -36,8 +36,6 @@ const AppointmentDetail = () => {
         dispatch(getAppointmentDetail(id)).finally(() => hideLoader());
     }, [dispatch, id]);
 
-    console.log(selectedAppointment?.appointment_status_label);
-
     return (
         <>
             {/* Page Header */}
@@ -70,10 +68,10 @@ const AppointmentDetail = () => {
                     {selectedAppointment?.appointment_status_label === "Selected groomer not available" && <SelectedGroomerNotAvailableDetail selectedAppointment={selectedAppointment} />}
                     {selectedAppointment?.appointment_status_label === "Canceled by groomer" && <CanceledByGroomerDetail selectedAppointment={selectedAppointment} />}
                     {selectedAppointment?.appointment_status_label === "Canceled" && <CanceledDetail selectedAppointment={selectedAppointment} />}
-
-                    {/* remain */}
                     {selectedAppointment?.appointment_status_label === "Canceled by you" && <CanceledByYouDetail selectedAppointment={selectedAppointment} />}
                     {selectedAppointment?.appointment_status_label === "Appointment completed" && <AppointmentCompletedDetail selectedAppointment={selectedAppointment} />}
+
+                    {/* remain */}
                     {selectedAppointment?.appointment_status_label === "Updates made by groomer" && <UpdatesMadeByGroomerDetail selectedAppointment={selectedAppointment} />}
                     {/* remain */}
 

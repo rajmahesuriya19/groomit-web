@@ -62,19 +62,6 @@ export default UpdatesMadeByGroomerDetail;
 const ShaveDownSection = ({ addons }) => {
     if (!addons) return null;
 
-    // const pet = addons?.pets[0]?.
-    //     console.log(addons);
-
-
-    // Get the first addon that was added (+)
-    // const firstAddon = Object.values(addons).find(a => a.changed === "+");
-    // console.log(firstAddon);
-
-
-    // if (!firstAddon) return null;
-
-    // const { pet_name, prod_name, amt_show } = firstAddon;
-
     return (
         <div>
             {/* Add-on Summary */}

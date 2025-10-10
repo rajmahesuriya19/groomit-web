@@ -147,7 +147,6 @@ const CreateEditCards = () => {
             showLoader();
 
             const result = await dispatch(addPaymentCard(payload)).unwrap();
-            console.log("Card added:", result);
 
             navigate("/user/account");
         } catch (error) {

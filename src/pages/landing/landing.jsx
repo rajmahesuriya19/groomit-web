@@ -18,7 +18,6 @@ const Index = () => {
       if (loginUser.fulfilled.match(result)) {
         toast.success('Login successful 🎉');
         navigate('/user/dashboard');
-        console.log('Token:', result.payload.token);
       } else {
         toast.error(result.payload?.message || 'Login failed 😢');
       }

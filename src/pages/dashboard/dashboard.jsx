@@ -33,7 +33,6 @@ const dashboard = () => {
 
   const { dashboard } = useSelector((state) => state.dashboard);
   const { user, catPets = [], dogPets = [], upcoming_appts = [], recurring_appts = [], rebook_requests = [], completed_appts = [] } = dashboard;
-  console.log(dashboard);
 
   const hasAnyPet =
     dogPets?.length > 0 ||

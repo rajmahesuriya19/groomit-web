@@ -84,8 +84,6 @@ const CreateEditAccount = () => {
         try {
             showLoader("Updating profile...");
             const result = await dispatch(updateUserInfo(payload)).unwrap();
-
-            console.log("✅ Profile updated:", result);
             navigate("/user/account");
         } catch (error) {
             console.error("❌ Failed to update profile:", error);
@@ -101,7 +99,6 @@ const CreateEditAccount = () => {
     };
 
     const handleVerifyPhone = (otp) => {
-        console.log("Verified OTP:", otp);
         dispatch(getUserInfo())
         setVerifyPhoneModalOpen(false);
     };

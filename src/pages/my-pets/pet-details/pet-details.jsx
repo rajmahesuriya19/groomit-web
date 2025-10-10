@@ -33,11 +33,7 @@ const PetDetails = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
 
-
     const { pet, loading, error } = useSelector((state) => state.pets.selectedPet || {});
-
-    console.log(pet);
-
 
     useEffect(() => {
         if (id) {

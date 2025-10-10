@@ -20,9 +20,6 @@ const GroomerMatchInProgress = ({ appointment }) => {
         ? `${appointment.addressInfo.address1}, ${appointment.addressInfo.city}, ${appointment.addressInfo.state}, ${appointment.addressInfo.zip}`
         : 'N/A';
 
-    console.log(appointment);
-
-
     return (
         <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#FFBF00] hover:shadow-lg transition">
 

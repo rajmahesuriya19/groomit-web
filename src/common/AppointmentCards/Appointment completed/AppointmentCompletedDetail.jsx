@@ -2,6 +2,7 @@ import React from 'react'
 import Card from '../Card'
 import { ChevronRight } from 'lucide-react';
 
+import Refund from "../../../assets/icon/money-recive.svg"
 import Calender from '../../../assets/icon/calendar-black.svg';
 import Home from '../../../assets/icon/home-selection-a.svg';
 import Location from '../../../assets/icon/location.svg';
@@ -10,21 +11,31 @@ import { formatAppointmentDate } from '@/common/helpers';
 import MyPets from '../Pets Information/Pets';
 import Cards from '../Cards Section/Cards';
 import AppointmentHeader from '../Appointment Detail Header/AppointmentHeader';
+import RateServiceAccordion from '@/common/AccordionExpand/AccordionExpandDefault';
+import TipServiceAccordion from '@/common/AccordionExpand/TipServiceAccordion';
 
 const AppointmentCompletedDetail = ({ selectedAppointment }) => {
-
     const address = selectedAppointment?.address
         ? `${selectedAppointment.address.address1}, ${selectedAppointment.address.city}, ${selectedAppointment.address.state}, ${selectedAppointment.address.zip}`
         : 'N/A';
     return (
         <>
+            {selectedAppointment?.has_refund && <Card>
+                <RefundStatus cards={selectedAppointment?.card} />
+            </Card>}
+
             <Card borderColor="#438B53">
                 <AppointmentHeader appointment={selectedAppointment} />
             </Card>
 
             <Card>
                 <PreferredGroomer groomer={selectedAppointment?.groomer} />
+                <TipServiceAccordion tipOptions={selectedAppointment} />
             </Card>
+
+            {!selectedAppointment?.appt_detail?.isRatingEnable && <Card>
+                <RateServiceAccordion ratings={selectedAppointment?.appt_detail} />
+            </Card>}
 
             <Card>
                 <AppointmentInfo
@@ -105,6 +116,46 @@ const PreferredGroomer = ({ groomer }) => {
             <p className="mt-2 font-inter text-xs text-gray-600">
                 Calling is available only through the app
             </p>
+        </div>
+    );
+};
+
+/* 💇 Refund Status */
+const RefundStatus = ({ cards }) => {
+    if (!cards || cards.length === 0) return null;
+
+    const card = cards[0];
+
+    return (
+        <div className="flex flex-col gap-3">
+            {/* Header */}
+            <div className="flex items-center gap-3">
+                <img
+                    src={Refund}
+                    alt="Refund"
+                    className="w-9 h-9 object-cover"
+                />
+                <div className="flex-1">
+                    <p className="font-inter font-semibold text-base text-primary-dark">
+                        Refunds Issued
+                    </p>
+                    <p className="font-inter text-sm text-primary-light">
+                        {card.card_number ? `**** **** **** ${card.card_number}` : "**** **** **** ****"}
+                    </p>
+                </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-primary-line pt-3 flex flex-col gap-2">
+                <p className="font-inter text-sm text-gray-600 mb-2">
+                    There are refunds in your account.
+                </p>
+                <button
+                    className="w-full h-[40px] rounded-[10px] text-white font-medium bg-primary-dark hover:bg-primary-light transition-colors"
+                >
+                    Review Refunds
+                </button>
+            </div>
         </div>
     );
 };

@@ -197,8 +197,6 @@ const AddUpdateDog = () => {
         payload.vaccinated_exp_date = parseMMYYYY(formData.vaccinated_exp_date);
         payload.is_mixed = formData.is_mixed ? 1 : 0;
 
-        console.log("🚀 Final Payload", payload);
-
         try {
             const res = await dispatch(addUpdatePet(payload));
             if (!res.error) {

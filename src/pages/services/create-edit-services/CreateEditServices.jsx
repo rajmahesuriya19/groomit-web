@@ -91,8 +91,6 @@ const CreateEditServices = () => {
     }, [isEdit, addresses, id, reset]);
 
     const onSubmit = async (formData) => {
-        console.log(formData);
-
         const payload = {
             street: formData.street,
             apartment_number: formData.apartment_number || "",

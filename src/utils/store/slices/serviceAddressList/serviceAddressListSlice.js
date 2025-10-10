@@ -46,7 +46,6 @@ export const updateAddress = createAsyncThunk(
       if (!data.success) {
         return rejectWithValue(data)
       }
-      console.log(data)
       return data.data.address
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: 'Failed to update address' })
