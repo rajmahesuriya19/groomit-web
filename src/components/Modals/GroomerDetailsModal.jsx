@@ -30,12 +30,12 @@ const GroomerDetailsModal = ({ type, open, onClose, groomer }) => {
     const dispatch = useDispatch();
     const { groomers } = useSelector((state) => state.groomers);
 
-    const [localGroomer, setLocalGroomer] = useState(groomer);
+    const [localGroomer, setLocalGroomer] = useState(groomer || null);
 
     useEffect(() => {
         if (!groomer) return;
         const updated = groomers.find((g) => g.groomer_id === groomer.groomer_id);
-        if (updated) setLocalGroomer(updated);
+        setLocalGroomer(updated || groomer);
     }, [groomers, groomer]);
 
     const handleFav = (id, isFav) => {

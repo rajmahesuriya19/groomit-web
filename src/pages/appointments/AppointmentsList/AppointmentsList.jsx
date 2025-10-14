@@ -17,23 +17,25 @@ import Canceled from '@/common/AppointmentCards/Canceled/Canceled';
 const AppointmentsList = ({ data = [] }) => {
     return (
         <div className="space-y-4">
-            {data?.map((appt) => (
-                <>
-                    {appt?.appointment_status_label === "Shaved-down request" && <ShaveDownRequest appointment={appt} />}
-                    {appt?.appointment_status_label === "Groomer confirmation pending" && <GroomerConfirmationPending appointment={appt} />}
-                    {appt?.appointment_status_label === "Groomer Match In Progress" && <GroomerMatchInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === "Payment failed" && <PaymentFailed appointment={appt} />}
-                    {appt?.appointment_status_label === "Selected groomer not available" && <SelectedGroomerNotAvailable appointment={appt} />}
-                    {appt?.appointment_status_label === "Canceled by groomer" && <CanceledByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === "Canceled by you" && <CanceledByYou appointment={appt} />}
-                    {appt?.appointment_status_label === "Canceled" && <Canceled appointment={appt} />}
-                    {appt?.appointment_status_label === "Appointment completed" && <AppointmentCompleted appointment={appt} />}
-                    {appt?.appointment_status_label === "Updates made by groomer" && <UpdatesMadeByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === "Groomer confirmed" && <GroomerConfirmed appointment={appt} />}
-                    {appt?.appointment_status_label === "Grooming in progress" && <GroomingInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === "Groomer on the way" && <GroomerOnWay appointment={appt} />}
-                    {appt?.appointment_status_label === "Groomer arrived" && <GroomerArrived appointment={appt} />}
-                </>
+            {data?.map((appt, idx) => (
+                <div key={idx}>
+                    <>
+                        {appt?.appointment_status_label === "Shaved-down request" && <ShaveDownRequest appointment={appt} />}
+                        {appt?.appointment_status_label === "Groomer confirmation pending" && <GroomerConfirmationPending appointment={appt} />}
+                        {appt?.appointment_status_label === "Groomer Match In Progress" && <GroomerMatchInProgress appointment={appt} />}
+                        {appt?.appointment_status_label === "Payment failed" && <PaymentFailed appointment={appt} />}
+                        {appt?.appointment_status_label === "Selected groomer not available" && <SelectedGroomerNotAvailable appointment={appt} />}
+                        {appt?.appointment_status_label === "Canceled by groomer" && <CanceledByGroomer appointment={appt} />}
+                        {appt?.appointment_status_label === "Canceled by you" && <CanceledByYou appointment={appt} />}
+                        {appt?.appointment_status_label === "Canceled" && <Canceled appointment={appt} />}
+                        {appt?.appointment_status_label === "Appointment completed" && <AppointmentCompleted appointment={appt} />}
+                        {appt?.appointment_status_label === "Updates made by groomer" && <UpdatesMadeByGroomer appointment={appt} />}
+                        {appt?.appointment_status_label === "Groomer confirmed" && <GroomerConfirmed appointment={appt} />}
+                        {appt?.appointment_status_label === "Grooming in progress" && <GroomingInProgress appointment={appt} />}
+                        {appt?.appointment_status_label === "Groomer on the way" && <GroomerOnWay appointment={appt} />}
+                        {appt?.appointment_status_label === "Groomer arrived" && <GroomerArrived appointment={appt} />}
+                    </>
+                </div>
             ))}
         </div>
     );
