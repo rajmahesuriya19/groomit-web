@@ -130,7 +130,9 @@ const dashboard = () => {
                           {appt.appointment_status_label || "Appointment Completed"}
                         </p>
                       </div>
-                      <ChevronRight size={24} className="text-primary-dark" />
+                      <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appt?.appointment_id}`)}>
+                        <ChevronRight size={24} className="text-primary-dark" />
+                      </div>
                     </div>
 
                     {/* Requested Time */}
@@ -260,7 +262,9 @@ const dashboard = () => {
                           {`Rebooking suggested by ${appt?.rebook_groomer?.first_name}`}
                         </p>
                       </div>
-                      <ChevronRight size={24} className="text-primary-dark" />
+                      <div className="cursor-pointer" onClick={() => navigate(`/user/view-rebook-confirmation-session/${appt?.id}`)}>
+                        <ChevronRight size={24} className="text-primary-dark" />
+                      </div>
                     </div>
 
                     {/* Requested Time */}
@@ -539,7 +543,9 @@ const dashboard = () => {
                         </p>
                       </div>
 
-                      <ChevronRight size={24} className="text-primary-dark" />
+                      <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appt?.appointment_id}`)}>
+                        <ChevronRight size={24} className="text-primary-dark" />
+                      </div>
                     </div>
 
                     {/* Requested Time */}

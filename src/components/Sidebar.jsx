@@ -81,6 +81,7 @@ export default function Sidebar() {
             if (item.label === "Appointments") {
               isActive =
                 location.pathname.startsWith("/user/appointments") ||
+                location.pathname.startsWith("/user/view-rebook-confirmation-session/") ||
                 location.pathname.startsWith("/user/appointment/");
             }
 

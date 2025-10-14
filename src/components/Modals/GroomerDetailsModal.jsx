@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Box, IconButton } from '@mui/material';
 import Close from '../../assets/icon/close.svg';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import heartFilled from '../../assets/icon/fav-yes.png';
 import heartGrey from '../../assets/icon/fav-no.png';
 import blocked from '../../assets/icon/blocked.svg';
@@ -26,8 +26,17 @@ const modalStyle = {
     outline: 'none',
 };
 
-const GroomerDetailsModal = ({ open, onClose, groomer }) => {
+const GroomerDetailsModal = ({ type, open, onClose, groomer }) => {
     const dispatch = useDispatch();
+    const { groomers } = useSelector((state) => state.groomers);
+
+    const [localGroomer, setLocalGroomer] = useState(groomer);
+
+    useEffect(() => {
+        if (!groomer) return;
+        const updated = groomers.find((g) => g.groomer_id === groomer.groomer_id);
+        if (updated) setLocalGroomer(updated);
+    }, [groomers, groomer]);
 
     const handleFav = (id, isFav) => {
         // optimistic local toggle
@@ -43,6 +52,7 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
         }
     };
 
+    if (!localGroomer) return null;
 
     return (
         <Modal open={open} onClose={onClose}>
@@ -54,28 +64,28 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
 
                 <div className="flex justify-between items-center py-6">
                     <div className="flex items-center gap-4 w-full">
-                        {groomer?.profile_photo_url ? (
+                        {localGroomer?.profile_photo_url ? (
                             <img
-                                src={groomer?.profile_photo_url}
-                                alt={groomer?.name}
+                                src={localGroomer?.profile_photo_url}
+                                alt={localGroomer?.name}
                                 className="rounded-md w-[50px] h-[50px]"
                             />
                         ) : (
                             <img
                                 src={FallbackGroomer}
-                                alt={groomer?.name}
+                                alt={localGroomer?.name}
                                 className="rounded-md w-[50px] h-[50px]"
                             />
                         )}
                         <div className="flex flex-col gap-1 w-[219px]">
                             <div className="flex items-center gap-1">
                                 <h4 className="text-base font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
-                                    {groomer?.name}
+                                    {localGroomer?.name}
                                 </h4>
                             </div>
                         </div>
                     </div>
-                    {groomer?.blocked_by ? (
+                    {localGroomer?.blocked_by ? (
                         <button className="cursor-pointer">
                             <img
                                 src={blocked}
@@ -86,15 +96,15 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                     ) : (
                         <>
                             <button
-                                key={groomer?.groomer_id}
+                                key={localGroomer?.groomer_id}
                                 className="cursor-pointer"
-                                onClick={() => handleFav(groomer?.groomer_id, groomer?.is_fav_groomer)}
+                                onClick={() => handleFav(localGroomer?.groomer_id, localGroomer?.is_fav_groomer)}
                             >
                                 <img
-                                    src={groomer?.is_fav_groomer ? heartFilled : heartGrey}
-                                    alt={groomer?.is_fav_groomer ? "Favourite" : "Not Favourite"}
+                                    src={localGroomer?.is_fav_groomer ? heartFilled : heartGrey}
+                                    alt={localGroomer?.is_fav_groomer ? "Favourite" : "Not Favourite"}
                                     className={`w-[40px] h-[36px] cursor-pointer 
-    ${groomer?.is_fav_groomer ? "rounded-[10px] shadow-md" : ""}`}
+    ${localGroomer?.is_fav_groomer ? "rounded-[10px] shadow-md" : ""}`}
                                 />
                             </button>
                         </>
@@ -105,7 +115,7 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                     <h4 className="text-left text-base font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                         About Me
                     </h4>
-                    <p className="text-primary-dark text-sm text-left">{groomer?.bio}</p>
+                    <p className="text-primary-dark text-sm text-left">{localGroomer?.bio}</p>
                 </div>
 
                 <div className="flex flex-col gap-6">
@@ -113,15 +123,15 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                     <div className="flex gap-6">
                         {/* Gold Package */}
                         <div className="flex gap-4 items-start w-1/2 min-w-0">
-                            <div className="w-[35px] h-[35px] p-[7px] rounded-[10px] bg-[#F2F2F2] flex items-center justify-center shrink-0" onClick={() => handleFav(groomer?.groomer_id, groomer.is_fav_groomer)}>
+                            <div className="w-[35px] h-[35px] p-[7px] rounded-[10px] bg-[#F2F2F2] flex items-center justify-center shrink-0" onClick={() => handleFav(localGroomer?.groomer_id, localGroomer.is_fav_groomer)}>
                                 <img src={StarGray} alt="Star" className="w-[21px] h-[21px]" />
                             </div>
                             <div className="min-w-0">
                                 <div className="font-inter text-left font-bold text-[14px] leading-[18px] truncate">
-                                    {groomer?.rating_avg}
+                                    {localGroomer?.rating_avg}
                                 </div>
                                 <div className="font-inter text-left text-[#3064A3] underline cursor-pointer font-normal text-[14px] leading-[18px] truncate">
-                                    {groomer?.rating_qty} Ratings
+                                    {localGroomer?.rating_qty} Ratings
                                 </div>
                             </div>
                         </div>
@@ -133,7 +143,7 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                             </div>
                             <div className="min-w-0">
                                 <div className="font-inter text-left font-bold text-[14px] leading-[18px] truncate">
-                                    {groomer?.groomer_exp_years} Years
+                                    {localGroomer?.groomer_exp_years} Years
                                 </div>
                                 <div className="font-inter text-left font-normal text-[14px] leading-[18px] truncate">
                                     of Experience
@@ -151,7 +161,7 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                             </div>
                             <div className="min-w-0">
                                 <div className="font-inter text-left font-bold text-[14px] leading-[18px] truncate">
-                                    {groomer?.groomer_pet_serviced_count} Pets Serviced
+                                    {localGroomer?.groomer_pet_serviced_count} Pets Serviced
                                 </div>
                                 <div className="font-inter text-left font-normal text-[14px] leading-[18px] truncate">
                                     Years on Groomit App
@@ -166,7 +176,7 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                             </div>
 
                             <div className="min-w-0">
-                                {groomer?.groomer_service_area?.map((area, idx) => (
+                                {localGroomer?.groomer_service_area?.map((area, idx) => (
                                     <div
                                         key={idx}
                                         className={`font-inter text-left text-[14px] leading-[18px] truncate ${idx === 0 ? "font-bold" : "font-normal"
@@ -179,7 +189,6 @@ const GroomerDetailsModal = ({ open, onClose, groomer }) => {
                         </div>
                     </div>
                 </div>
-
             </Box>
         </Modal>
     );

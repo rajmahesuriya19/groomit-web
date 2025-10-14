@@ -30,6 +30,20 @@ export const getAppointmentDetail = createAsyncThunk(
     }
 );
 
+// ✅ Async Thunk to fetch Rebook-Detail data
+export const getRebookDetail = createAsyncThunk(
+    "appointments/getRebookDetail",
+    async (appointmentId, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get(`api/user/view-schedule-groomer-rebook-request/${appointmentId}`);
+            return response?.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to fetch appointment detail");
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch appointment detail" });
+        }
+    }
+);
+
 const appointmentsSlice = createSlice({
     name: "appointments",
     initialState: {
@@ -71,6 +85,19 @@ const appointmentsSlice = createSlice({
                 state.selectedAppointment = action.payload;
             })
             .addCase(getAppointmentDetail.rejected, (state, action) => {
+                state.loading = false;
+                state.detailError = action.payload?.message || "Something went wrong";
+            })
+
+            .addCase(getRebookDetail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getRebookDetail.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedAppointment = action.payload;
+            })
+            .addCase(getRebookDetail.rejected, (state, action) => {
                 state.loading = false;
                 state.detailError = action.payload?.message || "Something went wrong";
             });

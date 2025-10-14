@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Card from '../Card'
 import { ChevronRight } from 'lucide-react';
 
+import Info from '../../../assets/icon/info-circle-grey.svg';
 import Calender from '../../../assets/icon/calendar-black.svg';
 import Home from '../../../assets/icon/home-selection-a.svg';
 import Location from '../../../assets/icon/location.svg';
@@ -10,8 +11,11 @@ import { formatAppointmentDate } from '@/common/helpers';
 import MyPets from '../Pets Information/Pets';
 import Cards from '../Cards Section/Cards';
 import AppointmentHeader from '../Appointment Detail Header/AppointmentHeader';
+import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
 
 const GroomerConfirmedDetail = ({ selectedAppointment }) => {
+    const [groomerModal, setGroomerModal] = useState(false);
+    const [selectedGroomer, setSelectedGroomer] = useState(null);
 
     const address = selectedAppointment?.address
         ? `${selectedAppointment.address.address1}, ${selectedAppointment.address.city}, ${selectedAppointment.address.state}, ${selectedAppointment.address.zip}`
@@ -35,7 +39,13 @@ const GroomerConfirmedDetail = ({ selectedAppointment }) => {
                     subtitle="Service Type"
                 />
                 <AppointmentInfo icon={Location} title={address} subtitle="Service Address" />
-                <PreferredGroomer groomer={selectedAppointment?.groomer} />
+                <PreferredGroomer
+                    groomer={selectedAppointment?.groomer}
+                    onInfoClick={(g) => {
+                        setSelectedGroomer(g);
+                        setGroomerModal(true);
+                    }}
+                />
             </Card>
 
             <Card>
@@ -52,6 +62,13 @@ const GroomerConfirmedDetail = ({ selectedAppointment }) => {
             <Card>
                 <Cards cards={selectedAppointment?.card} charged={selectedAppointment?.total_charged} />
             </Card>
+
+            <GroomerDetailsModal
+                type={"appointments"}
+                open={groomerModal}
+                onClose={() => setGroomerModal(false)}
+                groomer={selectedGroomer}
+            />
         </>
     )
 }
@@ -59,7 +76,7 @@ const GroomerConfirmedDetail = ({ selectedAppointment }) => {
 export default GroomerConfirmedDetail;
 
 /* 💇 Preferred Groomer */
-const PreferredGroomer = ({ groomer }) => {
+const PreferredGroomer = ({ groomer, onInfoClick }) => {
     if (!groomer) return null;
 
     const {
@@ -81,9 +98,14 @@ const PreferredGroomer = ({ groomer }) => {
                 />
 
                 <div className="flex-1">
-                    <p className="font-inter font-bold text-sm text-primary-dark">
-                        {first_name} {last_name?.[0] || ''}.
-                    </p>
+                    <div className="flex gap-1 items-center">
+                        <p className="font-inter font-bold text-sm text-primary-dark">
+                            {first_name} {last_name?.[0]}.
+                        </p>
+                        <button onClick={() => onInfoClick?.(groomer)}>
+                            <img src={Info} alt="Info" className="w-5 h-5" />
+                        </button>
+                    </div>
                     <p className="font-inter text-xs text-gray-500 mt-1">{groomer_type || 'Preferred Groomer'}</p>
                 </div>
 

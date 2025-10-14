@@ -18,6 +18,7 @@ import AddUpdateCat from './pages/my-pets/add-update-cat/AddUpdateCat.jsx';
 import AddUpdateDog from './pages/my-pets/add-update-dog/AddUpdateDog.jsx';
 import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
+import Inbox from './pages/inbox/Inbox.jsx';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
             <Route path={RoutePath.APPOINTMENTS} element={<Appointments />} />
             <Route path={RoutePath.APPOINTMENT_DETAIL} element={<AppointmentDetail />} />
+            <Route path={RoutePath.REBOOK_DETAIL} element={<AppointmentDetail />} />
             <Route path={RoutePath.CREATE_ACCOUNT} element={<CreateEditAccount />} />
             <Route path={RoutePath.EDIT_ACCOUNT} element={<CreateEditAccount />} />
             <Route path={RoutePath.ADD_SERVICE} element={<CreateEditServices />} />
@@ -40,6 +42,7 @@ function App() {
             <Route path={RoutePath.CHANGE_PASSWORD} element={<ChangePassword />} />
             <Route path={RoutePath.DASHBOARD} element={<Dashboard />} />
             <Route path={RoutePath.PETS} element={<Pets />} />
+            <Route path={RoutePath.INBOX} element={<Inbox />} />
             <Route path={RoutePath.PET_DETAILS} element={<PetDetails />} />
             <Route path={RoutePath.ADD_DOG} element={<AddUpdateDog />} />
             <Route path={RoutePath.ADD_CAT} element={<AddUpdateCat />} />

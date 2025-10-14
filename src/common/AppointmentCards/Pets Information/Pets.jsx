@@ -13,14 +13,14 @@ const MyPets = ({ pets }) => {
     return (
         <div>
             {pets.map((pet) => {
-                const packageName = pet?.package?.prod_name || '';
+                const packageName = pet?.package?.prod_name || pet?.packageProduct?.prod_name || '';
                 const badgeColor = packageColors[packageName] || '#ED9F00';
 
                 return (
                     <div key={pet.pet_id} className="mt-4 pt-3 border-t border-gray-200">
                         <div className="flex items-center gap-4">
                             <img
-                                src={pet.photo_url || 'https://www.groomit.me/v7/images/icons/dog-avatar.jpg'}
+                                src={pet.photo_url || pet?.profilePicture?.path || 'https://www.groomit.me/v7/images/icons/dog-avatar.jpg'}
                                 alt={pet.name || 'Pet'}
                                 className="w-[40px] h-[40px] rounded-md object-cover"
                             />

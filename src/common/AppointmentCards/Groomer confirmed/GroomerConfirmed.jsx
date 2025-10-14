@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 import Calender from '../../../assets/icon/calendar-black.svg';
@@ -8,14 +8,18 @@ import Location from '../../../assets/icon/location.svg';
 import CopyIcon from '../../../assets/icon/copyy.svg';
 import Message from '../../../assets/icon/message-blue.svg';
 import Call from '../../../assets/icon/call-green.svg';
+import Info from '../../../assets/icon/info-circle-grey.svg';
 
 import CopyTooltip from '../../CopyTooltip/CopyTooltip';
 import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
 import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
+import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
 
 const GroomerConfirmed = ({ appointment }) => {
     const navigate = useNavigate();
+    const [groomerModal, setGroomerModal] = useState(false);
+    const [selectedGroomer, setSelectedGroomer] = useState(null);
 
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
     const pets = appointment?.pets?.map((pet) => pet.name).join(', ') || 'N/A';
@@ -24,47 +28,62 @@ const GroomerConfirmed = ({ appointment }) => {
         : 'N/A';
 
     return (
-        <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#28B446] hover:shadow-lg transition-all duration-200">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-                <CopyTooltip textToCopy={`#${appointment_id}`}>
-                    <div className="flex flex-col">
-                        <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide">
-                            #{appointment_id}
-                            <img
-                                src={CopyIcon}
-                                alt="Copy"
-                                className="w-3 h-3 opacity-80 hover:opacity-100 transition"
-                            />
+        <>
+            <div className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 border-[#28B446] hover:shadow-lg transition-all duration-200">
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                    <CopyTooltip textToCopy={`#${appointment_id}`}>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide">
+                                #{appointment_id}
+                                <img
+                                    src={CopyIcon}
+                                    alt="Copy"
+                                    className="w-3 h-3 opacity-80 hover:opacity-100 transition"
+                                />
+                            </div>
+                            <p className="font-inter font-bold text-base text-gray-800 mt-1">{appointment_status_label}</p>
                         </div>
-                        <p className="font-inter font-bold text-base text-gray-800 mt-1">{appointment_status_label}</p>
-                    </div>
-                </CopyTooltip>
+                    </CopyTooltip>
 
-                <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appointment?.appointment_id}`)}>
-                    <ChevronRight size={24} className="text-primary-dark mt-1" />
+                    <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appointment?.appointment_id}`)}>
+                        <ChevronRight size={24} className="text-primary-dark mt-1" />
+                    </div>
                 </div>
+
+                {/* Appointment Details */}
+                <AppointmentInfo icon={Calender} title={`${formatAppointmentDate(appointment?.ap_date)} | ${appointment?.display_time}`} subtitle="Requested Time" />
+                <AppointmentInfo
+                    icon={Home}
+                    title={appointment?.inhome_mv === "InHome" ? 'In Home' : 'Mobile Van'}
+                    subtitle="Service Type"
+                />
+                <AppointmentInfo icon={Paw} title={pets} subtitle="Pets to be Groomed" />
+                <AppointmentInfo icon={Location} title={address} subtitle="Service Address" />
+
+                {/* Groomer Info */}
+                <PreferredGroomer
+                    groomer={appointment?.groomer}
+                    onInfoClick={(g) => {
+                        setSelectedGroomer(g);
+                        setGroomerModal(true);
+                    }}
+                />
             </div>
 
-            {/* Appointment Details */}
-            <AppointmentInfo icon={Calender} title={`${formatAppointmentDate(appointment?.ap_date)} | ${appointment?.display_time}`} subtitle="Requested Time" />
-            <AppointmentInfo
-                icon={Home}
-                title={appointment?.inhome_mv === "InHome" ? 'In Home' : 'Mobile Van'}
-                subtitle="Service Type"
+            <GroomerDetailsModal
+                type={"appointments"}
+                open={groomerModal}
+                onClose={() => setGroomerModal(false)}
+                groomer={selectedGroomer}
             />
-            <AppointmentInfo icon={Paw} title={pets} subtitle="Pets to be Groomed" />
-            <AppointmentInfo icon={Location} title={address} subtitle="Service Address" />
-
-            {/* Groomer Info */}
-            <PreferredGroomer groomer={groomer} />
-        </div>
+        </>
     );
 };
 
 export default GroomerConfirmed;
 
-const PreferredGroomer = ({ groomer }) => {
+const PreferredGroomer = ({ groomer, onInfoClick }) => {
     if (!groomer) return null;
 
     const {
@@ -86,9 +105,14 @@ const PreferredGroomer = ({ groomer }) => {
                 />
 
                 <div className="flex-1">
-                    <p className="font-inter font-bold text-sm text-primary-dark">
-                        {first_name} {last_name?.[0] || ''}.
-                    </p>
+                    <div className="flex gap-1 items-center">
+                        <p className="font-inter font-bold text-sm text-primary-dark">
+                            {first_name} {last_name?.[0]}.
+                        </p>
+                        <button onClick={() => onInfoClick?.(groomer)}>
+                            <img src={Info} alt="Info" className="w-5 h-5" />
+                        </button>
+                    </div>
                     <p className="font-inter text-xs text-gray-500 mt-1">{groomer_type || 'Preferred Groomer'}</p>
                 </div>
 
