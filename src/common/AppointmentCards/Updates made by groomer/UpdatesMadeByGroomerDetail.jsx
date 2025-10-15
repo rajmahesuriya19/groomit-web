@@ -12,6 +12,7 @@ import MyPets from '../Pets Information/Pets';
 import Cards from '../Cards Section/Cards';
 import AppointmentHeader from '../Appointment Detail Header/AppointmentHeader';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
+import PackageSection from '../PackageSection';
 
 const UpdatesMadeByGroomerDetail = ({ selectedAppointment }) => {
     const [groomerModal, setGroomerModal] = useState(false);
@@ -24,7 +25,10 @@ const UpdatesMadeByGroomerDetail = ({ selectedAppointment }) => {
         <>
             <Card borderColor="#FF8A00">
                 <AppointmentHeader appointment={selectedAppointment} />
-                <ShaveDownSection addons={selectedAppointment} />
+                {selectedAppointment?.update_addons_arr &&
+                    Object.keys(selectedAppointment.update_addons_arr).length > 0 && (
+                        <PackageSection addons={selectedAppointment} />
+                    )}
             </Card>
 
             <Card>
@@ -52,10 +56,10 @@ const UpdatesMadeByGroomerDetail = ({ selectedAppointment }) => {
             <Card>
                 <div className="flex justify-between items-center">
                     <div className="font-inter font-bold text-primary-dark text-base">Pet Information</div>
-                    <div className="flex items-center">
+                    {selectedAppointment?.pets?.length > 1 && <div className="flex items-center">
                         <div className="font-inter font-normal text-[#3064A3] text-sm">Details</div>
                         <ChevronRight size={15} className="text-[#3064A3]" />
-                    </div>
+                    </div>}
                 </div>
                 <MyPets pets={selectedAppointment?.pets} />
             </Card>
@@ -75,40 +79,6 @@ const UpdatesMadeByGroomerDetail = ({ selectedAppointment }) => {
 }
 
 export default UpdatesMadeByGroomerDetail;
-
-/* ✂️ Shave Down Actions */
-const ShaveDownSection = ({ addons }) => {
-    if (!addons) return null;
-
-    return (
-        <div>
-            {/* Add-on Summary */}
-            {/* <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="flex items-end gap-4">
-                    <div className="flex-1">
-                        <p className="font-inter font-bold text-sm text-primary-dark">{pet_name}</p>
-                        <p className="font-inter text-sm font-normal mt-1 text-[#4B5563]">
-                            {prod_name} Added
-                        </p>
-                    </div>
-
-                    <div className="font-inter font-bold text-sm text-primary-dark">
-                        ${amt_show}
-                    </div>
-                </div>
-            </div> */}
-
-            {/* Contact Groomer */}
-            <div className="mt-4 pt-3 border-t border-gray-200">
-                <div className="font-inter font-bold text-xs text-[#1F2937]">
-                    Any issues with this?{" "}
-                    <span className="font-normal text-[#4B5563]">Please reach out to your groomer.</span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 /* 💇 Preferred Groomer */
 const PreferredGroomer = ({ groomer, onInfoClick }) => {

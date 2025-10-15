@@ -51,10 +51,10 @@ const GroomingInProgressDetail = ({ selectedAppointment }) => {
             <Card>
                 <div className="flex justify-between items-center">
                     <div className="font-inter font-bold text-primary-dark text-base">Pet Information</div>
-                    <div className="flex items-center">
+                    {selectedAppointment?.pets?.length > 1 && <div className="flex items-center">
                         <div className="font-inter font-normal text-[#3064A3] text-sm">Details</div>
                         <ChevronRight size={15} className="text-[#3064A3]" />
-                    </div>
+                    </div>}
                 </div>
                 <MyPets pets={selectedAppointment?.pets} />
             </Card>

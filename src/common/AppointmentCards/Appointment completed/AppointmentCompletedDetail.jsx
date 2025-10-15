@@ -16,6 +16,7 @@ import AppointmentHeader from '../Appointment Detail Header/AppointmentHeader';
 import RateServiceAccordion from '@/common/AccordionExpand/AccordionExpandDefault';
 import TipServiceAccordion from '@/common/AccordionExpand/TipServiceAccordion';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
+import PackageSection from '../PackageSection';
 
 const AppointmentCompletedDetail = ({ selectedAppointment }) => {
     const [groomerModal, setGroomerModal] = useState(false);
@@ -32,6 +33,10 @@ const AppointmentCompletedDetail = ({ selectedAppointment }) => {
 
             <Card borderColor="#438B53">
                 <AppointmentHeader appointment={selectedAppointment} />
+                {selectedAppointment?.update_addons_arr &&
+                    Object.keys(selectedAppointment.update_addons_arr).length > 0 && (
+                        <PackageSection addons={selectedAppointment} />
+                    )}
             </Card>
 
             <Card>
@@ -67,10 +72,10 @@ const AppointmentCompletedDetail = ({ selectedAppointment }) => {
             <Card>
                 <div className="flex justify-between items-center">
                     <div className="font-inter font-bold text-primary-dark text-base">Pet Information</div>
-                    <div className="flex items-center">
+                    {selectedAppointment?.pets?.length > 1 && <div className="flex items-center">
                         <div className="font-inter font-normal text-[#3064A3] text-sm">Details</div>
                         <ChevronRight size={15} className="text-[#3064A3]" />
-                    </div>
+                    </div>}
                 </div>
                 <MyPets pets={selectedAppointment?.pets} />
             </Card>
