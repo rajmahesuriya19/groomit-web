@@ -44,12 +44,41 @@ export const fetchSelectedChat = createAsyncThunk(
     }
 );
 
+// ✅ Send Messages (with FormData)
+export const sendSupportMessage = createAsyncThunk(
+    "inbox/sendSupportMessage",
+    async ({ appointment_id, comment, ticket_id, files = [] }, { rejectWithValue }) => {
+        try {
+            const formData = new FormData();
+            formData.append("appointment_id", appointment_id);
+            formData.append("comment", comment);
+            formData.append("ticket_id", ticket_id);
+
+            // Append multiple files
+            if (files.length > 0) {
+                files.forEach((file, index) => {
+                    formData.append("files[]", file); // Adjust key if API expects another name
+                });
+            }
+
+            const response = await axiosInstance.post("api/user/help/save", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            return response.data.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to send message");
+            return rejectWithValue(error.response?.data || { message: "Failed to send message" });
+        }
+    }
+);
+
 const inboxSlice = createSlice({
     name: "inbox",
     initialState: {
         groomersChat: [],
         supportChat: [],
-        selectedChat: [],
+        selectedChat: null,
         loading: false,
         error: null,
     },
@@ -98,6 +127,22 @@ const inboxSlice = createSlice({
                 state.selectedChat = action.payload;
             })
             .addCase(fetchSelectedChat.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Something went wrong";
+            })
+
+            // Send Support Message
+            .addCase(sendSupportMessage.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(sendSupportMessage.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.selectedChat) {
+                    state.selectedChat.messages.push(action.payload);
+                }
+            })
+            .addCase(sendSupportMessage.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || "Something went wrong";
             });

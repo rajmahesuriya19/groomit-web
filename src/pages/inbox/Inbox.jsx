@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../../assets/icon/message-text.svg';
@@ -31,6 +31,7 @@ const EmptyState = ({ icon, title, description }) => (
 const Inbox = () => {
     const [activeTab, setActiveTab] = React.useState(0);
     const [galleryOpen, setGalleryOpen] = React.useState(false);
+    const [uploadedImages, setUploadedImages] = useState([]);
     const { showLoader, hideLoader } = useLoader();
     const dispatch = useDispatch();
 
@@ -39,8 +40,6 @@ const Inbox = () => {
     const cameraInputRef = useRef(null);
 
     const { groomersChat, supportChat, selectedChat } = useSelector((state) => state.inbox || []);
-
-    console.log(selectedChat);
 
     const tabs = [
         { label: 'Groomers', type: 'groomers', count: groomersChat.filter(chat => chat.new_message).length },
@@ -62,40 +61,54 @@ const Inbox = () => {
 
     // 📄 Handle document upload
     const handleDocClick = () => {
-        docInputRef.current?.click();
+        if (docInputRef.current) {
+            docInputRef.current.value = "";
+            docInputRef.current.click();
+        }
+    };
+
+    const handleCameraClick = () => {
+        if (cameraInputRef.current) {
+            cameraInputRef.current.value = "";
+            cameraInputRef.current.click();
+        }
     };
 
     // 🖼️ Handle image upload
     const handleImgClick = () => {
-        imgInputRef.current?.click();
+        if (imgInputRef.current) {
+            imgInputRef.current.value = "";
+            imgInputRef.current.click();
+        }
     };
 
     // Example handlers to preview / upload
     const handleDocChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log("Document selected:", file.name);
-            // 👉 You can upload or preview here
+            console.log("📄 Document selected:", file.name);
         }
     };
 
     const handleImgChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            console.log("Image selected:", file.name);
-            // 👉 You can upload or preview here
+        const files = Array.from(e.target.files || []);
+        console.log("📸 Selected images:", files);
+
+        if (files.length > 0) {
+            setUploadedImages((prev) => [...prev, ...files]);
         }
+        setGalleryOpen(false);
     };
 
-    const handleCameraClick = () => {
-        cameraInputRef.current?.click();
+    const handleRemoveImage = (index) => {
+        setUploadedImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     const handleCameraCapture = (e) => {
         const file = e.target.files[0];
         if (file) {
-            console.log("📸 Captured image:", file.name);
-            // 👉 You can preview or upload the photo here
+            console.log("📷 Captured image:", file.name);
+            setUploadedImages((prev) => [...prev, file]);
         }
     };
 
@@ -385,7 +398,7 @@ const Inbox = () => {
                                         <div className="absolute bottom-0 left-0 right-0 p-4 bg-white relative">
                                             {/* 📸 Gallery modal */}
                                             {galleryOpen && (
-                                                <div className="absolute bottom-[70px] right-[70px] w-[210px] rounded-xl py-4 px-5 bg-white shadow-lg animate-fadeIn">
+                                                <div className="absolute bottom-[70px] right-[70px] w-[210px] rounded-xl py-4 px-5 bg-white shadow-lg animate-fadeIn z-10">
                                                     <div className="flex items-center justify-between gap-4">
                                                         {/* 📄 Document Upload */}
                                                         <div className="flex flex-col items-center gap-1">
@@ -421,6 +434,7 @@ const Inbox = () => {
                                                                 type="file"
                                                                 accept="image/*"
                                                                 className="hidden"
+                                                                multiple
                                                                 onChange={handleImgChange}
                                                             />
                                                         </div>
@@ -450,9 +464,31 @@ const Inbox = () => {
                                                 </div>
                                             )}
 
-                                            <div className="font-inter font-bold text-xs mb-3 text-center">
+                                            {/* 🖼️ Uploaded Image Preview */}
+                                            {uploadedImages?.length > 0 && (
+                                                <div className="flex flex-wrap gap-2 mb-3">
+                                                    {uploadedImages.map((img, idx) => (
+                                                        <div key={idx} className="relative">
+                                                            <img
+                                                                src={URL.createObjectURL(img)}
+                                                                alt={`preview-${idx}`}
+                                                                className="w-[75px] h-[50px] object-contain rounded-md border border-gray-200"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleRemoveImage(idx)}
+                                                                className="absolute top-[-5px] right-[-5px] bg-primary-dark text-white text-[10px] rounded-full w-[16px] h-[16px] flex justify-center"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {uploadedImages?.length === 0 && <div className="font-inter font-bold text-xs mb-3 text-center">
                                                 *Response times may vary based on complexity. We aim to reply within 1-3 business days.
-                                            </div>
+                                            </div>}
 
                                             {/* Input Section */}
                                             <div className="flex items-center justify-between w-full h-[57px] border border-primary-line rounded-xl px-[15px] py-[10px]">
