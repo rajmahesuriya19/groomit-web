@@ -21,6 +21,7 @@ import HelpCircle from "../assets/icon/info-circle-black.svg";
 import Star from "../assets/icon/star-gray.svg";
 import PlayStore from "../assets/menu-new/play-store.svg";
 import AppStore from "../assets/menu-new/app-store.svg";
+import { clearSelectedChat } from "@/utils/store/slices/inbox/inboxSlice";
 
 // Sidebar item component
 const SidebarItem = ({ label, href, icon, activeIcon, active, onClick }) => (
@@ -98,6 +99,7 @@ export default function Sidebar() {
                 key={item.label}
                 {...item}
                 active={isActive}
+                onClick={() => dispatch(clearSelectedChat())}
               />
             );
           })}
@@ -109,7 +111,7 @@ export default function Sidebar() {
         {/* Secondary Menu */}
         <div className="flex flex-col">
           {secondaryMenu.map((item) => (
-            <SidebarItem key={item.label} label={item.label} icon={item.icon} />
+            <SidebarItem key={item.label} label={item.label} icon={item.icon} onClick={() => dispatch(clearSelectedChat())} />
           ))}
         </div>
 
