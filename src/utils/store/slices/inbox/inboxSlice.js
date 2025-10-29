@@ -44,6 +44,40 @@ export const fetchSelectedChat = createAsyncThunk(
     }
 );
 
+// Fetch a Groomer selected chat detail
+export const fetchGroomerSelectedChat = createAsyncThunk(
+    "inbox/fetchGroomerSelectedChat",
+    async (appointment_id, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.post("api/user/message/detail", { appointment_id });
+            return response.data.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to fetch chat details");
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch chat details" });
+        }
+    }
+);
+
+// Send Groomer Messages
+export const sendGroomerMessage = createAsyncThunk(
+    "inbox/sendGroomerMessage",
+    async ({ appointment_id, message }, { rejectWithValue }) => {
+        try {
+            // POST message to the correct endpoint
+            const response = await axiosInstance.post(`api/user/send-message/${appointment_id}`, {
+                message,
+            });
+
+            return response.data.data;
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to send message");
+            return rejectWithValue(
+                error.response?.data || { message: "Failed to send message" }
+            );
+        }
+    }
+);
+
 // ✅ Send Messages (with FormData)
 export const sendSupportMessage = createAsyncThunk(
     "inbox/sendSupportMessage",
@@ -57,7 +91,7 @@ export const sendSupportMessage = createAsyncThunk(
             // Append multiple files
             if (files.length > 0) {
                 files.forEach((file, index) => {
-                    formData.append("files[]", file); // Adjust key if API expects another name
+                    formData.append("help_images[]", file);
                 });
             }
 
@@ -99,6 +133,36 @@ const inboxSlice = createSlice({
                 state.groomersChat = action.payload;
             })
             .addCase(fetchInboxMessages.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Something went wrong";
+            })
+
+            // Groomers Selected Chat
+            .addCase(fetchGroomerSelectedChat.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchGroomerSelectedChat.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedChat = action.payload;
+            })
+            .addCase(fetchGroomerSelectedChat.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Something went wrong";
+            })
+
+            // Send Groomers Message
+            .addCase(sendGroomerMessage.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(sendGroomerMessage.fulfilled, (state, action) => {
+                state.loading = false;
+                // if (state.selectedChat) {
+                //     state.selectedChat.messages.push(action.payload);
+                // }
+            })
+            .addCase(sendGroomerMessage.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || "Something went wrong";
             })
