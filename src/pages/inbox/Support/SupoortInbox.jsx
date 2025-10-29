@@ -1,12 +1,24 @@
-import { fetchSelectedChat } from '@/utils/store/slices/inbox/inboxSlice';
 import React from 'react'
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { fetchSelectedChat } from '@/utils/store/slices/inbox/inboxSlice';
 import { useDispatch } from 'react-redux';
 
 const SupoortInbox = ({ supportChat, selectedChat }) => {
     const dispatch = useDispatch();
-    const handleSelectChat = (ticket_id) => {
-        dispatch(fetchSelectedChat(ticket_id));
+    const { showLoader, hideLoader } = useLoader();
+
+    const handleSelectChat = async (ticket_id) => {
+        try {
+            showLoader();
+            await dispatch(fetchSelectedChat(ticket_id)).unwrap();
+        } catch (error) {
+            console.error('Failed to fetch chat:', error);
+            hideLoader();
+        } finally {
+            hideLoader();
+        }
     };
+
     return (
         <div className="space-y-3">
             {supportChat.map((ticket) => {

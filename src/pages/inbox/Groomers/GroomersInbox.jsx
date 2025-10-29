@@ -2,14 +2,22 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { fetchGroomerSelectedChat } from "@/utils/store/slices/inbox/inboxSlice";
 import fallback from "../../../assets/icon/sandra-static.svg";
+import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 
 const GroomersInbox = ({ groomersChat = [], selectedChat }) => {
-    console.log(selectedChat);
-
     const dispatch = useDispatch();
+    const { showLoader, hideLoader } = useLoader();
 
-    const handleSelectChat = (appointment_id) => {
-        dispatch(fetchGroomerSelectedChat(appointment_id));
+    const handleSelectChat = async (appointment_id) => {
+        try {
+            showLoader();
+            await dispatch(fetchGroomerSelectedChat(appointment_id)).unwrap();
+        } catch (error) {
+            console.error('Failed to fetch chat:', error);
+            hideLoader();
+        } finally {
+            hideLoader();
+        }
     };
 
     return (
