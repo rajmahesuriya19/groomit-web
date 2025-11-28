@@ -24,12 +24,16 @@ import { Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router';
 import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import RescheduleAppointemntModal from '@/components/Modals/RescheduleAppointemntModal';
+import CancelAppointemntModal from '@/components/Modals/CancelAppointemntModal';
 
 const dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { showLoader, hideLoader } = useLoader();
   const [tooltip, setTooltip] = useState('Click to copy');
+  const [changeTimeModal, setChangeTimeModal] = useState(false);
+  const [cancelAppModal, setCancelAppModal] = useState(false);
 
   const { dashboard } = useSelector((state) => state.dashboard);
   const { user, catPets = [], dogPets = [], upcoming_appts = [], recurring_appts = [], rebook_requests = [], completed_appts = [] } = dashboard;
@@ -84,143 +88,47 @@ const dashboard = () => {
       <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
         <div className="space-y-4">
 
-          {/* If Upcoming Appointments are available */}
-          {upcoming_appts?.length > 0 && (
-            <div>
-              {upcoming_appts.map((appt) => (
-                <>
-                  <div key={appt?.appointment_id} className="mb-4 px-3">
-                    <h3 className="font-inter font-bold text-xl text-primary-dark">{appt?.appointment_status ? 'Upcoming Appointment' : 'Last Appointment'}</h3>
-                  </div>
-                  <div
-                    key={appt?.appointment_id}
-                    className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#FFBF00] transition hover:shadow-lg"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="cursor-pointer" onClick={() => handleCopy(appt?.appointment_id)}>
-                        <Tooltip
-                          title={tooltip}
-                          arrow
-                          placement="top"
-                          componentsProps={{
-                            tooltip: {
-                              sx: {
-                                backgroundColor: "black",
-                                color: "white",
-                                fontSize: 12,
-                                padding: "6px 12px",
-                                borderRadius: "4px",
-                              },
-                            },
-                            arrow: {
-                              sx: { color: "black" },
-                            },
-                          }}
-                        >
-                          <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
-                            #{appt?.appointment_id}
-                            <img
-                              src={CopyIcon}
-                              alt="Copy"
-                              className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
-                            />
-                          </div>
-                        </Tooltip>
-                        <p className="font-inter font-bold text-base text-gray-800 mt-1">
-                          {appt.appointment_status_label || "Appointment Completed"}
-                        </p>
-                      </div>
-                      <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appt?.appointment_id}`)}>
-                        <ChevronRight size={24} className="text-primary-dark" />
-                      </div>
-                    </div>
-
-                    {/* Requested Time */}
-                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                        <img src={Calender} alt="Calendar" className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-inter font-bold text-primary-dark text-sm">
-                          {new Date(appt.ap_date).toLocaleDateString("en-US", {
-                            weekday: "short",
-                            month: "short",
-                            day: "numeric"
-                          })} | ETA {appt.display_time.replace("ETA ", "")}
-                        </p>
-                        <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
-                      </div>
-                    </div>
-
-                    {/* Service Type */}
-                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                        <img src={Home} alt="Home" className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-inter font-bold text-primary-dark text-sm">
-                          {appt.inhome_mv == "InHome" ? "In Home" : "Mobile Van"}
-                        </p>
-                        <p className="font-inter text-xs text-gray-500 mt-1">Service Type</p>
-                      </div>
-                    </div>
-
-                    {/* Pets */}
-                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                        <img src={Paw} alt="Pets" className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-inter font-bold text-primary-dark text-sm">
-                          {appt.pets?.map((pet) => pet.name).join(", ")}
-                        </p>
-                        <p className="font-inter text-xs text-gray-500 mt-1">Pets to be Groomed</p>
-                      </div>
-                    </div>
-
-                    {/* Service Address */}
-                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
-                        <img src={Location} alt="Location" className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-inter font-bold text-primary-dark text-sm">
-                          {appt.addressInfo?.address1}, {appt.addressInfo?.city}, {appt.addressInfo?.state}, {appt.addressInfo?.zip}
-                        </p>
-                        <p className="font-inter text-xs text-gray-500 mt-1">Service Address</p>
-                      </div>
-                    </div>
-
-                    {/* Preferred Groomer */}
-                    <div className="mt-4 pt-3 border-t border-gray-200">
-                      <div className="flex items-start gap-4">
-                        <div className="flex justify-center items-center rounded-lg">
-                          <img
-                            src={appt?.groomer?.profile_photo_url}
-                            alt={appt?.groomer?.first_name}
-                            className="object-cover rounded-md w-[40px] h-[40px]"
-                          />
-                        </div>
-
-                        <div className="flex-1">
-                          <p className="font-inter font-bold text-primary-dark text-sm">
-                            {appt?.groomer?.first_name} {appt?.groomer?.last_name?.[0]}.
-                          </p>
-                          <p className="font-inter text-xs text-gray-500 mt-1">Preferred Groomer</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              ))}
+          {/* Reminder Card */}
+          {(hasAnyPet) && <div className="rounded-2xl p-1 bg-white shadow-md">
+            <div className="bg-[#FFF6DB] rounded-xl py-4 px-6">
+              <h3 className="text-center font-inter font-bold text-xl">
+                Time for{" "}
+                {allPets.map((pet, index) => (
+                  <span key={index}>
+                    {pet?.name}
+                    {index !== allPets.length - 1 && ", "}
+                  </span>
+                ))}{" "}
+                Next Grooming!
+              </h3>
+              {/* <p className="text-center font-inter text-sm mt-2 leading-6 text-gray-700">
+                It’s been <span className="text-[#EB5757] font-semibold">4 weeks</span> since Bruno’s last grooming.
+                Let’s keep Bruno looking & feeling his best! 🐶
+              </p> */}
+              <button className="w-full bg-primary-dark rounded-lg h-12 mt-6 mb-4 text-white font-inter font-bold text-base hover:bg-primary-light transition-all">
+                Book Now
+              </button>
+              <div className="px-2 py-3 bg-white rounded-lg">
+                <p className="text-center font-inter text-sm text-primary-dark leading-6">
+                  “Golden Retrievers need grooming <span className="font-bold">every 4–6 weeks </span>
+                  to prevent matting & skin issues.”
+                </p>
+                <p className="mt-3 text-center font-inter font-bold text-xs uppercase text-[#3064A3]">
+                  — Experts
+                </p>
+              </div>
             </div>
-          )}
+          </div>}
 
           {/* If Rebook Appointments are available */}
           {rebook_requests?.length > 0 && (
             <div>
-              <div className="mb-4 px-3">
+              <div className="flex items-center justify-between mb-2">
                 <h3 className="font-inter font-bold text-xl text-primary-dark">Rebooking Request</h3>
+                <div className='flex items-center cursor-pointer' onClick={() => navigate(`/user/appointments`)}>
+                  <h3 className="font-inter font-normal text-sm text-primary-light">All Appointments</h3>
+                  <ChevronRight size={12} className="text-primary-light" />
+                </div>
               </div>
               {rebook_requests.map((appt, index) => (
                 <>
@@ -355,11 +263,11 @@ const dashboard = () => {
                     {/* Change Date/Time and Confirm Buttons */}
                     <div>
                       <div className="flex items-start mt-4 pt-3 border-t border-gray-200 gap-3">
-                        <button className='font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-gray-200'>Change Date/Time</button>
+                        <button className='font-inter font-bold text-base w-full h-[38px] rounded-[10px] border border-gray-200' onClick={() => setChangeTimeModal(true)}>Change Date/Time</button>
                         <button className='font-inter bg-primary-dark font-bold text-base text-white w-full h-[38px] rounded-[10px] border border-gray-200'>Confirm</button>
                       </div>
 
-                      <div className='mt-4 text-center font-inter font-normal text-sm underline text-[#3064A3]'>Reject Request</div>
+                      <div className='cursor-pointer mt-4 text-center font-inter font-normal text-sm underline text-[#3064A3]' onClick={() => setCancelAppModal(true)}>Reject Request</div>
                     </div>
                   </div>
                 </>
@@ -367,7 +275,141 @@ const dashboard = () => {
             </div>
           )}
 
-          <DashboardCarousel />
+          {/* If Upcoming Appointments are available */}
+          {upcoming_appts?.length > 0 && (
+            <div>
+              {upcoming_appts.map((appt) => (
+                <>
+                  <div key={appt?.appointment_id} className="flex items-center justify-between mb-2">
+                    <h3 className="font-inter font-bold text-xl text-primary-dark">{appt?.appointment_status ? 'Upcoming Appointment' : 'Last Appointment'}</h3>
+                    <div className='flex items-center cursor-pointer' onClick={() => navigate(`/user/appointments`)}>
+                      <h3 className="font-inter font-normal text-sm text-primary-light">All Appointments</h3>
+                      <ChevronRight size={12} className="text-primary-light" />
+                    </div>
+                  </div>
+                  <div
+                    key={appt?.appointment_id}
+                    className="mb-4 p-5 bg-white rounded-2xl shadow-md border-t-[3px] border-[#FFBF00] transition hover:shadow-lg"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="cursor-pointer" onClick={() => handleCopy(appt?.appointment_id)}>
+                        <Tooltip
+                          title={tooltip}
+                          arrow
+                          placement="top"
+                          componentsProps={{
+                            tooltip: {
+                              sx: {
+                                backgroundColor: "black",
+                                color: "white",
+                                fontSize: 12,
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                              },
+                            },
+                            arrow: {
+                              sx: { color: "black" },
+                            },
+                          }}
+                        >
+                          <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide relative group">
+                            #{appt?.appointment_id}
+                            <img
+                              src={CopyIcon}
+                              alt="Copy"
+                              className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition"
+                            />
+                          </div>
+                        </Tooltip>
+                        <p className="font-inter font-bold text-base text-gray-800 mt-1">
+                          {appt.appointment_status_label || "Appointment Completed"}
+                        </p>
+                      </div>
+                      <div className="cursor-pointer" onClick={() => navigate(`/user/appointment/${appt?.appointment_id}`)}>
+                        <ChevronRight size={24} className="text-primary-dark" />
+                      </div>
+                    </div>
+
+                    {/* Requested Time */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Calender} alt="Calendar" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {new Date(appt.ap_date).toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric"
+                          })} | ETA {appt.display_time.replace("ETA ", "")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Requested Time</p>
+                      </div>
+                    </div>
+
+                    {/* Service Type */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Home} alt="Home" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.inhome_mv == "InHome" ? "In Home" : "Mobile Van"}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Type</p>
+                      </div>
+                    </div>
+
+                    {/* Pets */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Paw} alt="Pets" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.pets?.map((pet) => pet.name).join(", ")}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Pets to be Groomed</p>
+                      </div>
+                    </div>
+
+                    {/* Service Address */}
+                    <div className="flex items-start mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg me-3 w-[40px] h-[40px]">
+                        <img src={Location} alt="Location" className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="font-inter font-bold text-primary-dark text-sm">
+                          {appt.addressInfo?.address1}, {appt.addressInfo?.city}, {appt.addressInfo?.state}, {appt.addressInfo?.zip}
+                        </p>
+                        <p className="font-inter text-xs text-gray-500 mt-1">Service Address</p>
+                      </div>
+                    </div>
+
+                    {/* Preferred Groomer */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="flex justify-center items-center rounded-lg">
+                          <img
+                            src={appt?.groomer?.profile_photo_url}
+                            alt={appt?.groomer?.first_name}
+                            className="object-cover rounded-md w-[40px] h-[40px]"
+                          />
+                        </div>
+
+                        <div className="flex-1">
+                          <p className="font-inter font-bold text-primary-dark text-sm">
+                            {appt?.groomer?.first_name} {appt?.groomer?.last_name?.[0]}.
+                          </p>
+                          <p className="font-inter text-xs text-gray-500 mt-1">Preferred Groomer</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ))}
+            </div>
+          )}
 
           {/* First Appointment Card */}
           {!upcoming_appts?.length && <div className="rounded-2xl p-1 bg-white shadow-md">
@@ -385,31 +427,6 @@ const dashboard = () => {
               <p className="font-inter text-[11px] text-gray-500 text-center">
                 It only takes a few seconds to book ✨
               </p>
-            </div>
-          </div>}
-
-          {/* Reminder Card */}
-          {(hasAnyPet) && <div className="rounded-2xl p-1 bg-white shadow-md">
-            <div className="bg-[#FFF6DB] rounded-xl py-4 px-6">
-              <h3 className="text-center font-inter font-bold text-xl">
-                Time for Bruno’s Next Grooming!
-              </h3>
-              <p className="text-center font-inter text-sm mt-2 leading-6 text-gray-700">
-                It’s been <span className="text-[#EB5757] font-semibold">4 weeks</span> since Bruno’s last grooming.
-                Let’s keep Bruno looking & feeling his best! 🐶
-              </p>
-              <button className="w-full bg-primary-dark rounded-lg h-12 mt-6 mb-4 text-white font-inter font-bold text-base hover:bg-primary-light transition-all">
-                Book Now
-              </button>
-              <div className="px-2 py-3 bg-white rounded-lg">
-                <p className="text-center font-inter text-sm text-primary-dark leading-6">
-                  “Golden Retrievers need grooming <span className="font-bold">every 4–6 weeks</span>
-                  to prevent matting & skin issues.”
-                </p>
-                <p className="mt-3 text-center font-inter font-bold text-xs uppercase text-[#3064A3]">
-                  — Experts
-                </p>
-              </div>
             </div>
           </div>}
 
@@ -486,10 +503,12 @@ const dashboard = () => {
           {/* If Completed Appointments are available */}
           {completed_appts?.length > 0 && (
             <div>
-              <div className="mb-4 px-3">
-                <h3 className="font-inter font-bold text-xl text-primary-dark">
-                  Last Appointment
-                </h3>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-inter font-bold text-xl text-primary-dark">Last Appointment</h3>
+                <div className='flex items-center cursor-pointer' onClick={() => navigate(`/user/appointments`)}>
+                  <h3 className="font-inter font-normal text-sm text-primary-light">All Appointments</h3>
+                  <ChevronRight size={12} className="text-primary-light" />
+                </div>
               </div>
 
               {completed_appts.map((appt, index) => {
@@ -617,6 +636,9 @@ const dashboard = () => {
               })}
             </div>
           )}
+
+          <DashboardCarousel />
+
         </div>
 
         {/* Divider */}
@@ -629,6 +651,24 @@ const dashboard = () => {
           <SupportItems />
         </div>
       </div>
+
+      <RescheduleAppointemntModal
+        type={''}
+        open={changeTimeModal}
+        onClose={() => setChangeTimeModal(false)}
+        onConfirm={() => setChangeTimeModal(false)}
+        title={"Reschedule Appointemnt"}
+        description={"Are you sure you want to reschedule this appointment?"}
+      />
+      <CancelAppointemntModal
+        type={''}
+        open={cancelAppModal}
+        onClose={() => setCancelAppModal(false)}
+        onConfirm={() => setCancelAppModal(false)}
+        title={"Cancel Appointment"}
+        description={"You are about to cancel this upcoming appointment, You were not charged for this appointment."}
+        lastConfirm={"Are you sure you want to cancel?"}
+      />
     </>
   )
 }

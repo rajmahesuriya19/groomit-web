@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Card from '../Card'
 import { ChevronRight } from 'lucide-react';
 
@@ -12,14 +12,30 @@ import MyPets from '../Pets Information/Pets';
 import Cards from '../Cards Section/Cards';
 import AppointmentHeader from '../Appointment Detail Header/AppointmentHeader';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
+import { useLocation, useNavigate } from 'react-router';
+import ReschedulingPolicyModal from '@/components/Modals/ReschedulingPolicyModal';
 
 const SelectedGroomerNotAvailableDetail = ({ selectedAppointment }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [groomerModal, setGroomerModal] = useState(false);
+    const [rescheduleModal, setRescheduleModal] = useState(false);
     const [selectedGroomer, setSelectedGroomer] = useState(null);
 
     const address = selectedAppointment?.address
         ? `${selectedAppointment.address.address1}, ${selectedAppointment.address.city}, ${selectedAppointment.address.state}, ${selectedAppointment.address.zip}`
         : 'N/A';
+
+    useEffect(() => {
+        if (location.state?.flag) {
+            setRescheduleModal(true);
+
+            // clear flag from history so it doesn't trigger again
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location, navigate]);
+
     return (
         <>
             <Card borderColor="#EB5757">
@@ -31,7 +47,7 @@ const SelectedGroomerNotAvailableDetail = ({ selectedAppointment }) => {
                         setGroomerModal(true);
                     }}
                 />
-                <ShaveDownSection pet={selectedAppointment?.pets} />
+                <ShaveDownSection pet={selectedAppointment?.pets} onClick={() => setRescheduleModal(true)} />
             </Card>
 
             <Card>
@@ -70,6 +86,15 @@ const SelectedGroomerNotAvailableDetail = ({ selectedAppointment }) => {
                 onClose={() => setGroomerModal(false)}
                 groomer={selectedGroomer}
             />
+
+            <ReschedulingPolicyModal
+                type={''}
+                open={rescheduleModal}
+                onClose={() => setRescheduleModal(false)}
+                onConfirm={() => setRescheduleModal(false)}
+                title={"Rescheduling Policy"}
+                description={"Rescheduling your appointment applies the current pricing and service rates. Therefore, any change to your groomer selection or service may result in a difference to your total cost, leading to an additional charge or a refund."}
+            />
         </>
     )
 }
@@ -77,7 +102,7 @@ const SelectedGroomerNotAvailableDetail = ({ selectedAppointment }) => {
 export default SelectedGroomerNotAvailableDetail;
 
 /* ✂️ Shave Down Actions */
-const ShaveDownSection = ({ pet }) => {
+const ShaveDownSection = ({ pet, onClick }) => {
     if (!pet) return null;
 
     return (
@@ -88,7 +113,7 @@ const ShaveDownSection = ({ pet }) => {
                 </p>
 
                 <div className="flex gap-3">
-                    <button className="w-full h-[38px] rounded-[10px] font-inter font-bold text-base bg-primary-dark text-white transition">
+                    <button className="w-full h-[38px] rounded-[10px] font-inter font-bold text-base bg-primary-dark text-white transition" onClick={onClick}>
                         Reschedule
                     </button>
                 </div>

@@ -63,7 +63,14 @@ const SelectedGroomerNotAvailable = ({ appointment }) => {
                     <button className="flex-1 h-[38px] rounded-[10px] border border-gray-200 font-inter font-bold text-base">
                         Find Me Groomer
                     </button>
-                    <button className="flex-1 h-[38px] rounded-[10px] border border-gray-200 font-inter font-bold text-base">
+                    <button
+                        className="flex-1 h-[38px] rounded-[10px] border border-gray-200 font-inter font-bold text-base"
+                        onClick={() =>
+                            navigate(`/user/appointment/${appointment?.appointment_id}`, {
+                                state: { flag: true },
+                            })
+                        }
+                    >
                         Reschedule
                     </button>
                 </div>
