@@ -17,21 +17,50 @@ import RedScissor from "../assets/menu-new/scissor-a.svg";
 import User from "../assets/menu-new/user.svg";
 import RedUser from "../assets/icon/user.svg";
 import LogOut from "../assets/icon/logout.svg";
-import HelpCircle from "../assets/icon/info-circle-black.svg";
+import HelpCircle from "../assets/icon/help-circle-black.svg";
+import RedHelpCircle from "../assets/icon/info-circle.svg";
 import Star from "../assets/icon/star-gray.svg";
+import RedStar from "../assets/icon/red-star.svg";
 import PlayStore from "../assets/menu-new/play-store.svg";
 import AppStore from "../assets/menu-new/app-store.svg";
 import { clearSelectedChat } from "@/utils/store/slices/inbox/inboxSlice";
 
 // Sidebar item component
-const SidebarItem = ({ label, href, icon, activeIcon, active, onClick }) => (
-  <Link to={href || "#"} onClick={onClick} className={`flex items-center space-x-3 mt-[30px] cursor-pointer ${active ? 'text-brand border-r-[2px] border-brand' : 'text-primary-dark'}`}>
+const SidebarItem = ({
+  label,
+  href,
+  icon,
+  activeIcon,
+  active,
+  onClick,
+  target,
+}) => (
+  <Link
+    to={href || "#"}
+    target={target}
+    onClick={onClick}
+    className={`
+      group flex items-center gap-3 mt-[30px] cursor-pointer
+      ${active ? "text-brand border-r-[2px] border-brand" : "text-primary-dark border-r-[2px] border-transparent hover:border-brand"}
+    `}
+  >
     <img
-      src={active ? activeIcon || icon : icon}
-      alt={`${label} Icon`}
-      className="w-6 h-6 transition-all"
+      src={active ? activeIcon : icon}
+      className="w-6 h-6 transition-all group-hover:hidden"
+      alt=""
     />
-    <span className={`text-lg font-bold font-inter ${active ? "text-brand" : "text-primary-dark"}`}>
+    <img
+      src={activeIcon}
+      className="w-6 h-6 transition-all hidden group-hover:block"
+      alt=""
+    />
+
+    <span
+      className={`
+        text-lg font-bold font-inter transition-all
+        ${active ? "text-brand" : "text-primary-dark group-hover:text-brand"}
+      `}
+    >
       {label}
     </span>
   </Link>
@@ -53,8 +82,8 @@ export default function Sidebar() {
   ];
 
   const secondaryMenu = [
-    { label: "How It Works", icon: HelpCircle },
-    { label: "Review Us", icon: Star },
+    { label: "How It Works", href: "https://www.groomit.me/how-it-works", icon: HelpCircle, activeIcon: RedHelpCircle },
+    { label: "Review Us", href: "https://g.page/r/CcYk6tuuu6NhEB0/review", icon: Star, activeIcon: RedStar },
   ];
 
   const handleLogout = async () => {
@@ -111,7 +140,7 @@ export default function Sidebar() {
         {/* Secondary Menu */}
         <div className="flex flex-col">
           {secondaryMenu.map((item) => (
-            <SidebarItem key={item.label} label={item.label} icon={item.icon} onClick={() => dispatch(clearSelectedChat())} />
+            <SidebarItem target="_blank" key={item.label} {...item} onClick={() => dispatch(clearSelectedChat())} />
           ))}
         </div>
 
@@ -119,10 +148,10 @@ export default function Sidebar() {
         <div className="space-y-4 pt-6">
           <p className="font-inter font-normal text-sm text-primary-dark mb-3">Download the App</p>
           <div className="flex flex-col gap-3">
-            <a href="#" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.groomit.me/download-groomit-app" target="_blank" rel="noopener noreferrer">
               <img src={PlayStore} alt="Google Play" className="h-[36px]" />
             </a>
-            <a href="#" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.groomit.me/download-groomit-app" target="_blank" rel="noopener noreferrer">
               <img src={AppStore} alt="App Store" className="h-[36px]" />
             </a>
           </div>
@@ -130,7 +159,7 @@ export default function Sidebar() {
 
         {/* Logout */}
         <div>
-          <SidebarItem label="Logout" icon={LogOut} onClick={handleLogout} />
+          <SidebarItem label="Logout" activeIcon={LogOut} icon={LogOut} onClick={handleLogout} />
         </div>
       </div>
     </div>

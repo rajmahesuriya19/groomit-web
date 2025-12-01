@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, UserPlus, UserRound } from 'lucide-react';
 import notificationIcon from '../assets/icon/notification.svg';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,12 +11,15 @@ import { persistor } from '@/utils/store';
 const UserDropdown = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showLoader, hideLoader } = useLoader();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const { dashboard } = useSelector((state) => state.dashboard);
   const { user } = dashboard;
+
+  const showDropdown = location.pathname.startsWith('/user');
 
   const localToken = localStorage.getItem('token');
 
@@ -87,37 +90,43 @@ const UserDropdown = () => {
   return (
     <div className="relative cursor-pointer" ref={dropdownRef}>
       <div
-        className="
-          flex items-center justify-between bg-white
-          rounded-full px-3 py-2 gap-2
-          transition-all duration-150
-        "
-        style={{
-          width: '103px',
-          height: '48px',
-          border: '5px solid #FFFFFF',
-          boxShadow: '0px 5px 60px 0px #00000033',
-        }}
-        onClick={() => setIsOpen(!isOpen)}
+        className={`${showDropdown ? '' : 'flex items-center justify-between bg-white rounded-full px-3 py-2 gap-2 transition-all duration-150'}`}
+        style={
+          !showDropdown
+            ? {
+              width: '103px',
+              height: '48px',
+              border: '5px solid #FFFFFF',
+              boxShadow: '0px 5px 60px 0px #00000033',
+            }
+            : {}
+        }
+        onClick={() => !showDropdown ? setIsOpen(!isOpen) : navigate('/user/account')}
       >
         {/* Notification Icon */}
-        <div className="flex items-center justify-center relative">
+        {!showDropdown && <div className="flex items-center justify-center relative">
           <img src={notificationIcon} alt="Notification" width={26} height={26} />
-        </div>
+        </div>}
 
         {/* Divider */}
-        <div
+        {!showDropdown && <div
           className="bg-primary-light opacity-30"
           style={{ width: '1px', height: '19px' }}
-        />
+        />}
 
         {/* User Avatar */}
         <div
           className="flex items-center justify-center rounded-full overflow-hidden"
-          style={{ width: '28px', height: '28px' }}
+          style={
+            !showDropdown
+              ? {
+                width: '28px', height: '28px'
+              }
+              : {}
+          }
         >
           {user?.photo ? (
-            <img src={user.photo} alt={user.name} className="object-cover w-full h-full" />
+            <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px]' : 'object-cover w-full h-full'}`} />
           ) : (
             <img
               src="https://randomuser.me/api/portraits/men/75.jpg"
@@ -129,38 +138,40 @@ const UserDropdown = () => {
       </div>
 
       {/* Dropdown Menu */}
-      {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-          {activeMenu.map((item, index) => (
-            <div key={item.label}>
-              {item.onClick ? (
-                <button
-                  onClick={() => {
-                    item.onClick();
-                    setIsOpen(false);
-                  }}
-                  className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  {/* 👇 If offline, show icon */}
-                  {item.type === 'offline' && item.icon}
-                  <span>{item.label}</span>
-                </button>
-              ) : (
-                <Link
-                  to={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
-                >
-                  <span>{item.label}</span>
-                  <ChevronDown size={14} className="text-gray-400 -rotate-90" />
-                </Link>
-              )}
-              {index < activeMenu.length - 1 && <hr className="border-gray-100" />}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      {
+        isOpen && (
+          <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            {activeMenu.map((item, index) => (
+              <div key={item.label}>
+                {item.onClick ? (
+                  <button
+                    onClick={() => {
+                      item.onClick();
+                      setIsOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    {/* 👇 If offline, show icon */}
+                    {item.type === 'offline' && item.icon}
+                    <span>{item.label}</span>
+                  </button>
+                ) : (
+                  <Link
+                    to={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
+                  >
+                    <span>{item.label}</span>
+                    <ChevronDown size={14} className="text-gray-400 -rotate-90" />
+                  </Link>
+                )}
+                {index < activeMenu.length - 1 && <hr className="border-gray-100" />}
+              </div>
+            ))}
+          </div>
+        )
+      }
+    </div >
   );
 };
 

@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Navigation from './Navigation.jsx';
 import Sidebar from './Sidebar.jsx';
 import Book from "../assets/icon/knife.svg"
+import Header from './Header.jsx';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -10,7 +11,7 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation />
+      {showSidebar ? <Navigation /> : <Header />}
       <div className="flex">
         {showSidebar && <Sidebar />}
         {showSidebar && (

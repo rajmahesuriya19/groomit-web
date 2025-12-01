@@ -1,24 +1,48 @@
 import React from 'react';
-import { X, Home, Heart, Calendar, MessageSquare, Settings, Star, Info, LogOut, Download } from 'lucide-react';
+import { X } from 'lucide-react';
+
+// ICONS
+import HomeIcon from "../assets/menu-new/home.svg";
+import HomeRed from "../assets/menu-new/home-a.svg";
+
+import Calendar from "../assets/menu-new/calendar.svg";
+import CalendarRed from "../assets/menu-new/calendar-a.svg";
+
+import Scissor from "../assets/menu-new/scissor.svg";
+import ScissorRed from "../assets/menu-new/scissor-a.svg";
+
+import Message from "../assets/menu-new/message.svg";
+import MessageRed from "../assets/menu-new/message-a.svg";
+
+import User from "../assets/menu-new/user.svg";
+import UserRed from "../assets/icon/user.svg";
+
+import Review from "../assets/icon/help-circle-black.svg";
+import ReviewRed from "../assets/icon/info-circle.svg";
+
+import Star from "../assets/icon/star-gray.svg";
+import StarRed from "../assets/icon/red-star.svg";
+
+import Logout from "../assets/icon/logout.svg";
+import LogoutRed from "../assets/icon/logout.svg";
+
+import { useLocation } from "react-router-dom";
 
 const MobileMenu = ({ isOpen, onClose }) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   const menuItems = [
-    { label: 'Dashboard', href: '/user/dashboard', icon: Home },
-    { label: 'My Pets', href: '/user/pet/list', icon: Heart },
-    { label: 'Appointments', href: '/user/appointments', icon: Calendar },
-    { label: 'Inbox', href: '/user/inbox', icon: MessageSquare },
-    { label: 'My Account', href: '/user/account', icon: Settings },
-    { label: 'Review Us', href: '#/', icon: Star },
-    { label: 'How It Works', href: '#/', icon: Info },
-    { label: 'Logout', href: '#/', icon: LogOut },
+    { label: 'Home', href: '/user/dashboard', icon: HomeIcon, iconRed: HomeRed },
+    { label: 'Appointments', href: '/user/appointments', icon: Calendar, iconRed: CalendarRed },
+    { label: 'Groomers', href: '/user/groomers', icon: Scissor, iconRed: ScissorRed },
+    { label: 'Inbox', href: '/user/inbox', icon: Message, iconRed: MessageRed },
+    { label: 'My Account', href: '/user/account', icon: User, iconRed: UserRed },
   ];
 
-  const socialLinks = [
-    { name: 'Facebook', href: 'https://www.facebook.com/groomitapp/', emoji: '📘' },
-    { name: 'Instagram', href: 'https://www.instagram.com/groomitapp/', emoji: '📷' },
-    { name: 'YouTube', href: 'https://www.youtube.com/@groomitapp', emoji: '🎥' },
-    { name: 'LinkedIn', href: 'https://www.linkedin.com/company/groomit-llc/', emoji: '💼' },
-    { name: 'Twitter', href: 'https://x.com/groomitapp', emoji: '🐦' },
+  const secondMenu = [
+    { label: 'Review Us', href: '#/', icon: Review, iconRed: ReviewRed },
+    { label: 'How It Works', href: '#/', icon: Star, iconRed: StarRed },
   ];
 
   if (!isOpen) return null;
@@ -38,13 +62,13 @@ const MobileMenu = ({ isOpen, onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <img
-              className="h-8 w-auto"
-              src="https://dev.groomit.me/v7/images/web_logo.svg"
+              className="h-auto w-[160px]"
+              src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
               alt="Groomit.me"
             />
             <button
               onClick={onClose}
-              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              className="border border-[#DEE2E6] p-1 rounded-md text-gray-600"
             >
               <X size={24} />
             </button>
@@ -53,113 +77,94 @@ const MobileMenu = ({ isOpen, onClose }) => {
           {/* Menu Content */}
           <div className="flex-1 overflow-y-auto">
 
-            {/* Menu Items */}
-            <div className="p-4 space-y-1">
+            {/* Main Menu */}
+            <div className="space-y-1">
               {menuItems.map((item, index) => {
-                const Icon = item.icon;
+                const isActive = currentPath === item.href;
                 return (
-                  <div key={item.label}>
-                    <a
-                      href={item.href}
-                      className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
-                      onClick={onClose}
+                  <a
+                    key={index}
+                    href={item.href}
+                    onClick={onClose}
+                    className="group flex items-center gap-3 px-4 py-2 transition-colors"
+                  >
+                    <img
+                      src={isActive ? item.iconRed : item.icon}
+                      className="w-6 h-6 group-hover:hidden"
+                      alt=""
+                    />
+                    <img
+                      src={item.iconRed}
+                      className="w-6 h-6 hidden group-hover:block"
+                      alt=""
+                    />
+
+                    <span
+                      className={`font-bold font-inter text-sm ${isActive ? "text-red-500" : "text-primary-dark group-hover:text-red-500"
+                        }`}
                     >
-                      <Icon size={20} className="text-gray-400" />
-                      <span className="font-medium">{item.label}</span>
-                    </a>
-                    {index < menuItems.length - 1 && (
-                      <hr className="my-2 border-gray-100" />
-                    )}
-                  </div>
+                      {item.label}
+                    </span>
+                  </a>
                 );
               })}
             </div>
 
-            {/* Book Appointment Button */}
-            <div className="p-4">
-              <button className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors">
-                Book Appointment
-              </button>
+            <hr className="my-2 border-gray-100" />
+
+            {/* Second Menu */}
+            <div className="space-y-1">
+              {secondMenu.map((item, index) => (
+                <a
+                  key={index}
+                  href={item.href}
+                  onClick={onClose}
+                  className="group flex items-center gap-3 px-4 py-2 transition-colors"
+                >
+                  <img src={item.icon} className="w-6 h-6 group-hover:hidden" alt="" />
+                  <img src={item.iconRed} className="w-6 h-6 hidden group-hover:block" alt="" />
+
+                  <span className="font-bold font-inter text-sm group-hover:text-red-500">
+                    {item.label}
+                  </span>
+                </a>
+              ))}
             </div>
 
-            {/* Download App Section */}
-            <div className="p-4 border-t border-gray-200">
-              <p className="text-center text-gray-600 mb-4 font-medium">
+            <hr className="my-2 border-gray-100" />
+
+            {/* Download Section */}
+            <div className="px-4 py-2">
+              <p className="font-normal mb-2 text-gray-600 text-xs">
                 Download the app
               </p>
-              <div className="flex space-x-3">
-                <a href="/download-groomit-app" className="flex-1">
-                  <div className="bg-black text-white rounded-lg p-3 text-center hover:bg-gray-800 transition-colors">
-                    <Download size={20} className="mx-auto mb-1" />
-                    <span className="text-xs font-medium">App Store</span>
-                  </div>
+              <div className="flex gap-1">
+                <a href="https://raj.dev.groomit.me/download-groomit-app" target="_blank">
+                  <img className="h-auto w-full" src="https://raj.dev.groomit.me/v7/images/webapp/icons/menu-new/play-store.svg" alt="Play Store" />
                 </a>
-                <a href="/download-groomit-app" className="flex-1">
-                  <div className="bg-green-600 text-white rounded-lg p-3 text-center hover:bg-green-700 transition-colors">
-                    <Download size={20} className="mx-auto mb-1" />
-                    <span className="text-xs font-medium">Play Store</span>
-                  </div>
+                <a href="https://raj.dev.groomit.me/download-groomit-app" target="_blank">
+                  <img className="h-auto w-full" src="https://raj.dev.groomit.me/v7/images/webapp/icons/menu-new/app-store.svg" alt="App Store" />
                 </a>
               </div>
             </div>
 
-            {/* Help and Social Section */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1 font-medium">
-                    Need Help?
-                  </p>
-                  <a
-                    href="mailto:help@groomit.me"
-                    className="text-sm text-red-600 hover:text-red-700 transition-colors"
-                  >
-                    help@groomit.me
-                  </a>
-                </div>
-                <div className="flex space-x-3">
-                  {socialLinks.map((social) => (
-                    <a
-                      key={social.name}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xl hover:scale-110 transition-transform"
-                      title={social.name}
-                    >
-                      {social.emoji}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+            <hr className="my-2 border-gray-100" />
 
-          {/* Footer */}
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <div className="text-center text-xs text-gray-500 space-y-2">
-              <div className="flex justify-center space-x-4">
-                <a href="#" className="hover:text-gray-700 transition-colors">
-                  Privacy Policy
-                </a>
-                <span>|</span>
-                <a href="#" className="hover:text-gray-700 transition-colors">
-                  Cookies Policy
-                </a>
-              </div>
-              <div className="flex justify-center space-x-4">
-                <a href="#" className="hover:text-gray-700 transition-colors">
-                  Acceptable Use Policy
-                </a>
-                <span>|</span>
-                <a href="#" className="hover:text-gray-700 transition-colors">
-                  Accessibility
-                </a>
-              </div>
-              <p className="pt-2 font-medium">
-                ©2025 Groomit, Inc. All rights reserved.
-              </p>
-            </div>
+            {/* Logout */}
+            <a
+              href="#"
+              className="group flex items-center gap-3 px-4 py-2 transition-colors"
+              onClick={onClose}
+            >
+              <img src={Logout} className="w-6 h-6 group-hover:hidden" alt="" />
+              <img src={LogoutRed} className="w-6 h-6 hidden group-hover:block" alt="" />
+
+              <span className="font-bold font-inter text-sm group-hover:text-red-500">
+                Logout
+              </span>
+            </a>
+
+            <div className="pb-6" />
           </div>
         </div>
       </div>

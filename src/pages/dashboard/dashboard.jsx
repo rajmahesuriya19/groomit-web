@@ -55,6 +55,25 @@ const dashboard = () => {
     dispatch(getDashboardData()).finally(() => hideLoader());
   }, [dispatch]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        showLoader();
+
+        await Promise.all([
+          dispatch(getDashboardData()),
+          dispatch(getUserInfo())
+        ]);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        hideLoader();
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
+
   return (
     <>
       <div className='w-full overflow-hidden'>
@@ -63,7 +82,7 @@ const dashboard = () => {
           <div className='font-inter font-normal text-sm text-primary-dark'>Ready to pamper your pets?</div>
         </div>
 
-        <div className='bg-white py-2 px-5 w-full block md:hidden'>
+        {/* <div className='bg-white py-2 px-5 w-full block md:hidden'>
           <div className='flex items-center gap-2'>
             <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
             <div>
@@ -71,7 +90,7 @@ const dashboard = () => {
               <div className='font-inter font-normal text-xs text-primary-dark'>Ready to pamper your pets?</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {(hasAnyPet && (recurring_appts.length > 0)) && <div className='flex items-center justify-between gap-2 bg-[#0A7170] py-[10px] px-[20px] w-full'>
           <div className='flex items-center gap-2 flex-1 min-w-0'>
