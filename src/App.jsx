@@ -4,6 +4,7 @@ import { RoutePath } from './common/enums/enumConstant.js';
 import Layout from './components/Layout.jsx';
 import Landing from './pages/landing/landing.jsx';
 import Account from './pages/account/account.jsx';
+import Groomers from './pages/groomers/groomers.jsx';
 import Appointments from './pages/appointments/appointments.jsx';
 import Dashboard from './pages/dashboard/dashboard.jsx';
 import Page404 from './pages/page404/index.jsx';
@@ -28,6 +29,7 @@ function App() {
         <Layout>
           <Routes>
             <Route path={RoutePath.HOME} element={<Landing />} />
+            <Route path={RoutePath.GROOMERS} element={<Groomers />} />
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
             <Route path={RoutePath.APPOINTMENTS} element={<Appointments />} />
             <Route path={RoutePath.APPOINTMENT_DETAIL} element={<AppointmentDetail />} />

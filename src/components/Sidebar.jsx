@@ -41,7 +41,7 @@ const SidebarItem = ({
     onClick={onClick}
     className={`
       group flex items-center gap-3 mt-[30px] cursor-pointer
-      ${active ? "text-brand border-r-[2px] border-brand" : "text-primary-dark border-r-[2px] border-transparent hover:border-brand"}
+      ${active ? "text-brand border-r-[3px] border-brand" : "text-primary-dark border-transparent"}
     `}
   >
     <img
@@ -75,8 +75,8 @@ export default function Sidebar() {
   const mainMenu = [
     { label: "Home", href: "/user/dashboard", icon: Home, activeIcon: RedHome },
     { label: "Appointments", href: "/user/appointments", icon: Calendar, activeIcon: RedCalendar },
-    // { label: "Groomers", href: "/user/groomers", icon: Scissor, activeIcon: RedScissor },
-    { label: "My Pets", href: "/user/pet/list", icon: Scissor, activeIcon: RedScissor },
+    { label: "Groomers", href: "/user/groomers", icon: Scissor, activeIcon: RedScissor },
+    // { label: "My Pets", href: "/user/pet/list", icon: Scissor, activeIcon: RedScissor },
     { label: "Inbox", href: "/user/inbox", icon: Inbox, activeIcon: RedInbox },
     { label: "My Account", href: "/user/account", icon: User, activeIcon: RedUser },
   ];

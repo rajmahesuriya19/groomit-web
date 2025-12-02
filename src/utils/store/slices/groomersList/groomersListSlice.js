@@ -26,11 +26,35 @@ export const addGroomerFav = createAsyncThunk(
     }
 );
 
+export const addBlockedGroomer = createAsyncThunk(
+    "groomers/addBlockedGroomer",
+    async (groomer_id, { rejectWithValue }) => {
+        try {
+            await axiosInstance.post("api/user/groomer/block/add", { groomer_id });
+            return groomer_id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: "Failed to Favourite" });
+        }
+    }
+);
+
 export const removeGroomerFav = createAsyncThunk(
     "groomers/removeGroomerFav",
     async (groomer_id, { rejectWithValue }) => {
         try {
             await axiosInstance.post("api/user/groomer/remove-favorite", { groomer_id });
+            return groomer_id;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: "Failed to Favourite" });
+        }
+    }
+);
+
+export const removeBlockedGroomer = createAsyncThunk(
+    "groomers/removeBlockedGroomer",
+    async (groomer_id, { rejectWithValue }) => {
+        try {
+            await axiosInstance.delete(`api/user/groomer/block/remove/${groomer_id}`);
             return groomer_id;
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: "Failed to Favourite" });
@@ -53,6 +77,14 @@ const groomersSlice = createSlice({
                     : g
             );
         },
+
+        toggleBlockLocal: (state, action) => {
+            state.groomers = state.groomers.map(g =>
+                g.groomer_id === action.payload
+                    ? { ...g, is_blocked_groomer: !g.is_blocked_groomer }
+                    : g
+            );
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -87,8 +119,45 @@ const groomersSlice = createSlice({
                 );
             })
 
+            .addCase(addBlockedGroomer.fulfilled, (state, action) => {
+                const id = action.payload;
+
+                // update state instantly
+                state.groomers = state.groomers.map(g =>
+                    g.groomer_id === id
+                        ? { ...g, is_blocked_groomer: true }
+                        : g
+                );
+
+                const groomerName = state.groomers.find(g => g.groomer_id === id)?.name;
+
+                toast.success(
+                    groomerName
+                        ? `${groomerName} has been blocked 🚫`
+                        : "Groomer blocked 🚫"
+                );
+            })
+
+            .addCase(removeBlockedGroomer.fulfilled, (state, action) => {
+                const id = action.payload;
+
+                // update state instantly
+                state.groomers = state.groomers.map(g =>
+                    g.groomer_id === id
+                        ? { ...g, is_blocked_groomer: false, blocked_by: null }
+                        : g
+                );
+
+                const groomerName = state.groomers.find(g => g.groomer_id === id)?.name;
+
+                toast.info(
+                    groomerName
+                        ? `${groomerName} has been unblocked ✔️`
+                        : "Groomer unblocked ✔️"
+                );
+            })
     },
 });
 
-export const { toggleFavLocal } = groomersSlice.actions;
+export const { toggleFavLocal, toggleBlockLocal } = groomersSlice.actions;
 export default groomersSlice.reducer;

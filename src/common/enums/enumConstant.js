@@ -1,5 +1,6 @@
 export const RoutePath = {
   HOME: '/',
+  GROOMERS: '/user/groomers',
   ACCOUNT: '/user/account',
   APPOINTMENTS: '/user/appointments',
   APPOINTMENT_DETAIL: '/user/appointment/:id',

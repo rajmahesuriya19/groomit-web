@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import AddressSelector from './AddressSelector.jsx';
 import UserDropdown from './UserDropdown.jsx';
@@ -9,6 +9,7 @@ import Rating from '../assets/icon/fill-star.svg';
 import { useSelector } from 'react-redux';
 
 const Navigation = () => {
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { dashboard } = useSelector((state) => state.dashboard);
@@ -18,9 +19,6 @@ const Navigation = () => {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
-
-  console.log(dashboard);
-
 
   return (
     <>
@@ -48,7 +46,9 @@ const Navigation = () => {
                   src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
                   alt="Groomit.me"
                 />
-              </Link> :
+              </Link> : location.pathname === "/user/groomers" ? <div>
+                <div className="font-filson font-bold text-xl text-primary-dark">My Groomers</div>
+              </div> :
                 <div className="w-full">
                   <div className="flex items-center gap-2">
                     <img src="https://groomit-demo.s3.amazonaws.com/images/user_profile_photo/83.png" alt="User" />
