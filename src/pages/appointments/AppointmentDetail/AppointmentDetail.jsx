@@ -19,7 +19,7 @@ import GroomerConfirmedDetail from '@/common/AppointmentCards/Groomer confirmed/
 import GroomingInProgressDetail from '@/common/AppointmentCards/Grooming in progress/GroomingInProgressDetail';
 import GroomerOnWayDetail from '@/common/AppointmentCards/Groomer on the way/GroomerOnWayDetail';
 import GroomerArrivedDetail from '@/common/AppointmentCards/Groomer arrived/GroomerArrivedDetail';
-import RebookConfirmationDetail from '@/common/AppointmentCards/RebookConfirmationDetail/RebookConfirmationDetail';
+import RebookConfirmationDetail from '@/common/AppointmentCards/Rebook Confirmation/RebookConfirmation';
 
 const AppointmentDetail = () => {
     const location = useLocation();

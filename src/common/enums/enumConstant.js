@@ -3,6 +3,7 @@ export const RoutePath = {
   GROOMERS: '/user/groomers',
   ACCOUNT: '/user/account',
   APPOINTMENTS: '/user/appointments',
+  RECCURING_SCHEDULE: '/user/appointments/RecurringPlan/RecurringScheduleDetails',
   APPOINTMENT_DETAIL: '/user/appointment/:id',
   REBOOK_DETAIL: '/user/view-rebook-confirmation-session/:id',
   CREATE_ACCOUNT: '/user/account/create',

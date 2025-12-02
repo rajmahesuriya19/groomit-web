@@ -27,6 +27,11 @@ module.exports = {
         lightGray: '#F2F4F7',
         cardBg: '#FAFAFA',
         white: '#FFFFFF',
+        borderLight: '#E4E4E4',
+        red: '#EB5757',
+        green: {
+          dark: '#0A7170',
+        },
         primary: {
           dark: '#2E2E2E',
           light: '#7C868A',

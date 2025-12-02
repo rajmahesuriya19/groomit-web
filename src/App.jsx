@@ -20,6 +20,7 @@ import AddUpdateDog from './pages/my-pets/add-update-dog/AddUpdateDog.jsx';
 import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
 import Inbox from './pages/inbox/Inbox.jsx';
+import RecurringScheduleDetails from './pages/appointments/RecurringPlan/RecurringScheduleDetails.jsx';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path={RoutePath.HOME} element={<Landing />} />
             <Route path={RoutePath.GROOMERS} element={<Groomers />} />
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
+            <Route path={RoutePath.RECCURING_SCHEDULE} element={<RecurringScheduleDetails />} />
             <Route path={RoutePath.APPOINTMENTS} element={<Appointments />} />
             <Route path={RoutePath.APPOINTMENT_DETAIL} element={<AppointmentDetail />} />
             <Route path={RoutePath.REBOOK_DETAIL} element={<AppointmentDetail />} />
