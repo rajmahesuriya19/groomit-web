@@ -121,7 +121,7 @@ const GroomerDetailsModal = ({ type, open, onClose, groomer }) => {
                                         </div>
                                     )}
                                 </div>
-                                {/* <div className='font-normal text-sm capitalize'>Last booked on 03/20/25</div> */}
+                                <div className='font-normal text-sm capitalize'>Last booked on 03/20/25</div>
                             </div>
                         </div>
                         <div className='flex gap-2 align-middle'>
