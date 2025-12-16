@@ -1,48 +1,23 @@
 import React, { useEffect, useState } from 'react'
 import SupportItems from '@/common/SupportItems/SupportItems'
 import { ChevronRight } from 'lucide-react'
+import { useNavigate } from 'react-router';
+import { useDispatch, useSelector } from 'react-redux';
 
 // icons
 import RecurringIcon from '../../assets/icon/white-groomit.png';
-import CopyIcon from '../../assets/icon/copyy.svg';
-import Home from '../../assets/icon/home-selection-a.svg';
-import Paw from '../../assets/icon/pet.svg';
-import Location from '../../assets/icon/location.svg';
 import FallbackDog from '../../assets/icon/dog-avatar.jpg';
 import FallbackCat from '../../assets/icon/cat-avatar.jpg';
-import Message from '../../assets/icon/message-blue.svg';
-import Call from '../../assets/icon/call-green.svg';
-import Star from '../../assets/icon/star.svg';
-import Tip from '../../assets/icon/tip.svg';
-import Calender from '../../assets/icon/calendar-black.svg';
 import Scissor from '../../assets/menu-new/scissor-a.svg';
 import CatAnimation from '../../assets/animation/Cat Animation.gif';
 import DogAnimation from '../../assets/animation/Dog Animation.gif';
-import { useDispatch, useSelector } from 'react-redux';
 import DashboardCarousel from '@/common/DashboardCarousel/DashboardCarousel';
-import { Tooltip } from '@mui/material';
-import { useNavigate } from 'react-router';
+import AppointmentCard from '../../pages/appointments/AppointmentCard';
 import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import RescheduleAppointemntModal from '@/components/Modals/RescheduleAppointemntModal';
 import CancelAppointemntModal from '@/components/Modals/CancelAppointemntModal';
-
-import ShaveDownRequest from '@/common/AppointmentCards/ShaveDown/ShaveDownRequest';
-import GroomerConfirmationPending from '@/common/AppointmentCards/Groomer Confirmation/GroomerConfirmationPending';
-import GroomerMatchInProgress from '@/common/AppointmentCards/Groomer Match In/GroomerMatchInProgress';
-import PaymentFailed from '@/common/AppointmentCards/Payment failed/PaymentFailed';
-import SelectedGroomerNotAvailable from '@/common/AppointmentCards/Selected Groomer Not Available/SelectedGroomerNotAvailable';
-import CanceledByGroomer from '@/common/AppointmentCards/Canceled By Groomer/CanceledByGroomer';
-import UpdatesMadeByGroomer from '@/common/AppointmentCards/Updates made by groomer/UpdatesMadeByGroomer';
-import GroomerConfirmed from '@/common/AppointmentCards/Groomer confirmed/GroomerConfirmed';
-import GroomingInProgress from '@/common/AppointmentCards/Grooming in progress/GroomingInProgress';
-import GroomerOnWay from '@/common/AppointmentCards/Groomer on the way/GroomerOnWay';
-import GroomerArrived from '@/common/AppointmentCards/Groomer arrived/GroomerArrived';
-import CanceledByYou from '@/common/AppointmentCards/Canceled By You/CanceledByYou';
-import AppointmentCompleted from '@/common/AppointmentCards/Appointment completed/AppointmentCompleted';
-import Canceled from '@/common/AppointmentCards/Canceled/Canceled';
 import RebookConfirmation from '@/common/AppointmentCards/Rebook Confirmation/RebookConfirmation';
-
 import RecurringPlanList from "@/common/AppointmentCards/Recurring Plan/RecurringPlanList";
 
 const dashboard = () => {
@@ -63,12 +38,21 @@ const dashboard = () => {
     completed_appts = [],
     recurring_cancelled = [],
     current_appts = [],
+    petReminderList = []
   } = dashboard;
-  console.log('dashboard-data', dashboard);
 
   const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0 || [];
 
   const allPets = [...dogPets, ...catPets];
+
+  const breedNames = [
+    ...new Set(
+      petReminderList
+        .map(pet => pet.breed_name)
+        .filter(Boolean) // remove null / ""
+    ),
+  ];
+  const breedsText = breedNames.join(', ');
 
   useEffect(() => {
     showLoader();
@@ -106,6 +90,11 @@ const dashboard = () => {
     navigate(`/user/appointments/RecurringPlan/RecurringScheduleDetails`)
 
   }
+
+  const renderItem = ({ item, index }) => (
+    <AppointmentCard item={item} index={index} onPressAppointmentCard={() => {}} />
+  )
+
   return (
     <>
       <div className="w-full overflow-hidden">
@@ -114,7 +103,7 @@ const dashboard = () => {
           <div className="font-inter font-normal text-sm text-primary-dark">Ready to pamper your pets?</div>
         </div>
 
-        {/* <div className='bg-white py-2 px-5 w-full block md:hidden'>
+        <div className='bg-white py-2 px-5 w-full block md:hidden'>
           <div className='flex items-center gap-2'>
             <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
             <div>
@@ -122,7 +111,7 @@ const dashboard = () => {
               <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
             </div>
           </div>
-        </div> */}
+        </div>
 
       {hasAnyPet && recurring_appts.length > 0 && (
           <RecurringPlanList
@@ -146,31 +135,25 @@ const dashboard = () => {
       <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
         <div className="space-y-4">
           {/* Reminder Card */}
-          {hasAnyPet && (
+          {petReminderList?.length > 0 && (
             <div className="rounded-2xl p-1 bg-white shadow-md">
               <div className="bg-[#FFF6DB] rounded-xl py-4 px-6">
                 <h3 className="text-center font-inter font-bold text-xl">
                   Time for{' '}
-                  {allPets.map((pet, index) => (
+                  {petReminderList.map((pet, index) => (
                     <span key={index}>
                       {pet?.name}
-                      {index !== allPets.length - 1 && ', '}
+                      {index !== petReminderList.length - 1 && ', '}
                     </span>
                   ))}{' '}
                   Next Grooming!
                 </h3>
-                {/* <p className="text-center font-inter text-sm mt-2 leading-6 text-gray-700">
-                It’s been <span className="text-[#EB5757] font-semibold">4 weeks</span> since Bruno’s last grooming.
-                Let’s keep Bruno looking & feeling his best! 🐶
-              </p> */}
                 <button className="w-full bg-primary-dark rounded-lg h-12 mt-6 mb-4 text-white font-inter font-bold text-base hover:bg-primary-light transition-all">
                   Book Now
                 </button>
                 <div className="px-2 py-3 bg-white rounded-lg">
                   <p className="text-center font-inter text-sm text-primary-dark leading-6">
-                    "Alapahapa Blue Blood Bulldog, Affenpinscher, Affenpinscher, Alapahapa Blue Blood Bulldog, Alapahapa Blue Blood Bulldog,
-                    Affenshire, Affenshire, Affenpinscher, Beagle, Affenpoo, Afghan Hound, Affenpoo, Affenpoo, Alano Espanol, Affenpinscher,
-                    Affenpinscher, Affenpinscher needs grooming <span className="font-bold">every 4–6 weeks </span>
+                    "{breedsText} needs grooming{" "} <span className="font-bold">every 4–6 weeks </span>
                     to prevent matting & skin issues.”
                   </p>
                   <p className="mt-3 text-center font-inter font-bold text-xs uppercase text-[#3064A3]">— Experts</p>
@@ -207,24 +190,9 @@ const dashboard = () => {
                   <ChevronRight size={12} className="text-primary-light" />
                 </div>
               </div>
-              {current_appts?.map((appt, idx) => (
+              {current_appts?.map((item, idx) => (
                 <div key={idx}>
-                  <>
-                    {appt?.appointment_status_label === 'Shaved-down request' && <ShaveDownRequest appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer confirmation pending' && <GroomerConfirmationPending appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer Match In Progress' && <GroomerMatchInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === 'Payment failed' && <PaymentFailed appointment={appt} />}
-                    {appt?.appointment_status_label === 'Selected groomer not available' && <SelectedGroomerNotAvailable appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled by groomer' && <CanceledByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled by you' && <CanceledByYou appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled' && <Canceled appointment={appt} />}
-                    {appt?.appointment_status_label === 'Appointment completed' && <AppointmentCompleted appointment={appt} />}
-                    {appt?.appointment_status_label === 'Updates made by groomer' && <UpdatesMadeByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer confirmed' && <GroomerConfirmed appointment={appt} />}
-                    {appt?.appointment_status_label === 'Grooming in progress' && <GroomingInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer on the way' && <GroomerOnWay appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer arrived' && <GroomerArrived appointment={appt} />}
-                  </>
+                  {renderItem({ item, idx })}
                 </div>
               ))}
             </div>
@@ -237,24 +205,9 @@ const dashboard = () => {
                   <ChevronRight size={12} className="text-primary-light" />
                 </div>
               </div>
-              {upcoming_appts?.map((appt, idx) => (
+              {upcoming_appts?.map((item, idx) => (
                 <div key={idx}>
-                  <>
-                    {appt?.appointment_status_label === 'Shaved-down request' && <ShaveDownRequest appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer confirmation pending' && <GroomerConfirmationPending appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer Match In Progress' && <GroomerMatchInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === 'Payment failed' && <PaymentFailed appointment={appt} />}
-                    {appt?.appointment_status_label === 'Selected groomer not available' && <SelectedGroomerNotAvailable appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled by groomer' && <CanceledByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled by you' && <CanceledByYou appointment={appt} />}
-                    {appt?.appointment_status_label === 'Canceled' && <Canceled appointment={appt} />}
-                    {appt?.appointment_status_label === 'Appointment completed' && <AppointmentCompleted appointment={appt} />}
-                    {appt?.appointment_status_label === 'Updates made by groomer' && <UpdatesMadeByGroomer appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer confirmed' && <GroomerConfirmed appointment={appt} />}
-                    {appt?.appointment_status_label === 'Grooming in progress' && <GroomingInProgress appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer on the way' && <GroomerOnWay appointment={appt} />}
-                    {appt?.appointment_status_label === 'Groomer arrived' && <GroomerArrived appointment={appt} />}
-                  </>
+                  {renderItem({ item, idx })}
                 </div>
               ))}
             </div>
@@ -267,25 +220,10 @@ const dashboard = () => {
                   <ChevronRight size={12} className="text-primary-light" />
                 </div>
               </div>
-              {completed_appts.map((appt, index) => {
+              {completed_appts.map((item, index) => {
                 return (
                   <div key={index}>
-                    <>
-                      {appt?.appointment_status_label === 'Shaved-down request' && <ShaveDownRequest appointment={appt} />}
-                      {appt?.appointment_status_label === 'Groomer confirmation pending' && <GroomerConfirmationPending appointment={appt} />}
-                      {appt?.appointment_status_label === 'Groomer Match In Progress' && <GroomerMatchInProgress appointment={appt} />}
-                      {appt?.appointment_status_label === 'Payment failed' && <PaymentFailed appointment={appt} />}
-                      {appt?.appointment_status_label === 'Selected groomer not available' && <SelectedGroomerNotAvailable appointment={appt} />}
-                      {appt?.appointment_status_label === 'Canceled by groomer' && <CanceledByGroomer appointment={appt} />}
-                      {appt?.appointment_status_label === 'Canceled by you' && <CanceledByYou appointment={appt} />}
-                      {appt?.appointment_status_label === 'Canceled' && <Canceled appointment={appt} />}
-                      {appt?.appointment_status_label === 'Appointment completed' && <AppointmentCompleted appointment={appt} />}
-                      {appt?.appointment_status_label === 'Updates made by groomer' && <UpdatesMadeByGroomer appointment={appt} />}
-                      {appt?.appointment_status_label === 'Groomer confirmed' && <GroomerConfirmed appointment={appt} />}
-                      {appt?.appointment_status_label === 'Grooming in progress' && <GroomingInProgress appointment={appt} />}
-                      {appt?.appointment_status_label === 'Groomer on the way' && <GroomerOnWay appointment={appt} />}
-                      {appt?.appointment_status_label === 'Groomer arrived' && <GroomerArrived appointment={appt} />}
-                    </>
+                   {renderItem({ item, index })}
                   </div>
                 );
               })}
@@ -311,7 +249,7 @@ const dashboard = () => {
             </div>
           )}
 
-          {!hasAnyPet && (
+          {hasAnyPet.length == 0 && (
             <div className="rounded-2xl p-1 bg-white shadow-md">
               <div className="py-3 px-3">
                 <h3 className="font-inter font-bold text-base">Add Your Pets</h3>

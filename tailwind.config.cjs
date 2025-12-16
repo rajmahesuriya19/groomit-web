@@ -29,6 +29,13 @@ module.exports = {
         white: '#FFFFFF',
         borderLight: '#E4E4E4',
         red: '#EB5757',
+        color11: '#28B446',
+        color12: '#EB5757',
+        color17: '#9449CE',
+        color29: '#2F87D8',
+        color47: '#438B53',
+        color48: '#FFBF00',
+        color49: '#FF8A00',
         green: {
           dark: '#0A7170',
         },
