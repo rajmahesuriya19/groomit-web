@@ -68,7 +68,6 @@ const AppointmentCompleted = ({ appointment }) => {
                 <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
                     <div className="flex gap-3">
                         <ActionButton label="Rate Service" icon={Star} onClick={() => {
-                            console.log('Rate Service clicked')
                             setRateModal(true)}}
                              />
                         <ActionButton label="Give Tip" icon={Tip} />

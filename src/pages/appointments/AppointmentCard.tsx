@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import CopyIcon from '../../assets/icon/copyy.svg';
 import { ChevronRight } from 'lucide-react';
 import AppointmentInfo from '../../common/AppointmentCard/AppointmentInfo';
@@ -6,6 +6,7 @@ import Calender from '../../assets/icon/calendar-black.svg';
 import Home from '../../assets/icon/home-selection-a.svg';
 import Paw from '../../assets/icon/pet.svg';
 import Location from '../../assets/icon/location.svg';
+import User from '../../assets/icon/menu/user.svg';
 
 import { formatAppointmentDate } from '../../common/helpers';
 import GroomerDetailsModal from '../../components/Modals/GroomerDetailsModal';
@@ -218,25 +219,12 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
   const handleRefundButton = async () => {
     let id = item?.appointment_id
-    console.log('refund id', id);
     
     try {
       const response = await dispatch(getAppointmentDetail(id))
-      console.log('refund response', response);
       let appointmentData = response.payload
-      navigate(`/user/appointments/TransactionReceipt`)
-      navigate(`/user/appointments/TransactionReceipt`, { state: { appointmentData, autoScroll: true } })
-      if (response?.success) {
-
-      //   navigate(Roots.TransactionReceipt, {
-      //     appointmentData,
-      //     autoScroll: true
-      //   })
-      // } else {
-      //   isOpenModalConfig({
-      //     modalType: 'ERROR',
-      //     descritption: response?.message
-      //   })
+      if (response.payload) {
+        navigate(`/user/appointments/TransactionReceipt`, { state: { appointmentData, autoScroll: true } })
       }
     } catch (error) { }
   }
@@ -246,17 +234,6 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
   if ((!item?.is_hide_rating_and_tip_after_30_days && item?.isRatingEnable) || isReRating) {
     tempButtons.push(
-      //   <GrayBorderButton
-      //     key="rate"
-      //     title={isReRating ? 'Re-Rate Service' : 'Rate Service'}
-      //     onPress={() => onPressRateService && onPressRateService(item)}
-      //     leftComponent={
-      //       <View style={styles.paddingRight5}>
-      //         <Icon name="starRate" height={SCALE_SIZE(22)} width={SCALE_SIZE(22)} />
-      //       </View>
-      //     }
-      //     style={() => styles.tempButton}
-      //   />
       <button className="w-full h-[40px] rounded-lg font-inter font-bold text-base border border-gray-200 transition">
         {isReRating ? 'Re-Rate Service' : 'Rate Service'}
       </button>
@@ -271,17 +248,6 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
     item.tip === null
   ) {
     tempButtons.push(
-      //   <GrayBorderButton
-      //     key="tip"
-      //     title="Give Tip"
-      //     onPress={() => onPressGiveTip && onPressGiveTip(item)}
-      //     leftComponent={
-      //       <View style={styles.paddingRight5}>
-      //         <Icon name="circleDollerWhite" height={SCALE_SIZE(22)} width={SCALE_SIZE(22)} />
-      //       </View>
-      //     }
-      //     style={() => styles.tempButton}
-      //   />
       <button className="w-full h-[40px] rounded-lg font-inter font-bold text-base border border-gray-200 transition">Give Tip</button>,
     );
   }
@@ -290,9 +256,6 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
     tempButtons.push(
       <button className="w-full h-[40px] rounded-lg font-inter font-bold text-base border border-gray-200 transition" onClick={handleRefundButton}>Refund Status</button>,
     );
-  }
-  {
-    /* <GrayBorderButton key="refund" title="Refund Status" onPress={handleRefundButton} style={() => styles.tempButton} /> */
   }
 
   if (getStatusLabelColor()?.showRebookButton) {
@@ -304,7 +267,6 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
   for (let i = 0; i < tempButtons.length; i += 2) {
     chunkedButtons.push(tempButtons.slice(i, i + 2));
   }
-  const checkInDate = item?.check_in ? new Date(item.check_in.replace(' ', 'T')) : null;
 
   const regularUIStatuses = () => {
     return (
@@ -392,7 +354,6 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
           ))}
 
         {/* Action Button */}
-
         {getStatusLabelColor()?.showReschduleButton && isAllowedAction && (
           <div className="flex flex-row mt-3">
             {FN_FIND_ME_BEST_GROOMER && (
@@ -442,12 +403,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
                   className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center"
                   aria-hidden="true"
                 >
-                  <Icon
-                    name="user"
-                    height={21}
-                    width={21}
-                    color="#2E2E2E"
-                  />
+                <img src={User} alt="user"  className="w-5 h-5" />
                 </div>
               )}
 
@@ -465,23 +421,9 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
             <RebookConfirmation
               appointment={item}
-              onPressCancelAppoitment={() => {
-                // CommonMessage(
-                //   PET_EXCEPTIONS.GROOMER_REBOOKING_CANCEL_APPOINTMENT,
-                //   setCommonException,
-                //   cancelAppointment
-                // )
-              }}
-              onPressChangeDateTime={() => {
-                // CommonMessage(
-                //   PET_EXCEPTIONS.GROOMER_REBOOKING_RESCHEDULE_APPOINTMENT,
-                //   setCommonException,
-                //   () => changeDateTime(true)
-                // )
-              }}
-              onPressConfirm={() => {
-                // onPressConfirmGroomerRebookingConfirm()
-              }}
+              onPressCancelAppoitment={() => {}}
+              onPressChangeDateTime={() => {}}
+              onPressConfirm={() => {}}
               loading={loader}
             />
           </>
@@ -508,19 +450,8 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
       {['recurring', 'annual', 'flexible'].includes(item?.type) ? (
         nextRecurringPlan()
       ) : item?.type === 'recurring_cancelled' ? (
-        <></>
+        <></> // will add cancelled recurring UI here later
       ) : (
-        // <RecurringContainer
-        //   style={{
-        //     marginTop: SCALE_SIZE(15),
-        //     borderRadius: SCALE_SIZE(20)
-        //   }}
-        //   item={item}
-        //   rightText="View Plan"
-        //   isAllowedAction={isAllowedAction}
-        //   isRecurring={recurringType}>
-        //   {cancelRecurringObject()}
-        // </RecurringContainer>
         regularUIStatuses()
       )}
     </div>

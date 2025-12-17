@@ -10,7 +10,7 @@ import CopyTooltip from '../../CopyTooltip/CopyTooltip';
 import { useNavigate } from 'react-router';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
 
-const ShaveDownRequest = ({ appointment }) => {
+const ShaveDownRequest = ({ appointment, isAllowedAction, refreshParent }) => {
     const [groomerModal, setGroomerModal] = useState(false);
     const [selectedGroomer, setSelectedGroomer] = useState(null);
 
