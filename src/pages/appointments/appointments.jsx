@@ -9,6 +9,8 @@ import AppointmentsList from './AppointmentsList/AppointmentsList';
 import calendar from '../../assets/menu-new/calendar-gray.svg';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 
+import Upcoming from './Upcoming';
+import History from './History';
 const CustomTabPanel = ({ children, value, index }) => {
     return (
         <div role="tabpanel" hidden={value !== index} aria-labelledby={`custom-tab-${index}`}>
@@ -19,7 +21,7 @@ const CustomTabPanel = ({ children, value, index }) => {
 
 const EmptyState = ({ title, description, buttonText }) => (
     <div className="flex flex-col items-center justify-center h-[500px] w-full gap-2 p-0">
-        <img src={calendar} alt="calendar" className="w-[60px] h-[60px]" />
+        {/* <img src={calendar} alt="calendar" className="w-[60px] h-[60px]" /> */}
         <div className="font-inter font-bold text-xl text-center">{title}</div>
         <div className="font-inter font-normal text-base text-center">{description}</div>
         <button
@@ -80,8 +82,18 @@ const Appointments = () => {
                 </div>
 
                 {/* Tab Panels */}
-                {tabs.map((tab, index) => {
+                <CustomTabPanel value={activeTab} index={0}>
+                    <Upcoming data={appointments?.upcoming_appts || []} />
+                </CustomTabPanel>
+
+                <CustomTabPanel value={activeTab} index={1}>
+                    <History data={appointments?.completed_appts || []} />
+                </CustomTabPanel>
+                
+                {/* {tabs.map((tab, index) => {
                     const tabData = getTabData(tab.type);
+                    console.log('tabData', tab);
+                    
                     return (
                         <CustomTabPanel key={index} value={activeTab} index={index}>
                             {tabData.length > 0 ? (
@@ -95,7 +107,7 @@ const Appointments = () => {
                             )}
                         </CustomTabPanel>
                     );
-                })}
+                })} */}
             </div>
 
             {/* Divider */}

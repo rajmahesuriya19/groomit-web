@@ -21,6 +21,7 @@ import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
 import Inbox from './pages/inbox/Inbox.jsx';
 import RecurringScheduleDetails from './pages/appointments/RecurringPlan/RecurringScheduleDetails.jsx';
+import TransactionReceipt from './pages/appointments/TransactionReceipt.tsx'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path={RoutePath.ACCOUNT} element={<Account />} />
             <Route path={RoutePath.RECCURING_SCHEDULE} element={<RecurringScheduleDetails />} />
             <Route path={RoutePath.APPOINTMENTS} element={<Appointments />} />
+            <Route path={RoutePath.TRANSACTION_RECEIPT} element={<TransactionReceipt />} />
             <Route path={RoutePath.APPOINTMENT_DETAIL} element={<AppointmentDetail />} />
             <Route path={RoutePath.REBOOK_DETAIL} element={<AppointmentDetail />} />
             <Route path={RoutePath.CREATE_ACCOUNT} element={<CreateEditAccount />} />

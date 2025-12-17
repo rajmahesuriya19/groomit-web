@@ -12,7 +12,7 @@ import Calender from '../../../assets/icon/calendar-black.svg';
 import { Tooltip } from '@mui/material';
 import { useNavigate } from 'react-router';
 
-const RebookConfirmation = ({ appointment }) => {
+const RebookConfirmation = ({ appointment, onPressCancelAppoitment, onPressChangeDateTime, onPressConfirm, loading }) => {
   const navigate = useNavigate();
   const [tooltip, setTooltip] = useState('Click to copy');
 

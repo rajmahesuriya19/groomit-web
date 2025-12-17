@@ -14,9 +14,11 @@ import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
 import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
+import RateServiceModal from '@/components/Modals/RateServiceModal';
 
 const AppointmentCompleted = ({ appointment }) => {
     const [groomerModal, setGroomerModal] = useState(false);
+    const [rateModal, setRateModal] = useState(false);
     const [selectedGroomer, setSelectedGroomer] = useState(null);
 
     const navigate = useNavigate();
@@ -65,7 +67,9 @@ const AppointmentCompleted = ({ appointment }) => {
                 {/* Actions */}
                 <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
                     <div className="flex gap-3">
-                        <ActionButton label="Rate Service" icon={Star} />
+                        <ActionButton label="Rate Service" icon={Star} onClick={() => {
+                            setRateModal(true)}}
+                             />
                         <ActionButton label="Give Tip" icon={Tip} />
                     </div>
                     <ActionButton label="Rebook" variant="brand" />
@@ -77,6 +81,12 @@ const AppointmentCompleted = ({ appointment }) => {
                 open={groomerModal}
                 onClose={() => setGroomerModal(false)}
                 groomer={selectedGroomer}
+            />
+            <RateServiceModal
+                type={"appointments"}
+                open={rateModal}
+                onClose={() => setRateModal(false)}
+                appointment={appointment}
             />
         </>
     );
@@ -135,7 +145,7 @@ const PreferredGroomer = ({ groomer, onInfoClick }) => {
 };
 
 // 🧩 Generic text button (e.g. Rate Service, Refund Status, Rebook)
-const ActionButton = ({ label, icon, variant = 'default' }) => {
+const ActionButton = ({ label, icon, variant = 'default', onClick }) => {
     const baseStyle =
         'flex-1 h-[40px] rounded-xl border font-inter font-bold text-base flex items-center justify-center gap-2 transition-all duration-200';
     const variants = {
@@ -144,7 +154,7 @@ const ActionButton = ({ label, icon, variant = 'default' }) => {
     };
 
     return (
-        <button className={variants[variant]}>
+        <button className={variants[variant]} onClick={onClick}>
             {icon && <img
                 src={icon}
                 alt='Star'

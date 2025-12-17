@@ -13,11 +13,13 @@ import AppointmentInfo from '../../AppointmentCard/AppointmentInfo';
 import { formatAppointmentDate } from '../../helpers';
 import { useNavigate } from 'react-router';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
+import RateServiceModal from '@/components/Modals/RateServiceModal';
 
 const CanceledByYou = ({ appointment }) => {
     const navigate = useNavigate();
     const [groomerModal, setGroomerModal] = useState(false);
     const [selectedGroomer, setSelectedGroomer] = useState(null);
+    const [rateModal, setRateModal] = useState(false);
 
     const { appointment_id, appointment_status_label, ap_date, display_time, groomer } = appointment || {};
 
@@ -64,7 +66,7 @@ const CanceledByYou = ({ appointment }) => {
                 {/* Actions */}
                 <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
                     <div className="flex gap-3">
-                        <ActionButton label="Rate Service" icon={Star} />
+                        <ActionButton label="Rate Service" icon={Star} onClick={() => {setRateModal(true)}} />
                         <ActionButton label="Refund Status" />
                     </div>
                     <ActionButton label="Rebook" variant="brand" />
@@ -76,6 +78,12 @@ const CanceledByYou = ({ appointment }) => {
                 open={groomerModal}
                 onClose={() => setGroomerModal(false)}
                 groomer={selectedGroomer}
+            />
+            <RateServiceModal
+                type={"appointments"}
+                open={rateModal}
+                onClose={() => setRateModal(false)}
+                appointment={appointment}
             />
         </>
     );

@@ -100,7 +100,7 @@ const GroomerDetailsModal = ({ type, open, onClose, groomer }) => {
                                     <h4 className="text-base font-bold text-primary-dark leading-[22px] tracking-[-0.01em] font-inter">
                                         {localGroomer?.name}
                                     </h4>
-                                    {((localGroomer?.rating_avg > 0) || (localGroomer?.rating_qty > 0)) && (
+                                    {/* {((localGroomer?.rating_avg > 0) || (localGroomer?.rating_qty > 0)) && (
                                         <div
                                             className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1"
                                         >
@@ -119,9 +119,9 @@ const GroomerDetailsModal = ({ type, open, onClose, groomer }) => {
                                                 )
                                             }
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
-                                <div className='font-normal text-sm capitalize'>Last booked on 03/20/25</div>
+                                {/* <div className='font-normal text-sm capitalize'>Last booked on 03/20/25</div> */}
                             </div>
                         </div>
                         <div className='flex gap-2 align-middle'>
