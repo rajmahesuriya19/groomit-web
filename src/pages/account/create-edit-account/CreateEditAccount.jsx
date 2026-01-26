@@ -191,7 +191,7 @@ const CreateEditAccount = () => {
                                             <img src={userIcon} alt="User" className="w-[20px] h-[20px]" />
                                         </div>
                                     </div>
-                                    {errors.first_name && <p className="text-red-500 text-sm">{errors.first_name.message}</p>}
+                                    {errors.first_name && <p className="text-brand text-sm">{errors.first_name.message}</p>}
 
                                     <div className="relative">
                                         <input
@@ -203,7 +203,7 @@ const CreateEditAccount = () => {
                                             <img src={userIcon} alt="User" className="w-[20px] h-[20px]" />
                                         </div>
                                     </div>
-                                    {errors.last_name && <p className="text-red-500 text-sm">{errors.last_name.message}</p>}
+                                    {errors.last_name && <p className="text-brand text-sm">{errors.last_name.message}</p>}
                                 </div>
                             </div>
 
@@ -264,7 +264,7 @@ const CreateEditAccount = () => {
                                         <img src={Tick} alt="Tick" className="w-[20px] h-[20px]" />
                                     </div>}
                                 </div>
-                                <div className="text-red-500 text-sm">{errors.email?.message}</div>
+                                <div className="text-brand text-sm">{errors.email?.message}</div>
                             </div>
 
                             {/* Phone */}
@@ -304,7 +304,7 @@ const CreateEditAccount = () => {
 
                                 </div>
                                 {/* Error msg */}
-                                <div className="text-red-500 text-sm">{errors.phone?.message}</div>
+                                <div className="text-brand text-sm">{errors.phone?.message}</div>
                             </div>
                         </div>
                     </div>

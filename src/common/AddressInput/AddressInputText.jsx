@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import Location from '../../assets/icon/location.svg';
 import GooglePlacesAutocomplete from "react-google-places-autocomplete";
 
-const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => {
+const AddressInputText = ({ value, onChange, label, error, onSelect }) => {
     const [internalValue, setInternalValue] = useState(null);
 
-    // 🔄 Sync internalValue whenever RHF value changes
+    // Sync RHF value
     useEffect(() => {
         if (typeof value === "string" && value.trim() !== "") {
             setInternalValue({ label: value, value });
@@ -15,6 +16,21 @@ const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => 
 
     return (
         <div className="relative w-full">
+            {/* Icon */}
+            <img
+                src={Location}
+                alt="Location"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-[24px] h-[24px] z-20"
+            />
+
+            {/* Floating label (same as CustomInput) */}
+            <label
+                className={`absolute top-[10px] left-[15px] text-[12px] font-inter pointer-events-none z-10
+          ${error ? "text-[#EB5757]" : "text-[#7C868A]"}`}
+            >
+                {label}
+            </label>
+
             <GooglePlacesAutocomplete
                 apiKey={process.env.REACT_APP_GOOGLE_MAPS_API}
                 selectProps={{
@@ -30,42 +46,62 @@ const AddressInputText = ({ value, onChange, placeholder, error, onSelect }) => 
                         onChange(selected.label || "");
                         onSelect?.(selected);
                     },
-                    placeholder: placeholder || "123 Main Street",
+                    placeholder: "",
                     options: { componentRestrictions: { country: "us" } },
-                    components: { DropdownIndicator: null, IndicatorSeparator: null },
+                    components: {
+                        DropdownIndicator: null,
+                        IndicatorSeparator: null,
+                    },
                     styles: {
+                        control: (provided) => ({
+                            ...provided,
+                            minHeight: "56px",
+                            padding: "15px",
+                            borderRadius: "10px",
+                            backgroundColor: "#FBFBFB",
+                            border: error ? "1px solid #EB5757 !important" : "1px solid #BEC3C5 !important",
+                            boxShadow: "none",
+                            alignItems: "center",
+                            cursor: "text",
+                        }),
+                        valueContainer: (provided) => ({
+                            ...provided,
+                            padding: 0,
+                            marginTop: "12px",
+                        }),
                         input: (provided) => ({
                             ...provided,
-                            width: "100%",
-                            minWidth: "0",
-                            padding: "8px 16px",
-                            fontSize: "1rem",
-                            lineHeight: "21px",
-                            fontFamily: "Inter, sans-serif",
-                            borderRadius: "0.375rem",
-                            border: error ? "1px solid #ef4444" : "1px solid #E2E2E2",
-                            color: "#2E2E2E",
-                            outline: "none",
                             margin: 0,
+                            padding: 0,
+                            color: "#2E2E2E",
+                            fontFamily: "Inter",
+                            fontSize: "14px",
+                            fontWeight: 400,
                         }),
-                        valueContainer: (provided) => ({ ...provided, padding: 0 }),
-                        placeholder: (provided) => ({ ...provided, padding: "0 15px" }),
-                        singleValue: (provided) => ({ ...provided, padding: "0 15px" }),
-                        control: (provided) => ({ ...provided, boxShadow: "none", border: "none", minHeight: "unset" }),
+                        placeholder: () => ({
+                            display: "none",
+                        }),
+                        singleValue: (provided) => ({
+                            ...provided,
+                            margin: 0,
+                            padding: 0,
+                            color: "#2E2E2E",
+                            fontFamily: "Inter",
+                            fontSize: "14px",
+                        }),
                         menu: (provided) => ({
                             ...provided,
                             zIndex: 9999,
-                            borderRadius: "0.375rem",
+                            borderRadius: "10px",
                             boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
                         }),
                         option: (provided, state) => ({
                             ...provided,
-                            padding: "0.6rem 1rem",
-                            borderRadius: "0.5rem",
-                            fontSize: "0.9rem",
+                            padding: "10px 15px",
+                            fontSize: "14px",
+                            backgroundColor: state.isFocused ? "#F3F4F6" : "#fff",
                             color: "#2E2E2E",
-                            backgroundColor: state.isFocused ? "#f3f4f6" : "#fff",
-                            "&:active": { backgroundColor: "#ef4444", color: "#fff" },
+                            cursor: "pointer",
                         }),
                     },
                 }}

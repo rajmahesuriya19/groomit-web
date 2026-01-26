@@ -47,6 +47,7 @@ const CreateEditCards = () => {
     const isEdit = Boolean(id);
 
     const { addresses } = useSelector((state) => state.addresses);
+    const token = useSelector((state) => state.auth.unique_token);
 
     const defaultAddress = addresses.find(addr => addr.default_address === "Y")
 
@@ -130,7 +131,7 @@ const CreateEditCards = () => {
         const [month, year] = formData.expirationDate.split("/");
 
         const payload = {
-            booking_session_token: "booking_session_6888c7d65d91b1.59307650",
+            booking_session_token: token,
             cardNumber: formData.cardNumber.replace(/\s/g, ""),
             cardName: formData.cardName,
             expiryMonth: month,
@@ -208,7 +209,7 @@ const CreateEditCards = () => {
                                         <img src={Card} alt="Card" className="w-[24px] h-[24px]" />
                                     </div>
                                 </div>
-                                <p className="text-red-500 text-sm">{errors.cardNumber?.message}</p>
+                                <p className="text-brand text-sm">{errors.cardNumber?.message}</p>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -228,7 +229,7 @@ const CreateEditCards = () => {
                                         <img src={userIcon} alt="user" className="w-[24px] h-[24px]" />
                                     </div>
                                 </div>
-                                <p className="text-red-500 text-sm">{errors.cardName?.message}</p>
+                                <p className="text-brand text-sm">{errors.cardName?.message}</p>
                             </div>
 
                             <div className="flex gap-2">
@@ -247,7 +248,7 @@ const CreateEditCards = () => {
                                             <img src={Calender} alt="Calender" className="w-[24px] h-[24px]" />
                                         </div>
                                     </div>
-                                    <p className="text-red-500 text-sm">{errors.expirationDate?.message}</p>
+                                    <p className="text-brand text-sm">{errors.expirationDate?.message}</p>
                                 </div>
 
                                 <div className="flex-1 flex flex-col gap-2">
@@ -265,7 +266,7 @@ const CreateEditCards = () => {
                                             <img src={Lock} alt="Lock" className="w-[24px] h-[24px]" />
                                         </div>
                                     </div>
-                                    <p className="text-red-500 text-sm">{errors.cvv?.message}</p>
+                                    <p className="text-brand text-sm">{errors.cvv?.message}</p>
                                 </div>
                             </div>
 
@@ -359,7 +360,7 @@ const CreateEditCards = () => {
                                     </div>
                                 </div>
 
-                                <div className="text-red-500 text-sm">{errors.address?.message}</div>
+                                <div className="text-brand text-sm">{errors.address?.message}</div>
                             </div>
 
                             <div className="flex flex-col gap-2">
@@ -387,7 +388,7 @@ const CreateEditCards = () => {
                                     {...register('city')}
                                     className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                 />
-                                <div className="text-red-500 text-sm">{errors.city?.message}</div>
+                                <div className="text-brand text-sm">{errors.city?.message}</div>
                             </div>
 
                             <div className="flex gap-2">
@@ -399,7 +400,7 @@ const CreateEditCards = () => {
                                         {...register('state')}
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
-                                    <div className="text-red-500 text-sm">{errors.state?.message}</div>
+                                    <div className="text-brand text-sm">{errors.state?.message}</div>
                                 </div>
 
                                 <div className="flex-1 flex flex-col gap-2">
@@ -410,7 +411,7 @@ const CreateEditCards = () => {
                                         {...register('zip')}
                                         className="w-full rounded-md border border-[#E2E2E2] px-4 py-2 text-base leading-[21px] tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300"
                                     />
-                                    <div className="text-red-500 text-sm">{errors.zip?.message}</div>
+                                    <div className="text-brand text-sm">{errors.zip?.message}</div>
                                 </div>
                             </div>
                         </div>

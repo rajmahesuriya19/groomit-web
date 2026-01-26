@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Plus, ChevronRight, ChevronLeft, PlusIcon } from 'lucide-react';
 import Tooltip from "@mui/material/Tooltip";
-import Edit2 from '../../assets/icon/edit.svg';
+import Edit2 from '../../assets/icon/edit-3.svg';
+import Paw from '../../assets/icon/pet.svg';
+import LocationBlack from '../../assets/icon/location.svg';
+import CardBlack from '../../assets/icon/card.svg';
+import AddDog from '../../assets/icon/add-dog.svg';
+import AddCat from '../../assets/icon/add-cat.svg';
 import Mail from '../../assets/icon/sms-red.svg';
 import Phone from '../../assets/icon/phone-red.svg';
 import Info from '../../assets/icon/info-circle-yellow.svg';
@@ -9,9 +14,10 @@ import infoGrey from '../../assets/icon/info-circle-grey.svg';
 import heartFilled from '../../assets/icon/heart-fill.svg';
 import heartGrey from '../../assets/icon/heart-grey.svg';
 import blocked from '../../assets/icon/blocked.svg';
-import PasswordIcon from '../../assets/icon/red-lock.svg';
-import Notification from '../../assets/icon/notification-red.svg';
+import PasswordIcon from '../../assets/icon/lock-black.svg';
+import Notification from '../../assets/icon/notification-black.svg';
 import Share from '../../assets/icon/share.svg';
+import ShareWhite from '../../assets/icon/share-white.svg';
 import LogOut from '../../assets/icon/logout.svg';
 import Add from '../../assets/icon/add-blue.svg';
 import Location from '../../assets/icon/location-red.svg';
@@ -35,10 +41,14 @@ import { fetchAddresses } from '@/utils/store/slices/serviceAddressList/serviceA
 import { addGroomerFav, getGroomersList, removeGroomerFav, toggleFavLocal } from '@/utils/store/slices/groomersList/groomersListSlice';
 import GroomerDetailsModal from '@/components/Modals/GroomerDetailsModal';
 import SupportItems from '@/common/SupportItems/SupportItems';
+import { Box } from '@mui/material';
+import { getPetList } from '@/utils/store/slices/petList/petListSlice';
+import AddPetsModal from '@/components/Modals/AddPetsModal';
+import { Link } from 'react-router-dom';
 
 const settingItems = [
-  { label: 'Notification', icon: Notification },
-  { label: 'Change Password', icon: PasswordIcon },
+  { label: 'Notification', icon: Notification, href: "/user/notifications-preferences" },
+  { label: 'Change Password', icon: PasswordIcon, href: "/user/account/password/change" },
 ];
 
 const cardIcons = {
@@ -54,12 +64,30 @@ const Account = () => {
   const [tooltipText, setTooltipText] = useState("Click to Copy");
   const [groomerModal, setGroomerModal] = useState(false);
   const [selectedGroomer, setSelectedGroomer] = useState(null);
+  const [petsModal, setPetsModal] = useState(false);
+
+  const { dashboard } = useSelector((state) => state.dashboard);
+  const { user } = dashboard;
+
+  const {
+    dogPets = [],
+    catPets = [],
+  } = useSelector((state) => state.pets.pets || {});
+
+  const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0;
+  const allPets = [...dogPets, ...catPets];
 
   const users = useSelector((state) => state.user.user);
   const groomers = useSelector((state) => state.groomers.groomers);
   const addresses = useSelector((state) => state.addresses.addresses);
   const cards = useSelector((state) => state.cards.cards);
   const isEditMode = true;
+
+  // get the selected/default address
+  const selectedAddress = addresses.find(addr => addr?.default_address === "Y")
+    || addresses[0];
+
+  const selectedCard = cards.find(c => c?.default_card === "Y") || cards[0];
 
   const handleClick = () => {
     navigator.clipboard.writeText("SANTIAGO123");
@@ -100,6 +128,7 @@ const Account = () => {
 
         await Promise.all([
           dispatch(getGroomersList()),
+          dispatch(getPetList()),
           dispatch(getUserInfo()),
           dispatch(fetchAddresses()),
           dispatch(fetchPaymentCards()),
@@ -114,84 +143,89 @@ const Account = () => {
     fetchData();
   }, [dispatch]);
 
+  // Create dynamic preview text
+  const getPetNamesPreview = () => {
+    if (!allPets.length) return "";
+
+    const names = allPets.map(pet => pet?.name);
+
+    if (names.length <= 4) return names.join(", ");
+
+    const visibleNames = names.slice(0, 4).join(", ");
+    const extraCount = names.length - 4;
+
+    return `${visibleNames} +${extraCount} More`;
+  };
+
+  const getSelectedAddressName = () => {
+    if (!selectedAddress) return "";
+
+    const a = selectedAddress;
+
+    return `${a?.address1 || ""} ${a?.address2 || ""}, ${a?.city || ""}, ${a?.state || ""} ${a?.zip || ""}`.trim();
+  };
+
+  const getSelectedCardText = () => {
+    if (!selectedCard) return "";
+
+    const brand = selectedCard?.payment_type_name || "Card";
+    const last4 = selectedCard?.card_number || "";
+
+    return `${brand} **** ${last4}`;
+  };
+
   return (
     <>
-      <div className="p-4 md:p-8 grid grid-cols-1 md:grid-cols-[auto_auto_auto] gap-6">
+      <div className='hidden md:flex bg-white items-center justify-between overflow-hidden w-full' style={{
+        padding: '10px 45px 10px 20px'
+      }}>
+        <div>
+          <div className='font-filson font-bold text-xl text-primary-dark'>My Account</div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-primary-dark p-2">
+          <p className="text-xs font-bold text-white leading-none font-inter tracking-normal">
+            CREDITS
+          </p>
+          <p className="text-base font-bold text-white leading-none font-inter tracking-[-0.01em]">
+            ${user?.available_credit}.00
+          </p>
+        </div>
+      </div>
+
+      <div className="gap-4 grid grid-cols-1 md:gap-8 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] px-5 py-[18px]">
         {/* Left Section */}
         <div className="space-y-4">
-          <div>
-            <div className="hidden md:flex justify-between items-center mb-6">
-              <h2 className="mb-3 text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]">
-                My Account
-              </h2>
-            </div>
-
-            <div className="md:mx-0 -mx-4 -my-4 mb-6">
-              <div className="flex md:hidden items-center justify-between bg-white px-5 py-4 h-[64px] w-full">
-                <button
-                  onClick={() => navigate(-1)}
-                  className="flex items-center justify-center"
-                >
-                  <ChevronLeft size={24} className="text-primary-light" />
-                </button>
-
-                <h2 className="text-xl font-['Filson Soft'] font-bold text-primary-dark leading-[100%] tracking-[-0.01em] capitalize">
-                  My Account
-                </h2>
-
-                <div className="w-[62px] h-[38px] bg-brand rounded-[5px] px-2 py-1 flex flex-col justify-center items-center gap-[2px]">
-                  <span className="text-[8px] font-bold text-white leading-none tracking-[0px]">
-                    CREDITS
-                  </span>
-                  <span className="text-sm font-bold text-white leading-none tracking-[-0.01em]">
-                    $518
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Profile Card */}
           <div
-            className="bg-white rounded-[15px] shadow-md flex justify-center items-start px-4 py-3"
-            style={{ height: '113px' }}
+            className="bg-white rounded-[15px] flex p-[15px]"
           >
             {/* Avatar */}
             {users?.photo ? (<img
               src={users?.photo}
               alt="Profile"
-              className="rounded-full w-[82px] h-[82px]"
+              className="h-[80px] rounded-[10px] w-[80px]"
             />) : (<img
               src='https://dev.groomit.me/v6/images/profile-avatar.svg'
               alt="Profile"
-              className="rounded-full w-[82px] h-[82px]"
+              className="h-[80px] rounded-[10px] w-[80px]"
             />)}
 
             {/* Profile Text */}
-            <div className="flex-1 ml-4 flex flex-col gap-[4px]">
+            <div className="flex flex-1 flex-col gap-2 ml-4 self-center">
               <h2
-                className="text-xl font-bold text-primary-dark leading-[100%] tracking-[-0.01em]"
+                className="text-base font-bold text-primary-dark leading-[100%] tracking-[-0.01em]"
               >
                 {users?.name}
               </h2>
               <div className="flex items-center text-sm text-gray-700 space-x-2 mt-1">
-                <img
-                  src={Mail}
-                  alt="Mail"
-                  className="w-[20px] h-[20px]"
-                />
                 <span className="text-sm font-normal text-primary-dark leading-[100%] tracking-[-0.01em]">
-                  {users?.email}
+                  {formatPhoneNumber(users?.phone)}
                 </span>
               </div>
               <div className="flex items-center text-sm text-gray-700 space-x-2 mt-1">
-                <img
-                  src={Phone}
-                  alt="Phone"
-                  className="w-[20px] h-[20px]"
-                />
-                <span className="text-sm font-medium text-primary-dark leading-[100%] tracking-[-0.01em]">
-                  {formatPhoneNumber(users?.phone)}
+                <span className="text-sm font-normal text-primary-dark leading-[100%] tracking-[-0.01em]">
+                  {users?.email}
                 </span>
                 {users?.is_phone_verified !== true && <img
                   src={Info}
@@ -204,17 +238,176 @@ const Account = () => {
             {/* Edit Icon */}
             <button
               onClick={() => navigate(isEditMode ? `/user/account/edit/${users?.user_id}` : "/user/account/create")}
+              className='h-full p-[7px] border border-primary-line rounded-[10px] mt-1'
             >
               <img
                 src={Edit2}
                 alt="Edit"
-                className="w-[24px] h-[24px] md:w-[28px] md:h-[28px] lg:w-[35px] lg:h-[35px]"
+                // className="w-[24px] h-[24px] md:w-[28px] md:h-[28px] lg:w-[35px] lg:h-[35px]"
+                className="w-[22px] h-[22px]"
               />
             </button>
           </div>
 
+          {/* Refer Box */}
+          <Box className="shadow-md overflow-hidden h-[136px] rounded-[15px] border-[5px] border-white bg-[#E4F5FF]" style={{
+            padding: '20px 5px 20px 0px'
+          }}>
+            <Box className={`w-full h-full`}>
+              <div className="bg-[#E4F5FF] rounded-xl pt-4 px-6 h-full">
+                <div className='flex justify-between items-center h-full'>
+                  <div>
+                    <h3 className="flex items-center font-inter font-bold text-base">
+                      Refer a Friend
+                    </h3>
+                    <p className="font-inter text-base text-primary-dark">
+                      And Both Receive <span className='text-[#3064A3]'>$25 Credits</span>
+                    </p>
+                    <button className="flex items-center justify-center gap-2 w-[170px] bg-primary-dark rounded-[10px] h-[38px] my-3 text-white font-inter font-bold text-base">
+                      #GROOM123 <img src={ShareWhite} className="w-6 h-6" alt="Share" />
+                    </button>
+                  </div>
+
+                  <div>
+                    <img src="https://dev.groomit.me/v7/images/webapp/icons/banner-cat.svg" alt="Cat" />
+                  </div>
+                </div>
+              </div>
+            </Box>
+          </Box>
+
+          {/* Add-pet Section */}
+          {hasAnyPet ? (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex flex-col gap-3'>
+                <div className='flex gap-2 items-center'>
+                  <img src={Paw} alt="Cat" className='w-[26px] h-[26px]' />
+                  <div className='text-base font-bold capitalize '>My Pets</div>
+                </div>
+
+                <div className='text-sm font-normal capitalize'>
+                  {getPetNamesPreview()}
+                </div>
+              </div>
+
+              <div>
+                <ChevronRight
+                  size={24}
+                  className="text-primary-light cursor-pointer"
+                  onClick={() => navigate("/user/pet/list")}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex gap-2 items-center'>
+                <img src={Paw} alt="Cat" className='w-[26px] h-[26px]' />
+                <div className='text-base font-bold capitalize '>Add Pet</div>
+              </div>
+
+              <div className='cursor-pointer' onClick={() => setPetsModal(true)}>
+                <PlusIcon size={24} />
+              </div>
+            </div>
+          )}
+
           {/* Add Service Address */}
           {addresses?.length > 0 ? (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex flex-col gap-3'>
+                <div className='flex gap-2 items-center'>
+                  <img src={LocationBlack} alt="LocationBlack" className='w-[26px] h-[26px]' />
+                  <div className='text-base font-bold capitalize '>Service Address</div>
+                </div>
+
+                <div className='text-sm font-normal capitalize'>
+                  {getSelectedAddressName()}
+                </div>
+              </div>
+
+              <div>
+                <ChevronRight
+                  size={24}
+                  className="text-primary-light cursor-pointer"
+                  onClick={() => navigate("/user/address")}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex gap-2 items-center'>
+                <img src={LocationBlack} alt="LocationBlack" className='w-[26px] h-[26px]' />
+                <div className='text-base font-bold capitalize '>Add Service Address</div>
+              </div>
+              <div>
+                <PlusIcon size={24} />
+              </div>
+            </div>
+          )}
+
+          {/* Add Payment Method */}
+          {cards?.length > 0 ? (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex flex-col gap-3'>
+                <div className='flex gap-2 items-center'>
+                  <img src={CardBlack} alt="Card" className='w-[26px] h-[26px]' />
+                  <div className='text-base font-bold capitalize '>Payment Method</div>
+                </div>
+
+                <div className='text-sm font-normal capitalize'>
+                  {getSelectedCardText()}
+                </div>
+              </div>
+
+              <div>
+                <ChevronRight
+                  size={24}
+                  className="text-primary-light cursor-pointer"
+                  onClick={() => navigate("/user/payment/card/list")}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+              <div className='flex gap-2 items-center'>
+                <img src={CardBlack} alt="Card" className='w-[26px] h-[26px]' />
+                <div className='text-base font-bold capitalize '>Add Payment Method</div>
+              </div>
+
+              <div>
+                <PlusIcon size={24} />
+              </div>
+            </div>
+          )}
+
+          {/* Settings */}
+          <div className="bg-white rounded-[15px] p-[15px]">
+            <div className="flex justify-between items-center pb-4 border-b border-primary-line">
+              <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
+                Settings
+              </h3>
+            </div>
+
+            {settingItems.map((item, index) => (
+              <Link
+                to={item.href}
+                key={index}
+                className={`flex justify-between items-center py-4
+      ${index !== settingItems.length - 1 ? 'border-b border-[#F2F2F2]' : 'pb-0'}`}
+              >
+                <div className="flex items-center gap-2">
+                  <img src={item.icon} alt={item.label} className="w-6 h-6" />
+                  <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
+                    {item.label}
+                  </span>
+                </div>
+                <ChevronRight size={24} className="text-primary-light" />
+              </Link>
+            ))}
+          </div>
+
+          {/* Add Service Address */}
+          {/* {addresses?.length > 0 ? (
             // If addresses exist
             <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
               <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -262,7 +455,7 @@ const Account = () => {
                     <button
                       onClick={() => navigate(`/user/address/edit/${item?.address_id}`)}
                     >
-                      <ChevronRight size={24} className="text-gray-400" />
+                      <ChevronRight size={24} className="text-primary-light" />
                     </button>
                   </div>
                 </div>
@@ -284,11 +477,11 @@ const Account = () => {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
 
 
           {/* Add Card */}
-          {cards?.length > 0 ? (
+          {/* {cards?.length > 0 ? (
             // If Card exist
             <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
               <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -352,7 +545,7 @@ const Account = () => {
                     <button
                       onClick={() => navigate(!item?.card_holder ? `/user/card/edit/${item?.billing_id}` : `/user/card/view/${item?.billing_id}`)}
                     >
-                      <ChevronRight size={24} className="text-gray-400" />
+                      <ChevronRight size={24} className="text-primary-light" />
                     </button>
                   </div>
                 </div>
@@ -375,10 +568,10 @@ const Account = () => {
                   <Plus size={20} />
                 </button>
               </div>
-            </div>)}
+            </div>)} */}
 
           {/* Add Groomers List */}
-          {groomers?.length > 0 && (
+          {/* {groomers?.length > 0 && (
             // If Groomer exist
             <div className="rounded-[15px] shadow-md bg-white p-[15px] flex flex-col gap-3">
               <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
@@ -471,108 +664,29 @@ const Account = () => {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Divider Section */}
         <div className="hidden md:flex justify-center">
-          <div className="h-full w-[1px] bg-[#C9CFD4]" />
+          <div className="h-full w-[1px] bg-[#E4E4E4]" />
         </div>
 
         {/* Right Section */}
-        <div className="space-y-4">
-          {/* Settings */}
-          <div className="bg-white rounded-2xl p-4 shadow-md">
-            <div className="flex justify-between items-center pb-3 border-b border-[#BEC3C5]">
-              <h3 className="text-base font-bold text-primary-dark leading-[100%] tracking-[0]">
-                Settings
-              </h3>
-            </div>
-
-            {settingItems.map((item, index) => (
-              <div
-                key={index}
-                className={`flex justify-between items-center cursor-pointer pt-3 ${index !== settingItems.length - 1 ? 'pb-3 border-b border-[#F2F2F2]' : 'pb-0'}`}
-              >
-                <div className="flex items-center gap-2">
-                  <img src={item.icon} alt={item.label} className="w-6 h-6" />
-                  <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
-                    {item.label}
-                  </span>
-                </div>
-                <ChevronRight size={24} className="text-gray-400" />
-              </div>
-            ))}
-          </div>
-
+        <div className="space-y-4 w-full min-w-0 block">
           {/* Support List */}
           <SupportItems />
 
-          {/* Share & Earn */}
-          <div className="bg-white rounded-2xl p-4 shadow-md flex md:flex-row items-center justify-between gap-4">
-            <div className="flex-1 w-full">
-              <h3 className="text-xl font-bold text-primary-dark leading-[100%] tracking-[0]">
-                Share & Earn
-              </h3>
-              <p className="text-base font-medium text-primary-light leading-[100%] tracking-[0] font-inter py-1">
-                Refer a Friend & both receive{' '}
-                <span className="text-brand font-semibold font-inter tracking-[0]">
-                  $10 Credits
-                </span>
-              </p>
-
-              <Tooltip
-                title={tooltipText}
-                arrow
-                placement="top"
-                componentsProps={{
-                  tooltip: {
-                    sx: {
-                      backgroundColor: "black",
-                      color: "white",
-                      fontSize: 12,
-                      padding: "6px 12px",
-                      borderRadius: "4px",
-                    },
-                  },
-                  arrow: {
-                    sx: {
-                      color: "black",
-                    },
-                  },
-                }}
-              >
-                <div
-                  onClick={handleClick}
-                  className="max-w-[172px] h-[38px] flex items-center justify-center gap-2 mt-2 border border-[#BEC3C5] px-4 py-1 rounded-full cursor-pointer"
-                >
-                  <img src={Share} alt="Share Icon" className="w-[24px] h-[24px]" />
-                  <p className="text-base font-semibold text-primary-dark font-inter text-center">
-                    SANTIAGO123
-                  </p>
-                </div>
-              </Tooltip>
-            </div>
-
-            <div className="w-full max-w-[130px] md:w-[130px] md:h-[130px] flex-shrink-0">
-              <img
-                src={Earn}
-                alt="Share & Earn"
-                className="w-full h-auto object-contain mx-auto"
-              />
-            </div>
-          </div>
-
           {/* Logout */}
-          <div className="bg-white rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer">
+          <div className="bg-white rounded-[15px] p-[15px] flex items-center justify-between cursor-pointer">
             <div className="flex items-center gap-2">
               <img src={LogOut} alt="Logout" className="w-6 h-6" />
-              <span className="text-sm font-bold text-primary-dark tracking-[-0.01em] font-inter">
+              <span className="text-base font-bold text-primary-dark tracking-[-0.01em] font-inter">
                 Log Out
               </span>
             </div>
             <button onClick={handleLogout}>
-              <ChevronRight size={24} className="text-gray-400" />
+              <ChevronRight size={24} className="text-primary-light" />
             </button>
           </div>
         </div>
@@ -583,6 +697,8 @@ const Account = () => {
         onClose={() => setGroomerModal(false)}
         groomer={selectedGroomer}
       />
+      <AddPetsModal open={petsModal}
+        onClose={() => setPetsModal(false)} />
     </>
   );
 };

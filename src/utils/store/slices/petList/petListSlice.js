@@ -67,16 +67,49 @@ export const addUpdatePet = createAsyncThunk(
 
 // Delete / Memorialize / Activate Pet
 export const updatePetStatus = createAsyncThunk(
-    'pets/updatePetStatus',
-    async ({ pet_id, remove_type }, { rejectWithValue }) => {
+    "pets/updatePetStatus",
+    async ({ pet_id, remove_type, add }, { rejectWithValue }) => {
         try {
-            const { data } = await axiosInstance.post(`api/user/pet/remove`, {
+            const payload = {
                 pet_id,
-                remove_type, // "M" = Memorialise, "D" = Permanent delete, "A" = Active
-            });
+                ...(add ? {} : { remove_type }),
+            };
+
+            const { data } = await axiosInstance.post(
+                `api/user/pet/${add ? "active" : "remove"}`,
+                payload
+            );
+
             return { pet_id, remove_type, data: data.data };
         } catch (error) {
-            return rejectWithValue(error.response?.data || { message: 'Failed to update pet status' });
+            return rejectWithValue(
+                error.response?.data || { message: "Failed to update pet status" }
+            );
+        }
+    }
+);
+
+// Save pet name in Booking Flow
+export const savePetBooking = createAsyncThunk(
+    "pets/savePetBooking",
+    async ({ type, name }, { rejectWithValue }) => {
+        const token = localStorage.getItem('token')
+        try {
+            const formData = new FormData();
+            formData.append('type', type);
+            formData.append('name', name);
+            formData.append('_token', token);
+
+            const { data } = await axiosInstance.post(
+                "book/save-pet-name",
+                formData
+            );
+
+            return data.data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data || { message: "Failed to save pet name" }
+            );
         }
     }
 );
@@ -84,12 +117,12 @@ export const updatePetStatus = createAsyncThunk(
 // Fetch pet breeds for booking
 export const getBookingPetBreeds = createAsyncThunk(
     'pets/getBookingPetBreeds',
-    async ({ bookingId }, { rejectWithValue }) => {
+    async ({ bookingId, booking_session_token }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.post(
                 `api/user/booking/pet/get/${bookingId}`,
                 {
-                    "booking_session_token": "booking_session_6888c7d65d91b1.59307650"
+                    booking_session_token
                 }
             );
 
@@ -214,10 +247,25 @@ const petsSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);
+            })
+
+            // Save Pet Name (Booking Flow)
+            .addCase(savePetBooking.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(savePetBooking.fulfilled, (state, action) => {
+                state.loading = false;
+                toast.success("Pet name saved 🐾");
+            })
+            .addCase(savePetBooking.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Something went wrong";
+                toast.error(state.error);
             });
 
     },
 });
 
-export const { clearPets, clearSelectedPet } = petsSlice.actions;
+export const { clearPets, clearSelectedPet, addPetDraft } = petsSlice.actions;
 export default petsSlice.reducer;

@@ -38,7 +38,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const hasRefund = item?.has_refund;
   const petsItem = item?.pets || [];
   const status = item?.appointment_status;
@@ -219,7 +219,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
   const handleRefundButton = async () => {
     let id = item?.appointment_id
-    
+
     try {
       const response = await dispatch(getAppointmentDetail(id))
       let appointmentData = response.payload
@@ -368,7 +368,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
         {getStatusLabelColor(item)?.showCheckMyAppointmentButton && (
           <div className="flex mt-3">
             <button className="w-full h-[40px] rounded-lg font-inter font-bold text-base border border-gray-200 transition">
-            View Updates
+              View Updates
             </button>
           </div>
         )}
@@ -385,7 +385,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
         {getStatusLabelColor(item)?.shavedDownRequestButtons && isAllowedAction && (
           <ShaveDownRequest appointment={item} isAllowedAction={isAllowedAction} refreshParent={refreshParent} />
-        )} 
+        )}
 
         {getStatusLabelColor(item)?.showGroomerRebookingCard && (
           <>
@@ -403,7 +403,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
                   className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center"
                   aria-hidden="true"
                 >
-                <img src={User} alt="user"  className="w-5 h-5" />
+                  <img src={User} alt="user" className="w-5 h-5" />
                 </div>
               )}
 
@@ -421,9 +421,9 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
 
             <RebookConfirmation
               appointment={item}
-              onPressCancelAppoitment={() => {}}
-              onPressChangeDateTime={() => {}}
-              onPressConfirm={() => {}}
+              onPressCancelAppoitment={() => { }}
+              onPressChangeDateTime={() => { }}
+              onPressConfirm={() => { }}
               loading={loader}
             />
           </>

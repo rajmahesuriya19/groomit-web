@@ -32,6 +32,7 @@ const ViewCard = () => {
     const [card, setCard] = useState(null);
 
     const { cards } = useSelector((state) => state.cards);
+    const token = useSelector((state) => state.auth.unique_token);
 
     useEffect(() => {
         if (cards?.length) {
@@ -43,7 +44,7 @@ const ViewCard = () => {
     const handleDeleteAccount = async () => {
         showLoader();
         try {
-            await dispatch(deletePaymentCard({ cardId: card.billing_id })).unwrap();
+            await dispatch(deletePaymentCard({ cardId: card.billing_id, booking_session_token: token })).unwrap();
             setIsDeleteModalOpen(false);
             hideLoader();
             navigate('/user/account');

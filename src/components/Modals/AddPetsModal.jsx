@@ -3,6 +3,8 @@ import { Modal, Box, IconButton } from '@mui/material';
 import Close from '../../assets/icon/close.svg';
 import { useNavigate } from 'react-router';
 import { RoutePath } from '@/common/enums/enumConstant';
+import CatAnimation from '../../assets/animation/Cat Animation.gif';
+import DogAnimation from '../../assets/animation/Dog Animation.gif';
 
 const modalStyle = {
     position: 'absolute',
@@ -18,7 +20,7 @@ const modalStyle = {
     outline: 'none',
 };
 
-const AddPetsModal = ({ open, onClose, iconDog, iconCat }) => {
+const AddPetsModal = ({ open, onClose }) => {
     const navigate = useNavigate();
 
     const handleNavigate = (pet) => {
@@ -41,35 +43,25 @@ const AddPetsModal = ({ open, onClose, iconDog, iconCat }) => {
                     <img src={Close} alt="Close" className="w-5 h-5" />
                 </IconButton>
 
-                <h2 className="text-lg font-bold text-primary-dark mb-4">
-                    Add a New Pet
-                </h2>
-                <p className="text-sm text-primary-light mb-6">
-                    Choose whether you’d like to add a dog or a cat
-                </p>
+                <div className="flex gap-2 mt-5">
+                    {/* Dog Card */}
+                    <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-[10px] transition-all cursor-pointer" onClick={() => handleNavigate('dog')}
+                        style={{
+                            padding: '15px 15px 0 15px'
+                        }}>
+                        <h4 className="font-inter font-bold text-base text-center">Add Dog</h4>
+                        <img src={DogAnimation} className="w-full h-[128px]" alt="Dog Animation" />
+                    </div>
 
-                <div className="flex gap-4 justify-center">
-                    <button
-                        className="flex flex-col items-center hover:scale-105 transition-transform"
-                        onClick={() => handleNavigate('dog')}
+                    {/* Cat Card */}
+                    <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-[10px] transition-all cursor-pointer" onClick={() => handleNavigate('cat')}
+                        style={{
+                            padding: '15px 15px 0 15px'
+                        }}
                     >
-                        <img
-                            src={iconDog}
-                            alt="Add Dog"
-                            className="w-[160px] h-[140px] object-contain"
-                        />
-                    </button>
-
-                    <button
-                        className="flex flex-col items-center hover:scale-105 transition-transform"
-                        onClick={() => handleNavigate('cat')}
-                    >
-                        <img
-                            src={iconCat}
-                            alt="Add Cat"
-                            className="w-[160px] h-[140px] object-contain"
-                        />
-                    </button>
+                        <h4 className="font-inter font-bold text-base text-center">Add Cat</h4>
+                        <img src={CatAnimation} className="w-full h-[128px]" alt="Cat Animation" />
+                    </div>
                 </div>
             </Box>
         </Modal>

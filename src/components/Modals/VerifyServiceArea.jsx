@@ -1,7 +1,6 @@
 import React from "react";
 import { Modal, Box, IconButton } from "@mui/material";
 import Close from "../../assets/icon/close.svg";
-import Bell from "../../assets/icon/bell-white.png";
 
 const modalStyle = {
     position: "absolute",
@@ -30,13 +29,8 @@ const VerifyServiceArea = ({ open, onClose, onConfirm, onReset, icon, title, des
                     <img src={Close} alt="Close" className="w-6 h-6" />
                 </IconButton>
 
-                {/* Icon */}
-                <div className="flex justify-center mt-2 mb-4">
-                    <img src={icon} alt="Modal Icon" className="w-12 h-12 sm:w-14 sm:h-14" />
-                </div>
-
                 {/* Title */}
-                <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center mb-2">
+                <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center mt-4 mb-2">
                     {title}
                 </h2>
 
@@ -46,29 +40,25 @@ const VerifyServiceArea = ({ open, onClose, onConfirm, onReset, icon, title, des
                 </p>
 
                 {/* Buttons */}
-                <div className="flex flex-col gap-3 w-full">
-                    {/* Change Service Area → reset + close */}
+                <Box className="flex flex-col justify-between gap-2 w-full">
                     <button
                         onClick={() => {
-                            if (onReset) onReset(); // reset all fields in parent
-                            onClose(); // close modal
+                            if (onReset) onReset();
+                            onClose();
                         }}
-                        className="bg-brand hover:bg-brand/90 transition text-white text-base font-semibold rounded-full py-3 w-full"
+                        className={`h-[50px] w-full rounded-[10px] text-primary-dark text-base font-bold tracking-wide transition-all duration-200 hover:opacity-90 active:scale-95 bg-white cursor-pointer border border-primary-dark`}
                     >
-                        Change Service Area
+                        Change Zip Code
                     </button>
-
-                    {/* Notify → just close modal */}
                     <button
                         onClick={() => {
                             if (onConfirm) onConfirm();
                         }}
-                        className="flex items-center justify-center gap-2 bg-black hover:bg-gray-900 transition text-white text-base font-semibold rounded-full py-3 w-full"
+                        className={`h-[50px] w-full rounded-[10px] text-white text-base font-bold tracking-wide transition-all duration-200 hover:opacity-90 active:scale-95 bg-primary-dark cursor-pointer`}
                     >
-                        <img src={Bell} alt="Notify" className="w-5 h-5" />
                         Notify Me - When Available
                     </button>
-                </div>
+                </Box>
             </Box>
         </Modal>
     );

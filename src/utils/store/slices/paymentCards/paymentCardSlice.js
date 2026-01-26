@@ -31,10 +31,10 @@ export const addPaymentCard = createAsyncThunk(
 // 🔹 Delete a payment card
 export const deletePaymentCard = createAsyncThunk(
   'cards/deletePaymentCard',
-  async ({ cardId }, { rejectWithValue }) => {
+  async ({ cardId, booking_session_token }, { rejectWithValue }) => {
     try {
       await axiosInstance.delete(`api/user/booking/payment/card/${cardId}`, {
-        "booking_session_token": "booking_session_6679b2185631a2.00523624"
+        booking_session_token: booking_session_token
       })
       return cardId;
     } catch (error) {
@@ -66,6 +66,23 @@ export const verifyPaymentCard = createAsyncThunk(
       return rejectWithValue(
         error.response?.data || { message: 'Failed to verify card' }
       );
+    }
+  }
+);
+
+// Set Default Card
+export const defaultPaymentCard = createAsyncThunk(
+  'cards/defaultPaymentCard',
+  async ({ user_billing_id, booking_session_token }, { rejectWithValue }) => {
+    try {
+      await axiosInstance.post('api/booking/payment/card/setDefault', {
+        user_billing_id,
+        booking_session_token,
+      });
+
+      return billing_id;
+    } catch (error) {
+      return rejectWithValue(getError(error, 'Failed to set default card'));
     }
   }
 );
@@ -150,8 +167,16 @@ const paymentCardsSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || 'Failed to verify card';
         toast.error(state.error);
-      });
+      })
 
+      // Default
+      .addCase(defaultPaymentCard.fulfilled, (state, action) => {
+        state.cards.forEach(card => {
+          card.default_card =
+            card.billing_id === action.payload ? 'Y' : 'N';
+        });
+        toast.success('Default card updated ⭐');
+      });
   },
 })
 

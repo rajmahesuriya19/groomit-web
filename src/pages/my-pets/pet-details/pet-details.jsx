@@ -85,7 +85,7 @@ const PetDetails = () => {
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <p className="text-red-500 font-semibold">{error}</p>
+                <p className="text-brand font-semibold">{error}</p>
             </div>
         );
     }

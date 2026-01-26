@@ -8,6 +8,8 @@ import addressReducer from './slices/serviceAddressList/serviceAddressListSlice'
 import groomersReducer from './slices/groomersList/groomersListSlice';
 import petsReducer from './slices/petList/petListSlice';
 import inboxReducer from './slices/inbox/inboxSlice';
+import bookingFlowReducer from './slices/booking-flow/bookingFlowSlice';
+import notificationsPreferencesReducer from './slices/notifications-preferences/notificationsPreferencesSlice';
 
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -17,7 +19,7 @@ import thunk from 'redux-thunk';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['dashboard', 'appointments', 'inbox', 'auth', 'user', 'cards', 'addresses', 'groomers', 'pets'],
+  whitelist: ['dashboard', 'appointments', 'inbox', 'auth', 'user', 'cards', 'addresses', 'groomers', 'pets', 'notifications_preferences', 'bookingFlow'],
 };
 
 const appReducer = combineReducers({
@@ -29,7 +31,9 @@ const appReducer = combineReducers({
   groomers: groomersReducer,
   addresses: addressReducer,
   pets: petsReducer,
-  inbox: inboxReducer
+  inbox: inboxReducer,
+  notifications_preferences: notificationsPreferencesReducer,
+  bookingFlow: bookingFlowReducer
 });
 
 // ✅ root reducer with reset logic

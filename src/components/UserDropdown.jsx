@@ -116,7 +116,7 @@ const UserDropdown = () => {
 
         {/* User Avatar */}
         <div
-          className="flex items-center justify-center rounded-full overflow-hidden"
+          className="flex items-center justify-center rounded-[10px] overflow-hidden"
           style={
             !showDropdown
               ? {
@@ -126,12 +126,12 @@ const UserDropdown = () => {
           }
         >
           {user?.photo ? (
-            <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px]' : 'object-cover w-full h-full'}`} />
+            <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px] object-contain' : 'w-[45px] h-[45px] object-contain'}`} />
           ) : (
             <img
               src="https://randomuser.me/api/portraits/men/75.jpg"
               alt="User Avatar"
-              className="object-cover w-full h-full"
+              className="w-[45px] h-[45px] object-contain"
             />
           )}
         </div>
