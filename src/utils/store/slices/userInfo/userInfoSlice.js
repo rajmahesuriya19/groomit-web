@@ -65,6 +65,58 @@ export const sendOtp = createAsyncThunk(
   }
 );
 
+export const sendOtpByEmail = createAsyncThunk(
+  "user/sendOtpByEmail",
+  async ({ email }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post(
+        "api/user/password/forgot-via-email",
+        { email }
+      );
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Failed to send OTP" }
+      );
+    }
+  }
+);
+
+export const verifyOtpByEmail = createAsyncThunk(
+  "user/verifyOtpByEmail",
+  async ({ email, key }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post("api/user/password/forgot/verify-email", {
+        email,
+        key,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: "OTP verification failed" });
+    }
+  }
+);
+
+export const resetForgotPassword = createAsyncThunk(
+  "user/resetForgotPassword",
+  async ({ email, otp }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosInstance.post(
+        "api/user/password/forgot/verify-email",
+        {
+          email,
+          key: otp,
+        }
+      );
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || { message: "Failed to reset password" }
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState: {
@@ -125,6 +177,21 @@ const userSlice = createSlice({
         toast.error(state.error);
       })
 
+      // send otp by Email
+      .addCase(sendOtpByEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(sendOtpByEmail.fulfilled, (state) => {
+        state.loading = false;
+        toast.success("OTP sent successfully 📩");
+      })
+      .addCase(sendOtpByEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to send OTP";
+        toast.error(state.error);
+      })
+
       // verify otp
       .addCase(verifyOtp.pending, (state) => {
         state.loading = true;
@@ -137,6 +204,36 @@ const userSlice = createSlice({
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || "OTP verification failed";
+        toast.error(state.error);
+      })
+
+      // verify otp by Email
+      .addCase(verifyOtpByEmail.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(verifyOtpByEmail.fulfilled, (state) => {
+        state.loading = false;
+        toast.success("Phone verified successfully 🎉");
+      })
+      .addCase(verifyOtpByEmail.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "OTP verification failed";
+        toast.error(state.error);
+      })
+
+      // reset forgot password
+      .addCase(resetForgotPassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(resetForgotPassword.fulfilled, (state) => {
+        state.loading = false;
+        toast.success("Password reset successfully 🔐");
+      })
+      .addCase(resetForgotPassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || "Failed to reset password";
         toast.error(state.error);
       });
   },

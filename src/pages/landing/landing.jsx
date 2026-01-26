@@ -1,4 +1,4 @@
-import { loginUser } from '@/utils/store/slices/auth/authSlice';
+import { createBookingData, loginUser } from '@/utils/store/slices/auth/authSlice';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
@@ -9,18 +9,31 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const email = 'nitesh111@groomit.me';
-    const password = 'Nitesh99';
+    // const email = 'raj@groomit.me';
+    // const password = 'Password@19';
+    // const email = 'xixox64504@datehype.com';
+    // const password = 'Rajtest19';
+    const email = 'pivimo3635@noihse.com';
+    const password = 'Test@123';
 
     try {
       const result = await dispatch(loginUser({ email, password }));
 
       if (loginUser.fulfilled.match(result)) {
+        CreateBookingData();
         toast.success('Login successful 🎉');
         navigate('/user/dashboard');
       } else {
         toast.error(result.payload?.message || 'Login failed 😢');
       }
+    } catch (error) {
+      toast.error(error.message || 'Something went wrong 🚨');
+    }
+  };
+
+  const CreateBookingData = async () => {
+    try {
+      const result = await dispatch(createBookingData());
     } catch (error) {
       toast.error(error.message || 'Something went wrong 🚨');
     }

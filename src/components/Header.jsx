@@ -15,10 +15,12 @@ const Header = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
+    const booking_flow = location.pathname.startsWith('/book');
+
     return (
         <>
             {/* Main Header */}
-            <nav className="bg-white border-b border-[#BEC3C5] sticky top-0 z-50 shadow-sm">
+            <nav className={`bg-white border-b border-[#BEC3C5] sticky top-0 z-50 shadow-sm ${booking_flow ? 'hidden md:block' : ''}`}>
                 <div className="mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
 
@@ -45,10 +47,10 @@ const Header = () => {
                         </div>
 
                         <div className='flex items-center gap-4'>
-                            <div class="md:hidden items-center flex gap-1 w-100">
+                            <div className="md:hidden items-center flex gap-1 w-100">
                                 <img src={Rating} className="w-5 h-5" alt="Star" />
                                 <a href="https://raj.dev.groomit.me/reviews">
-                                    <div class="font-inter text-sm font-bold underline">
+                                    <div className="font-inter text-sm font-bold underline">
                                         4.9 (147)
                                     </div>
                                 </a>
@@ -70,21 +72,21 @@ const Header = () => {
                             <div className="flex flex-wrap items-center gap-4 min-w-0 ml-4">
 
                                 {/* Credits Display */}
-                                <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-primary-dark px-3 py-2">
+                                {!booking_flow && <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-primary-dark px-3 py-2">
                                     <p className="text-xs font-medium text-white leading-none font-inter tracking-normal">
                                         CREDITS
                                     </p>
                                     <p className="text-base font-extrabold text-white leading-none font-inter tracking-[-0.01em]">
                                         $1,500.00
                                     </p>
-                                </div>
+                                </div>}
 
                                 {/* User Dropdown */}
                                 <UserDropdown />
 
                                 {/* Help Link */}
                                 <Link
-                                    to="/help"
+                                    to="/book/service-address"
                                     className="flex items-center px-[12px] py-[10px] rounded-[10px] border border-[#7C868A80] transition-colors hover:text-red-600 group"
                                 >
                                     <img
@@ -103,7 +105,12 @@ const Header = () => {
             </nav>
 
             {/* Mobile Menu Overlay */}
-            <MobileMenuHeader isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+            {!booking_flow && (
+                <MobileMenuHeader
+                    isOpen={isMobileMenuOpen}
+                    onClose={() => setIsMobileMenuOpen(false)}
+                />
+            )}
         </>
     );
 };

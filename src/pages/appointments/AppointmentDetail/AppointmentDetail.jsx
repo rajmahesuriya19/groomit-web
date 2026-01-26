@@ -66,8 +66,8 @@ const AppointmentDetail = () => {
                     </div>
                 </div>
 
-                <div className="px-2 w-full block md:hidden">
-                    <div className="flex items-center gap-2 w-full">
+                <div className="px-2 py-2 w-full block md:hidden">
+                    <div className="flex items-center w-full">
                         <ChevronLeft size={24} className="text-primary-dark cursor-pointer" onClick={() => navigate(-1)} />
                         <div className="w-full text-center font-filson font-bold text-xl text-primary-dark">
                             Appointment Details

@@ -34,9 +34,9 @@ const VerifyCardModal = ({ type, open, onClose, onConfirm, icon, title, decripti
                 </IconButton>
 
                 {/* Icon */}
-                <div className="flex justify-center mt-2 mb-2">
+                {icon && <div className="flex justify-center mt-2 mb-2">
                     <img src={icon} alt="Warning" className="w-[42px] h-[42px]" />
-                </div>
+                </div>}
 
                 {/* Title + description */}
                 <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center font-inter mb-2">

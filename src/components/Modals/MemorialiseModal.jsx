@@ -12,7 +12,7 @@ const modalStyle = {
     boxShadow: 24,
     p: 4,
     width: '90%',
-    maxWidth: 400,
+    maxWidth: 450,
     outline: 'none',
 };
 
@@ -25,7 +25,7 @@ const MemorialiseModal = ({ type, open, onClose, onConfirm, icon, title, decript
                 </IconButton>
 
                 <div className="flex justify-center mt-2 mb-2">
-                    <img src={icon} alt="Warning" className="w-[42px] h-[42px]" />
+                    <img src={icon} alt="Warning" className="w-[50px] h-[50px]" />
                 </div>
 
                 <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center font-inter mb-2">
@@ -36,12 +36,19 @@ const MemorialiseModal = ({ type, open, onClose, onConfirm, icon, title, decript
                     {decription}
                 </p>
 
-                <Box className="flex flex-col sm:flex-row justify-between gap-4">
+                <Box className="flex gap-2 w-full mt-6">
+                    <button
+                        onClick={onClose}
+                        className="bg-white border border-primary-dark text-primary-dark text-base font-bold rounded-[10px] px-[27px] h-[50px] w-full"
+                    >
+                        Cancel
+                    </button>
+
                     <button
                         onClick={onConfirm}
-                        className="!bg-brand text-white font-inter text-base font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
+                        className="bg-primary-dark text-white text-base font-bold rounded-[10px] px-[27px] h-[50px] w-full"
                     >
-                        Okay
+                        {type ? 'Yes' : 'Yes, Remove'}
                     </button>
                 </Box>
             </Box>

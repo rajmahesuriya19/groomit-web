@@ -70,6 +70,7 @@ const AddUpdateDog = () => {
     const [selectedBreedName, setSelectedBreedName] = useState("");
 
     const { petBreeds } = useSelector((state) => state.pets);
+    const token = useSelector((state) => state.auth.unique_token);
     const { pet: selectedPet, loading } = useSelector((state) => state.pets.selectedPet || {});
 
     const {
@@ -109,6 +110,7 @@ const AddUpdateDog = () => {
     useEffect(() => {
         dispatch(getBookingPetBreeds({
             bookingId: 17600 || selectedPet?.pet_id,
+            booking_session_token: token
         }));
         if (isEdit) {
             showLoader()
@@ -327,7 +329,7 @@ const AddUpdateDog = () => {
                                             className="w-full border rounded-lg px-3 py-2"
                                         />
                                         {errors.name && (
-                                            <p className="text-red-500 text-xs mt-2">
+                                            <p className="text-brand text-xs mt-2">
                                                 {errors.name.message}
                                             </p>
                                         )}
@@ -352,7 +354,7 @@ const AddUpdateDog = () => {
                                         />
                                     </div>
                                     {errors.date_of_birth && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.date_of_birth.message}
                                         </p>
                                     )}
@@ -416,7 +418,7 @@ const AddUpdateDog = () => {
                                     </div>
 
                                     {errors.breed_id && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.breed_id.message}
                                         </p>
                                     )}
@@ -507,7 +509,7 @@ const AddUpdateDog = () => {
                                         ))}
                                     </div>
                                     {errors.size_id && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.size_id.message}
                                         </p>
                                     )}
@@ -534,7 +536,7 @@ const AddUpdateDog = () => {
                                         ))}
                                     </div>
                                     {errors.gender && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.gender.message}
                                         </p>
                                     )}
@@ -594,7 +596,7 @@ const AddUpdateDog = () => {
                                             </div>
                                             {/* Error message if certificate is uploaded but expiration is empty */}
                                             {watch("vaccinated_image_url") && !watch("vaccinated_exp_date") && (
-                                                <p className="text-red-500 text-xs mt-2">
+                                                <p className="text-brand text-xs mt-2">
                                                     Expiration date is required when certificate is uploaded
                                                 </p>
                                             )}

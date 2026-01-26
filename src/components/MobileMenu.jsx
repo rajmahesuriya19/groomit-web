@@ -26,7 +26,7 @@ import StarRed from "../assets/icon/red-star.svg";
 import Logout from "../assets/icon/logout.svg";
 import LogoutRed from "../assets/icon/logout.svg";
 
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const location = useLocation();
@@ -81,12 +81,13 @@ const MobileMenu = ({ isOpen, onClose }) => {
             <div className="space-y-1">
               {menuItems.map((item, index) => {
                 const isActive = currentPath === item.href;
+
                 return (
-                  <a
+                  <Link
                     key={index}
-                    href={item.href}
+                    to={item.href}
                     onClick={onClose}
-                    className="group flex items-center gap-3 px-4 py-2 transition-colors"
+                    className={`group flex items-center gap-3 px-4 py-2 transition-colors`}
                   >
                     <img
                       src={isActive ? item.iconRed : item.icon}
@@ -100,12 +101,14 @@ const MobileMenu = ({ isOpen, onClose }) => {
                     />
 
                     <span
-                      className={`font-bold font-inter text-sm ${isActive ? "text-red-500" : "text-primary-dark group-hover:text-red-500"
+                      className={`font-bold font-inter text-sm ${isActive
+                        ? "text-brand"
+                        : "text-primary-dark group-hover:text-brand"
                         }`}
                     >
                       {item.label}
                     </span>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -124,7 +127,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
                   <img src={item.icon} className="w-6 h-6 group-hover:hidden" alt="" />
                   <img src={item.iconRed} className="w-6 h-6 hidden group-hover:block" alt="" />
 
-                  <span className="font-bold font-inter text-sm group-hover:text-red-500">
+                  <span className="font-bold font-inter text-sm group-hover:text-brand">
                     {item.label}
                   </span>
                 </a>
@@ -159,7 +162,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               <img src={Logout} className="w-6 h-6 group-hover:hidden" alt="" />
               <img src={LogoutRed} className="w-6 h-6 hidden group-hover:block" alt="" />
 
-              <span className="font-bold font-inter text-sm group-hover:text-red-500">
+              <span className="font-bold font-inter text-sm group-hover:text-brand">
                 Logout
               </span>
             </a>

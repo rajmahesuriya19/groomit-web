@@ -32,10 +32,10 @@ const BreedModal = ({ open, onClose, onConfirm, icon, title, decription }) => {
                     {decription}
                 </p>
 
-                <Box className="flex flex-col sm:flex-row justify-between gap-4">
+                <Box className="flex gap-2 w-full mt-6">
                     <button
                         onClick={onConfirm}
-                        className="!bg-brand text-white font-inter text-base font-semibold leading-[18px] rounded-full px-[27px] py-[11px] h-[48px] w-full"
+                        className="bg-primary-dark text-white text-base font-bold rounded-[10px] px-[27px] h-[50px] w-full"
                     >
                         Okay
                     </button>

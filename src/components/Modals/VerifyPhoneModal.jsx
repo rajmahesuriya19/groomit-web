@@ -146,7 +146,7 @@ const VerifyPhoneModal = ({ open, onClose, onConfirm, icon, title, description, 
                 </div>
 
                 {/* Error msg */}
-                {error && <div className="text-left text-red-500 text-xs mb-4">{error}</div>}
+                {error && <div className="text-left text-brand text-xs mb-4">{error}</div>}
 
                 {/* Resend */}
                 <p className="text-sm text-[#2E2E2E] my-6">

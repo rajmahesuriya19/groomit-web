@@ -46,7 +46,7 @@ const AddressSelector = () => {
           ${isOpen ? 'ring-2 ring-red-100 border-red-300' : ''}`}
       >
         {/* Icon */}
-        <MapPin size={22} className="text-red-500 flex-shrink-0" />
+        <MapPin size={22} className="text-brand flex-shrink-0" />
 
         {/* Address Text */}
         <div className="flex-1 min-w-0 text-left">

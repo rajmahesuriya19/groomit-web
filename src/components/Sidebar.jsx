@@ -100,7 +100,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="hidden md:flex">
+    <div className="hidden md:flex z-20">
       <div className="w-[265px] bg-white border-r border-[#BEC3C5] flex flex-col h-full pl-8 pb-6">
 
         {/* Main Menu */}
@@ -120,7 +120,7 @@ export default function Sidebar() {
             }
 
             if (item.label === "My Account") {
-              isActive = location.pathname.startsWith("/user/account");
+              isActive = location.pathname.startsWith("/user/account") || location.pathname.startsWith("/user/pet/") || location.pathname.startsWith("/user/address") || location.pathname.startsWith("/user/payment/card");
             }
 
             return (

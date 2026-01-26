@@ -62,7 +62,7 @@ const AddUpdateCat = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [memorialiseOpen, setMemorialiseOpen] = useState(false);
 
-    const { pet: selectedPet, loading } = useSelector((state) => state.pets.selectedPet)
+    const { pet: selectedPet, loading } = useSelector((state) => state.pets.selectedPet || {})
 
     const {
         register,
@@ -306,7 +306,7 @@ const AddUpdateCat = () => {
                                             className="w-full border rounded-lg px-3 py-2"
                                         />
                                         {errors.name && (
-                                            <p className="text-red-500 text-xs mt-2">
+                                            <p className="text-brand text-xs mt-2">
                                                 {errors.name.message}
                                             </p>
                                         )}
@@ -331,7 +331,7 @@ const AddUpdateCat = () => {
                                         />
                                     </div>
                                     {errors.date_of_birth && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.date_of_birth.message}
                                         </p>
                                     )}
@@ -358,7 +358,7 @@ const AddUpdateCat = () => {
                                         ))}
                                     </div>
                                     {errors.gender && (
-                                        <p className="text-red-500 text-xs mt-2">
+                                        <p className="text-brand text-xs mt-2">
                                             {errors.gender.message}
                                         </p>
                                     )}
@@ -418,7 +418,7 @@ const AddUpdateCat = () => {
                                             </div>
                                             {/* Error message if certificate is uploaded but expiration is empty */}
                                             {watch("vaccinated_image_url") && !watch("vaccinated_exp_date") && (
-                                                <p className="text-red-500 text-xs mt-2">
+                                                <p className="text-brand text-xs mt-2">
                                                     Expiration date is required when certificate is uploaded
                                                 </p>
                                             )}

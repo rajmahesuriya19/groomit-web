@@ -278,7 +278,7 @@ const CreateEditServices = () => {
                                         />
                                     )}
                                 />
-                                <div className="text-red-500 text-sm">{errors.street?.message}</div>
+                                <div className="text-brand text-sm">{errors.street?.message}</div>
                             </div>
 
                             {/* Apartment or suite number */}
@@ -317,7 +317,7 @@ const CreateEditServices = () => {
     tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
     ${autoFilled.city ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                 />
-                                <div className="text-red-500 text-sm">{errors.city?.message}</div>
+                                <div className="text-brand text-sm">{errors.city?.message}</div>
                             </div>
 
                             {/* State & Zip Code */}
@@ -333,7 +333,7 @@ const CreateEditServices = () => {
     tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
     ${autoFilled.state ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                     />
-                                    <div className="text-red-500 text-sm">{errors.state?.message}</div>
+                                    <div className="text-brand text-sm">{errors.state?.message}</div>
                                 </div>
 
                                 <div className="flex-1 flex flex-col gap-2">
@@ -347,7 +347,7 @@ const CreateEditServices = () => {
     tracking-[-0.02em] font-inter text-primary-dark placeholder:text-gray-300
     ${autoFilled.zip ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                                     />
-                                    <div className="text-red-500 text-sm">{errors.zip?.message}</div>
+                                    <div className="text-brand text-sm">{errors.zip?.message}</div>
                                 </div>
                             </div>
 

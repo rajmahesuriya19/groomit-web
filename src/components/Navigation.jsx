@@ -1,16 +1,27 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { ChevronLeft, Menu, PlusIcon, X } from 'lucide-react';
 import AddressSelector from './AddressSelector.jsx';
 import UserDropdown from './UserDropdown.jsx';
 import MobileMenu from './MobileMenu.jsx';
 import info from '../assets/icon/help-circle-black.svg';
 import Rating from '../assets/icon/fill-star.svg';
 import { useSelector } from 'react-redux';
+import AddPetsModal from './Modals/AddPetsModal.jsx';
+
+const PET_LABELS = {
+  dog: "Dog",
+  cat: "Cat",
+};
 
 const Navigation = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [petsModal, setPetsModal] = useState(false);
 
   const { dashboard } = useSelector((state) => state.dashboard);
   const { user } = dashboard;
@@ -20,10 +31,26 @@ const Navigation = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const hasIdInPath = /\d+$/.test(location.pathname);
+
+  // extract pet type from pathname
+  const petKey = Object.keys(PET_LABELS).find((key) =>
+    location.pathname.split("/").includes(key)
+  );
+
+  const petType = petKey ? PET_LABELS[petKey] : "";
+
+  console.log(isEdit);
+
   return (
     <>
       {/* Main Navigation */}
-      <nav className={` bg-white shadow-sm border-b border-[#BEC3C5] ${!showRating && 'sticky top-0 z-50'}`}>
+      <nav
+        className={`bg-white shadow-sm border-b border-[#BEC3C5]
+    ${!showRating && "sticky top-0 z-50"}
+    ${(hasIdInPath && !petType) ? "hidden" : ""}
+  `}
+      >
         <div className="mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
 
@@ -39,29 +66,78 @@ const Navigation = () => {
 
             {/* Mobile Menu Button */}
             {/* Logo */}
-            <div className="flex-shrink-0 md:hidden block">
+            <div className={`${location.pathname === "/user/account" && 'w-full'} flex-shrink-0 md:hidden block`}>
               {!showRating ? <Link to="/" className="flex items-center">
                 <img
                   className="h-10 w-40"
                   src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
                   alt="Groomit.me"
                 />
-              </Link> : location.pathname === "/user/groomers" ? <div>
-                <div className="font-filson font-bold text-xl text-primary-dark">My Groomers</div>
-              </div> :
-                <div className="w-full">
-                  <div className="flex items-center gap-2">
-                    <img src="https://groomit-demo.s3.amazonaws.com/images/user_profile_photo/83.png" alt="User" />
-                    <div>
-                      <div className="font-inter font-bold text-base text-primary-dark">{`Hi, ${user?.first_name}`}</div>
-                      <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
+              </Link> : location.pathname.includes("/user/account/edit") ?
+                <div className='flex items-center gap-2'>
+                  <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate("/user/account")} />
+                  <div className='font-filson font-bold text-xl text-primary-dark'>Edit Profile</div>
+                </div> : location.pathname === "/user/account" ?
+                  <div className="flex items-center justify-between w-full">
+                    {/* Left: My Account */}
+                    <div className="font-bold font-filson text-primary-dark text-xl w-full">
+                      My Account
                     </div>
-                  </div>
-                </div>
+
+                    <div className='flex gap-2 items-center'>
+                      {/* Right: Credits Box */}
+                      <div className="flex flex-col items-center justify-center gap-1 rounded-[12px] bg-primary-dark p-2">
+                        <p className="text-xs font-bold text-white leading-none font-inter tracking-normal">
+                          CREDITS
+                        </p>
+                        <p className="text-base font-bold text-white leading-none font-inter tracking-[-0.01em]">
+                          ${user?.available_credit}.00
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={toggleMobileMenu}
+                        className="p-1 rounded-[10px] border border-[#8A8D8E] text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                      >
+                        {isMobileMenuOpen ? <X size={25} /> : <Menu size={25} />}
+                      </button>
+                    </div>
+                  </div> : location.pathname === "/user/pet/list" ?
+                    <div className="w-full">
+                      <div className="flex items-center gap-2 w-full">
+                        <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
+                        <div className="font-filson font-bold text-xl text-primary-dark">My Pets</div>
+                      </div>
+                    </div>
+                    : petType ?
+                      <div className="w-full">
+                        <div className="flex items-center gap-2 w-full">
+                          <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
+                          <div className="font-filson font-bold text-xl text-primary-dark">
+                            {isEdit ? `Edit ${petType}` : `Add ${petType}`}
+                          </div>
+                        </div>
+                      </div>
+                      : location.pathname === "/user/inbox" ? <div>
+                        <div className="font-filson font-bold text-xl text-primary-dark">Inbox</div>
+                      </div> : location.pathname === "/user/groomers" ? <div>
+                        <div className="font-filson font-bold text-xl text-primary-dark">My Groomers</div>
+                      </div> : location.pathname === "/user/appointments" ? <div>
+                        <div className="font-filson font-bold text-xl text-primary-dark">Appointments</div>
+                      </div> :
+                        <div className="w-full">
+                          <div className="flex items-center gap-1">
+                            <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
+                            <div>
+                              <div className="font-inter font-bold text-base text-primary-dark">{`Hi, ${user?.first_name}`}</div>
+                              <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
+                            </div>
+                          </div>
+                        </div>
               }
             </div>
 
-            <div className='flex items-center gap-4'>
+            <div className='flex items-center gap-2'>
               {!showRating && <div className="md:hidden items-center flex gap-1 w-100">
                 <img src={Rating} className="w-5 h-5" alt="Star" />
                 <a href="https://raj.dev.groomit.me/reviews">
@@ -70,14 +146,22 @@ const Navigation = () => {
                   </div>
                 </a>
               </div>}
-              <div className="md:hidden">
+              {location.pathname === '/user/pet/list' && <div className="md:hidden">
+                <button
+                  onClick={() => setPetsModal(true)}
+                  className="p-1 rounded-[10px] border border-[#8A8D8E] text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  {isMobileMenuOpen ? <X size={25} /> : <PlusIcon size={25} className='text-primary-dark' />}
+                </button>
+              </div>}
+              {location.pathname !== '/user/account' && <div className="md:hidden">
                 <button
                   onClick={toggleMobileMenu}
                   className="p-1 rounded-[10px] border border-[#8A8D8E] text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
                 >
                   {isMobileMenuOpen ? <X size={25} /> : <Menu size={25} />}
                 </button>
-              </div>
+              </div>}
             </div>
 
 
@@ -101,7 +185,7 @@ const Navigation = () => {
 
                 {/* Help Link */}
                 <Link
-                  to="/help"
+                  to="/book/service-address"
                   className="flex items-center px-[12px] py-[10px] rounded-[10px] border border-[#7C868A80] transition-colors hover:text-red-600 group"
                 >
                   <img
@@ -118,6 +202,9 @@ const Navigation = () => {
           </div>
         </div>
       </nav>
+
+      <AddPetsModal open={petsModal}
+        onClose={() => setPetsModal(false)} />
 
       {/* Mobile Menu Overlay */}
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />

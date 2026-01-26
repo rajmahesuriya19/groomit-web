@@ -19,6 +19,7 @@ import RescheduleAppointemntModal from '@/components/Modals/RescheduleAppointemn
 import CancelAppointemntModal from '@/components/Modals/CancelAppointemntModal';
 import RebookConfirmation from '@/common/AppointmentCards/Rebook Confirmation/RebookConfirmation';
 import RecurringPlanList from "@/common/AppointmentCards/Recurring Plan/RecurringPlanList";
+import { getUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
 
 const dashboard = () => {
   const dispatch = useDispatch();
@@ -41,7 +42,7 @@ const dashboard = () => {
     petReminderList = []
   } = dashboard;
 
-  const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0 || [];
+  const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0;
 
   const allPets = [...dogPets, ...catPets];
 
@@ -85,14 +86,14 @@ const dashboard = () => {
     upcoming_appts?.length > 0 ||
     current_appts?.length > 0
 
-  const onPressRecurringDetails = (item) => { 
+  const onPressRecurringDetails = (item) => {
     // navigate('/user/Recurring Plan/RecurringScheduleDetails', { state: { recurringPlan: item } });
     navigate(`/user/appointments/RecurringPlan/RecurringScheduleDetails`)
 
   }
 
   const renderItem = ({ item, index }) => (
-    <AppointmentCard item={item} index={index} onPressAppointmentCard={() => {}} />
+    <AppointmentCard item={item} index={index} onPressAppointmentCard={() => { }} />
   )
 
   return (
@@ -103,7 +104,7 @@ const dashboard = () => {
           <div className="font-inter font-normal text-sm text-primary-dark">Ready to pamper your pets?</div>
         </div>
 
-        <div className='bg-white py-2 px-5 w-full block md:hidden'>
+        {/* <div className='bg-white py-2 px-5 w-full block md:hidden'>
           <div className='flex items-center gap-2'>
             <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
             <div>
@@ -111,9 +112,9 @@ const dashboard = () => {
               <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
-      {hasAnyPet && recurring_appts.length > 0 && (
+        {hasAnyPet && recurring_appts.length > 0 && (
           <RecurringPlanList
             data={recurring_appts}
             icon={RecurringIcon}
@@ -223,7 +224,7 @@ const dashboard = () => {
               {completed_appts.map((item, index) => {
                 return (
                   <div key={index}>
-                   {renderItem({ item, index })}
+                    {renderItem({ item, index })}
                   </div>
                 );
               })}
@@ -257,13 +258,13 @@ const dashboard = () => {
 
                 <div className="flex gap-4 mt-5">
                   {/* Dog Card */}
-                  <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-xl p-4 hover:shadow-lg hover:border-primary-dark transition-all cursor-pointer">
+                  <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-xl p-4 hover:shadow-lg hover:border-primary-dark transition-all cursor-pointer" onClick={() => navigate("/user/pet/add/dog")}>
                     <h4 className="font-inter font-semibold text-base text-center">Add Dog</h4>
                     <img src={DogAnimation} className="w-full h-[120px] mx-auto object-contain" alt="Dog Animation" />
                   </div>
 
                   {/* Cat Card */}
-                  <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-xl p-4 hover:shadow-lg hover:border-primary-dark transition-all cursor-pointer">
+                  <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-xl p-4 hover:shadow-lg hover:border-primary-dark transition-all cursor-pointer" onClick={() => navigate("/user/pet/add/cat")}>
                     <h4 className="font-inter font-semibold text-base text-center">Add Cat</h4>
                     <img src={CatAnimation} className="w-full h-[120px] mx-auto object-contain" alt="Cat Animation" />
                   </div>
