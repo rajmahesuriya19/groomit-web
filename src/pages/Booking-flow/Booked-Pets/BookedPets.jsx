@@ -33,7 +33,7 @@ const BookedPets = () => {
     }, [bookingAddress]);
 
     const handlePetSubmit = () => {
-        navigate("/book/slot");
+        navigate("/book/slot/view-groomers");
     }
 
     return (
