@@ -14,6 +14,7 @@ import SuccessIcon from "../../assets/icon/tick-green.svg";
 import FICollarModal from '../Modals/FICollarModal'
 import RecurringModal from '../Modals/RecurringModal'
 import { updatePetStepData, updateTotalPrice } from '@/utils/store/slices/booking-flow/bookingFlowSlice'
+import { ChevronRight } from 'lucide-react'
 
 /* -------------------- Helpers -------------------- */
 
@@ -84,7 +85,7 @@ const InfoSection = ({ index, items = [], items2 = [] }) => (
             {items.map((item, i) => (
                 <li
                     key={i}
-                    className={item.disabled ? "line-through text-primary-light" : ""}
+                    className={item.disabled ? "line-through text-primary-light" : "text-primary-light"}
                 >
                     {item.label}
                 </li>
@@ -96,7 +97,7 @@ const InfoSection = ({ index, items = [], items2 = [] }) => (
                 {items2.map((item, i) => (
                     <li
                         key={i}
-                        className={item.disabled ? "line-through text-primary-light" : ""}
+                        className={item.disabled ? "line-through text-primary-light" : "text-primary-light"}
                     >
                         {item.label}
                     </li>
@@ -108,10 +109,10 @@ const InfoSection = ({ index, items = [], items2 = [] }) => (
 
 /* -------------------- Package Card -------------------- */
 
-const PackageCard = ({ data, selected, onSelect }) => (
+const PackageCard = ({ data, selected, onSelect, error }) => (
     <div
         onClick={() => onSelect(data)}
-        className="flex flex-col gap-4 rounded-[10px] border border-primary-line bg-white p-[15px] cursor-pointer"
+        className={`flex flex-col gap-4 rounded-[10px] bg-white p-[15px] cursor-pointer ${error ? "border border-brand" : 'border border-primary-line'}`}
     >
         <div className="flex justify-between items-center">
             <div className="flex gap-2 items-center">
@@ -166,9 +167,68 @@ const PackageCard = ({ data, selected, onSelect }) => (
     </div>
 )
 
+// const PackageCard = ({ data, selected, onSelect, error }) => (
+//     <div
+//         onClick={() => onSelect(data)}
+//         className={`flex flex-col gap-4 rounded-[10px] bg-white p-[15px] cursor-pointer ${error ? "border border-brand" : 'border border-primary-line'}`}
+//     >
+//         <div className="flex justify-between items-center">
+//             <div className="flex gap-2 items-center">
+//                 <div className="flex gap-2 items-center">
+//                     <img
+//                         src={data.icon}
+//                         alt={`${data.name} Package`}
+//                         className="w-[40px] h-[40px] rounded-lg"
+//                     />
+//                     <div className="flex flex-col">
+//                         <div className="text-base font-bold">{data.title}</div>
+//                         <div className="text-sm font-bold">
+//                             {data.name} <span className="font-normal">| {data.quality}</span>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+
+//         <InfoSection
+//             items={[
+//                 { label: "Priority Availability", disabled: data.name === "Eco" },
+//                 { label: "Same-Day Eligible", disabled: data.name === "Eco" },
+//                 data.name !== "Silver" && { label: "Haircut" },
+//                 { label: "Bath" },
+//                 { label: "Nail Trim" },
+//             ].filter(Boolean)}
+//             items2={[
+//                 { label: "Ear Cleaning" },
+//                 { label: "Dry Brush Out" },
+//                 { label: "Blow Dry" },
+//                 data.name !== "Silver" && { label: "Sanitary trim" },
+//                 { label: "Cologne", disabled: data.name === "Silver" },
+//             ].filter(Boolean)}
+//         />
+
+//         <div className='w-full flex gap-2 mt-1'>
+//             <div className='bg-white w-full flex justify-center items-center flex-col h-[45px] border border-primary-light rounded-[10px] py-[5px]'>
+//                 <div className='text-sm'>$150</div>
+//                 <div className='text-xs'>One Time</div>
+//             </div>
+//             <div className='bg-white w-full flex justify-between items-center h-[45px] border border-primary-light rounded-[10px] py-[5px]'>
+//                 <div className='flex flex-col justify-center items-center w-full'>
+//                     <div className='text-sm'>$112 - $132</div>
+//                     <div className='text-xs'>Recurring</div>
+//                 </div>
+//                 <ChevronRight
+//                     size={30}
+//                     className="cursor-pointer text-primary-light"
+//                 />
+//             </div>
+//         </div>
+//     </div>
+// )
+
 /* -------------------- Main Component -------------------- */
 
-const StepTwoContent = ({ showSuccess }) => {
+const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
     const dispatch = useDispatch();
     const { showLoader, hideLoader } = useLoader();
 
@@ -184,8 +244,8 @@ const StepTwoContent = ({ showSuccess }) => {
     const [recurringModal, setRecurringModal] = useState(false)
 
     const tabs = [
-        { label: 'One-Time' },
-        { label: 'Recurring | Save $$' },
+        { label: 'Haircut & Bath' },
+        { label: 'Luxury Bath' },
     ]
 
     /* ---------------- Restore Tab ---------------- */
@@ -198,6 +258,7 @@ const StepTwoContent = ({ showSuccess }) => {
     /* ---------------- Select Package ---------------- */
     const handlePackageSelect = (pkg) => {
         console.log(pkg);
+        setPackageError("");
 
         dispatch(
             updatePetStepData({
@@ -264,7 +325,7 @@ const StepTwoContent = ({ showSuccess }) => {
                                     className={`w-1/2 h-[41px] text-sm transition-all
                     ${isActive
                                             ? 'bg-primary-dark text-white font-bold'
-                                            : 'bg-white text-primary-dark border border-primary-line'}
+                                            : 'bg-[#F2F2F2] text-primary-dark border border-primary-line'}
                   `}
                                     style={{
                                         borderRadius: index === 0
@@ -272,9 +333,7 @@ const StepTwoContent = ({ showSuccess }) => {
                                             : '0 10px 10px 0',
                                     }}
                                 >
-                                    {(tab.label === "Recurring | Save $$" && !isActive)
-                                        ? <>Recurring | <span className="text-[#0A7170]">Save $$</span></>
-                                        : tab.label}
+                                    {tab.label}
                                 </button>
                             )
                         })}
@@ -283,7 +342,7 @@ const StepTwoContent = ({ showSuccess }) => {
                     {/* One-Time */}
                     <CustomTabPanel value={activeTab} index={0}>
                         <div className="px-1 text-xs mb-3">
-                            Prices are based on the best-matched groomer in your area and may vary.
+                            Prices are based on the best-matched groomer in your area and may vary by availability and travel distance.
                         </div>
 
                         <div className="space-y-3 px-1">
@@ -293,8 +352,15 @@ const StepTwoContent = ({ showSuccess }) => {
                                     data={pkg}
                                     selected={savedPackage?.id === pkg.id}
                                     onSelect={handlePackageSelect}
+                                    error={packageError}
                                 />
                             ))}
+
+                            {packageError && (
+                                <p className="text-brand text-xs font-medium mt-1">
+                                    {packageError}
+                                </p>
+                            )}
                         </div>
                     </CustomTabPanel>
 
@@ -336,8 +402,15 @@ const StepTwoContent = ({ showSuccess }) => {
                                     data={pkg}
                                     selected={savedPackage?.id === pkg.id}
                                     onSelect={handlePackageSelect}
+                                    error={packageError}
                                 />
                             ))}
+
+                            {packageError && (
+                                <p className="text-brand text-xs font-medium mt-1">
+                                    {packageError}
+                                </p>
+                            )}
                         </div>
                     </CustomTabPanel>
                 </div>

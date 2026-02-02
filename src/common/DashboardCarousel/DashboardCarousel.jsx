@@ -64,7 +64,7 @@ const DashboardCarousel = () => {
                                         </div>
 
                                         <div>
-                                            <img src="https://dev.groomit.me/v7/images/webapp/icons/banner-cat.svg" alt="Cat" />
+                                            <img src="https://groomit.me/v7/images/webapp/icons/banner-cat.svg" alt="Cat" />
                                         </div>
                                     </div>
                                 </div>
@@ -87,7 +87,7 @@ const DashboardCarousel = () => {
                                         </div>
 
                                         <div>
-                                            <img src="https://dev.groomit.me/v7/images/webapp/icons/banner-dog.svg" alt="Cat" />
+                                            <img src="https://groomit.me/v7/images/webapp/icons/banner-dog.svg" alt="Cat" />
                                         </div>
                                     </div>
                                 </div>
@@ -108,13 +108,13 @@ const DashboardCarousel = () => {
 
                                         <div>
                                             <img
-                                                src="https://dev.groomit.me/v7/images/webapp/icons/dashboard-van.png"
+                                                src="https://groomit.me/v7/images/webapp/icons/dashboard-van.png"
                                                 className="hidden md:block mt-4"
                                                 alt="Mobile Van"
                                             />
 
                                             <img
-                                                src="https://dev.groomit.me/v7/images/webapp/icons/dashboard-van-mobile.png"
+                                                src="https://groomit.me/v7/images/webapp/icons/dashboard-van-mobile.png"
                                                 className="block md:hidden"
                                                 alt="Mobile Van"
                                             />

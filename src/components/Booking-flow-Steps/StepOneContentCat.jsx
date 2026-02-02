@@ -104,7 +104,7 @@ export const StepOneContentCat = ({
 
                     {/* Dropdown */}
                     {genderDropdownOpen && (
-                        <div className="absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
+                        <div className="fixed max-w-[180px] z-30 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg">
                             {[
                                 { key: "m", label: "Male" },
                                 { key: "f", label: "Female" },
@@ -115,7 +115,7 @@ export const StepOneContentCat = ({
                                         setValue("gender", g.key, { shouldDirty: true });
                                         setGenderDropdownOpen(false);
                                     }}
-                                    className={`px-3 py-2 cursor-pointer rounded mb-1 ${selectedGender === g.key ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90" : "hover:bg-gray-100"
+                                    className={`px-3 py-2 cursor-pointer rounded mb-1 ${selectedGender.toLowerCase() === g.key ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90" : "hover:bg-gray-100"
                                         }`}
                                 >
                                     {g.label}

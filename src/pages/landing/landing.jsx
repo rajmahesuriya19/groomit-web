@@ -9,12 +9,12 @@ const Index = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    // const email = 'raj@groomit.me';
-    // const password = 'Password@19';
+    const email = 'raj@groomit.me';
+    const password = 'Password@19';
     // const email = 'xixox64504@datehype.com';
     // const password = 'Rajtest19';
-    const email = 'pivimo3635@noihse.com';
-    const password = 'Test@123';
+    // const email = 'pivimo3635@noihse.com';
+    // const password = 'Test@123';
 
     try {
       const result = await dispatch(loginUser({ email, password }));

@@ -32,7 +32,8 @@ export const RoutePath = {
   BOOK_PET_DETAILS_FROM: '/book/pet/:id/from_pets',
   BOOK_PETS: '/book/pets',
   EXISTING_PETS: '/book/pet/existing',
-  SLOTS: '/book/slot',
+  SLOTS: '/book/slot/view-groomers',
+  SLOT_WITH_GROOMER: '/book/slot/groomer/:id',
   CHECKOUT: '/book/checkout',
   PAGE_404: '/404',
 };

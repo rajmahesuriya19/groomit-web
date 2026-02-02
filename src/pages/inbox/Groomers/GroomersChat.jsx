@@ -126,8 +126,8 @@ const GroomersChat = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                    <ActionIcon icon={allow_message ? Message : 'https://dev.groomit.me/v7/images/webapp/icons/message-gray.svg'} />
-                    <ActionIcon icon={allow_call ? Call : 'https://dev.groomit.me/v7/images/webapp/icons/call-gray.svg'} />
+                    <ActionIcon icon={allow_message ? Message : 'https://groomit.me/v7/images/webapp/icons/message-gray.svg'} />
+                    <ActionIcon icon={allow_call ? Call : 'https://groomit.me/v7/images/webapp/icons/call-gray.svg'} />
                 </div>
             </div>
 

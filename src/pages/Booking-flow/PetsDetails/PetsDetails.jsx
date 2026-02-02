@@ -6,7 +6,7 @@ import { useLocation, useNavigate, useParams } from 'react-router';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
-import { addUpdatePet, getBookingPetBreeds, getPetProfileID } from '@/utils/store/slices/petList/petListSlice';
+import { addUpdatePet, clearSelectedPet, getPetProfileID } from '@/utils/store/slices/petList/petListSlice';
 
 import BreedModal from '@/components/Modals/BreedModal';
 import StepAccordion from '@/components/StepAccordion';
@@ -18,7 +18,7 @@ import { StepOneContentCat } from '@/components/Booking-flow-Steps/StepOneConten
 import { normalizeDOB } from '@/pages/my-pets/add-update-cat/AddUpdateCat2';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { toast } from 'react-toastify';
-import { clearBookingFlow, completePetStep, moveToNextPet, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import { clearBookingFlow, completePetStep, getBookingPetBreeds, getBookingPetSizes, getPackageDetails, moveToNextPet, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 import CancelBookingFlowModal from '@/components/Modals/CancelBookingFlowModal';
 import BookingFooter from '../BookingFooter';
 
@@ -62,15 +62,19 @@ const PetsDetails = () => {
     const [completedSteps, setCompletedSteps] = useState([]);
     const [openStep, setOpenStep] = useState(1);
 
+    const [packageError, setPackageError] = useState("");
+    const [conditionError, setConditionError] = useState("");
+    const [behaviorError, setBehaviorError] = useState("");
     const [breedModalOpen, setBreedModalOpen] = useState(false);
     const [breedListModalOpen, setBreedListModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedBreedName, setSelectedBreedName] = useState('');
     const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
     const [cancelBookingFlow, SetCancelBookingFlow] = useState(false);
+    const [petProfileLoaded, setPetProfileLoaded] = useState(false);
 
     const token = useSelector((state) => state.auth.unique_token);
-    const { petBreeds } = useSelector((state) => state.pets);
+    // const { petBreeds } = useSelector((state) => state.pets);
     const bookingFlow = useSelector((state) => state.bookingFlow);
     const selectedPet = useSelector(
         (state) => state.pets?.selectedPet?.pet ?? null
@@ -89,10 +93,11 @@ const PetsDetails = () => {
         petsDraft,
         petCounts = { dog: 0, cat: 0 },
         address: bookingAddress,
-        totalPrice
+        totalPrice,
+        petBreeds
     } = bookingFlow;
 
-    const currentPetType = petCounts.dog > 0 ? 'dog' : 'cat';
+    const currentPetType = selectedPet?.type === 'dog' ? 'dog' : 'cat';
     const currentPetDraft = petsDraft[currentPetIndex];
 
     const addons =
@@ -126,14 +131,25 @@ const PetsDetails = () => {
 
     /* ---------------- Effects ---------------- */
     useEffect(() => {
+        if (!petProfileLoaded || selectedPet?.type === 'cat') return;
+
         dispatch(
             getBookingPetBreeds({
-                bookingId: 17600,
-                booking_session_token: 'booking_session_6888c7d65d91b1.59307650',
-                // booking_session_token: token,
+                pet_type: selectedPet?.type,
+                booking_session_token: token,
             })
         );
-    }, [dispatch]);
+        dispatch(
+            getPackageDetails({
+                id: (selectedPet?.pet_id || petsDraft[currentPetIndex]?.petId),
+                breed_id: (selectedPet?.breed?.breed_id || petsDraft[currentPetIndex]?.stepData?.details?.breed_id || petsDraft[currentPetIndex]?.stepData?.details?.breed?.breed_id),
+                size_id: (selectedPet?.size?.id || petsDraft[currentPetIndex]?.stepData?.details?.size_id || petsDraft[currentPetIndex]?.stepData?.details?.size?.id),
+                pet_type: selectedPet?.type,
+                booking_session_token: token,
+            })
+        );
+
+    }, [dispatch, petProfileLoaded]);
 
     const dateOfBirth = watch("date_of_birth");
 
@@ -186,18 +202,22 @@ const PetsDetails = () => {
     useEffect(() => {
         if (!isEdit || !id) return;
 
-        showLoader();
-
-        dispatch(getPetProfileID(id))
-            .finally(() => {
+        const fetchPetProfile = async () => {
+            showLoader();
+            try {
+                await dispatch(getPetProfileID(id)).unwrap();
+                setPetProfileLoaded(true);
+            } finally {
                 hideLoader();
-            });
+            }
+        };
+
+        fetchPetProfile();
     }, [isEdit, id, dispatch]);
 
     // 🐾 EDIT MODE — hydrate Redux + Form
     useEffect(() => {
-        if (!isEdit || !selectedPet) return;
-
+        if (!isEdit || !petProfileLoaded || !selectedPet) return;
         // if (currentPetDraft?.stepData?.details) return;
 
         console.log("second");
@@ -205,13 +225,22 @@ const PetsDetails = () => {
         const detailsPayload = {
             name: selectedPet.name,
             gender: selectedPet.gender,
-            date_of_birth: selectedPet.date_of_birth,
-            petType: selectedPet.pet_type,
+            date_of_birth: selectedPet?.dob,
+            petType: selectedPet.type,
         };
 
-        if (selectedPet.pet_type === "dog") {
-            detailsPayload.breed_id = selectedPet.breed_id;
-            detailsPayload.size_id = selectedPet.size_id;
+        if (selectedPet.type == "dog") {
+            detailsPayload.breed_id = selectedPet?.breed?.breed_id;
+
+            if (detailsPayload?.breed_id) {
+                dispatch(
+                    getBookingPetSizes({
+                        breed_id: selectedPet?.breed?.breed_id,
+                        booking_session_token: token,
+                    })
+                );
+            }
+            detailsPayload.size_id = selectedPet?.size?.id;
         }
 
         const existingPet = allPets.find((pet) => pet?.pet_id == id);
@@ -223,9 +252,6 @@ const PetsDetails = () => {
             ...(existingPet || {}),
             ...detailsPayload,
         };
-
-        console.log(finalPetObject);
-
 
         /* ---------------- Redux ---------------- */
         dispatch(
@@ -245,21 +271,40 @@ const PetsDetails = () => {
 
         /* ---------------- Breed name (DOG only) ---------------- */
         if (
-            selectedPet.pet_type === "dog" &&
-            selectedPet.breed_id &&
+            selectedPet.type == "dog" &&
+            selectedPet?.breed?.breed_id &&
             petBreeds?.length
         ) {
             const foundBreed = petBreeds.find(
-                (b) => b.breed_id?.toString() === selectedPet.breed_id?.toString()
+                (b) => b.breed_id?.toString() === selectedPet?.breed?.breed_id?.toString()
             );
 
             if (foundBreed) {
-                setSelectedBreedName(foundBreed.breed_name);
+                setSelectedBreedName(foundBreed?.breed_name);
             }
+        }
+
+        if (selectedPet?.isDetailsAdded == true && !shouldMarkDirty) {
+            dispatch(
+                completePetStep({
+                    petIndex: currentPetIndex,
+                    step: "details",
+                })
+            );
+
+            dispatch(
+                setPetID({
+                    petIndex: currentPetIndex,
+                    petId: +finalPetObject?.pet_id,
+                })
+            );
+
+            completeStepAndMove(1);
         }
     }, [
         isEdit,
         selectedPet,
+        petProfileLoaded,
         currentPetIndex,
         petBreeds,
         dispatch,
@@ -344,8 +389,6 @@ const PetsDetails = () => {
 
     /* ---------------- Submit Handlers ---------------- */
     const handleStepOne = async (formData) => {
-        console.log(formData);
-
         /* -------------------------
             Age validation (3 months)
         -------------------------- */
@@ -378,8 +421,6 @@ const PetsDetails = () => {
             /* -----------------------------------
                 1️⃣ Update backend if needed
             ----------------------------------- */
-            console.log(isDirty);
-
             if (!isEdit || isDirty) {
                 await dispatch(addUpdatePet(normalizedPayload)).unwrap();
                 await dispatch(getPetProfileID(id)).unwrap();
@@ -445,9 +486,11 @@ const PetsDetails = () => {
         const pkg = currentPetDraft?.stepData?.package
 
         if (!pkg?.id) {
-            toast.error("Please select a package")
+            setPackageError("Package selection is required.");
             return
         }
+
+        setPackageError("");
 
         if (!currentPetDraft?.completedSteps?.includes("package")) {
             dispatch(
@@ -463,7 +506,6 @@ const PetsDetails = () => {
             // mark local step as completed & move forward
             completeStepAndMove(2);
             navigate("/book/pets");
-
             return;
         }
 
@@ -471,14 +513,25 @@ const PetsDetails = () => {
     }
 
     const handleStepThree = () => {
-        const grooming =
-            currentPetDraft?.stepData?.grooming;
+        const grooming = currentPetDraft?.stepData?.grooming;
 
-        // optional validation
-        if (!grooming?.condition || !grooming?.behavior) {
-            toast.error("Please complete grooming details");
-            return;
+        let hasError = false;
+
+        if (!grooming?.condition) {
+            setConditionError("Please select pet's coat conditions.");
+            hasError = true;
+        } else {
+            setConditionError("");
         }
+
+        if (!grooming?.behavior) {
+            setBehaviorError("Please select pet's behavior.");
+            hasError = true;
+        } else {
+            setBehaviorError("");
+        }
+
+        if (hasError) return;
 
         if (!currentPetDraft?.completedSteps?.includes("grooming")) {
             dispatch(
@@ -489,17 +542,15 @@ const PetsDetails = () => {
             );
         }
 
-        // ✅ EDIT MODE: save & go back to pets list
         if (shouldMarkDirty) {
-            // mark local step as completed & move forward
             completeStepAndMove(3);
             navigate("/book/pets");
-
             return;
         }
 
         completeStepAndMove(3);
     };
+
 
     const handleStepFour = () => {
         if (!currentPetDraft?.completedSteps?.includes("addons")) {
@@ -524,6 +575,7 @@ const PetsDetails = () => {
 
         // 🐾 MOVE TO NEXT PET
         if (!isLastPet) {
+            dispatch(clearSelectedPet());
             const nextPetIndex = currentPetIndex + 1;
             const nextPetId = selectedPetIds[nextPetIndex];
 
@@ -553,11 +605,14 @@ const PetsDetails = () => {
 
     const handleFooterAction = () => {
         // ✅ If everything is done, move forward
-        // if (allStepsCompleted) {
-        //     navigate("/book/pets");
-        //     // This is bug line please track
-        //     return;
-        // }
+        if (allStepsCompleted && !openStep) {
+            navigate("/book/pets");
+            // This is bug line please track
+            return;
+        }
+
+        console.log(openStep);
+
 
         if (shouldMarkDirty && openStep === 1 && !isDirty) {
             toast.info("No changes to save");
@@ -599,21 +654,21 @@ const PetsDetails = () => {
             };
         }
 
-        const petName = details.name || "Pet";
+        const petName = details?.name || "Pet";
 
         let descriptionParts = [];
 
         // 🐶 DOG
-        if (details.petType === "dog") {
+        if (details.type === "dog") {
             const breed = petBreeds.find(
-                (b) => b.breed_id?.toString() === details.breed_id?.toString()
+                (b) => b.breed_id?.toString() === (details?.breed_id?.toString() || details?.breed?.breed_id?.toString())
             );
 
             if (breed?.breed_name) {
                 descriptionParts.push(breed.breed_name);
             }
 
-            if (details.size_id) {
+            if (details?.size_id) {
                 const DOG_SIZE_MAP = {
                     2: "Small",
                     3: "Medium",
@@ -632,7 +687,7 @@ const PetsDetails = () => {
         }
 
         // 🐱 CAT
-        if (details.petType === "cat") {
+        if (details.type === "cat") {
             descriptionParts.push("Cat");
         }
 
@@ -796,7 +851,7 @@ const PetsDetails = () => {
                         description={stepTwoHeader.description}
                         showSuccess={completedSteps.includes(2)}
                     >
-                        <StepTwoContent showSuccess={completedSteps.includes(2)} />
+                        <StepTwoContent showSuccess={completedSteps.includes(2)} setPackageError={setPackageError} packageError={packageError} />
                     </StepAccordion>
                 )}
 
@@ -817,7 +872,7 @@ const PetsDetails = () => {
                         description={stepThreeDesc ? stepThreeDesc : ''}
                         showSuccess={completedSteps.includes(3)}
                     >
-                        <StepThreeContent showSuccess={completedSteps.includes(3)} />
+                        <StepThreeContent showSuccess={completedSteps.includes(3)} setBehaviorError={setBehaviorError} setConditionError={setConditionError} conditionError={conditionError} behaviorError={behaviorError} />
                     </StepAccordion>
                 )}
 
@@ -889,6 +944,7 @@ const PetsDetails = () => {
                 onClose={() => SetCancelBookingFlow(false)}
                 onConfirm={() => {
                     dispatch(clearBookingFlow());
+                    dispatch(clearSelectedPet());
                     SetCancelBookingFlow(false);
                     navigate("/book/service-address");
                 }}

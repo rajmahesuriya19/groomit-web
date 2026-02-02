@@ -63,7 +63,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <img
               className="h-auto w-[160px]"
-              src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
+              src="https://groomit.me/v7/images/web_logo.svg"
               alt="Groomit.me"
             />
             <button
@@ -142,11 +142,11 @@ const MobileMenu = ({ isOpen, onClose }) => {
                 Download the app
               </p>
               <div className="flex gap-1">
-                <a href="https://raj.dev.groomit.me/download-groomit-app" target="_blank">
-                  <img className="h-auto w-full" src="https://raj.dev.groomit.me/v7/images/webapp/icons/menu-new/play-store.svg" alt="Play Store" />
+                <a href="https://groomit.me/download-groomit-app" target="_blank">
+                  <img className="h-auto w-full" src="https://groomit.me/v7/images/webapp/icons/menu-new/play-store.svg" alt="Play Store" />
                 </a>
-                <a href="https://raj.dev.groomit.me/download-groomit-app" target="_blank">
-                  <img className="h-auto w-full" src="https://raj.dev.groomit.me/v7/images/webapp/icons/menu-new/app-store.svg" alt="App Store" />
+                <a href="https://groomit.me/download-groomit-app" target="_blank">
+                  <img className="h-auto w-full" src="https://groomit.me/v7/images/webapp/icons/menu-new/app-store.svg" alt="App Store" />
                 </a>
               </div>
             </div>

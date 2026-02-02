@@ -7,6 +7,7 @@ import DogIcon from "../../assets/icon/icon-dog.svg";
 import CatIcon from "../../assets/icon/icon-cat.svg";
 import { ChevronRight } from "lucide-react";
 import EnterPetModal from "./EnterPetModal";
+import { useSelector } from "react-redux";
 
 const modalStyle = {
     position: "absolute",
@@ -25,6 +26,8 @@ const modalStyle = {
 const AddPetModal = ({ open, onClose, description }) => {
     const [enterPetModal, setEnterPetModal] = useState(false);
     const [petType, setPetType] = useState(null);
+
+    const { getPetServiceTypeApi } = useSelector((state) => state.bookingFlow || {});
 
     const PET_TYPES = [
         { key: "dog", label: "Dog", icon: DogIcon },
@@ -54,12 +57,26 @@ const AddPetModal = ({ open, onClose, description }) => {
                     {/* Pet Type Selection */}
                     <div className="flex flex-col gap-3">
                         {PET_TYPES.map((pet, idx) => {
+                            const isDisabled =
+                                (pet.key === "dog" && !getPetServiceTypeApi?.canAddDog) ||
+                                (pet.key === "cat" && !getPetServiceTypeApi?.canAddCat);
+
                             return (
                                 <div
-                                    className={`flex items-center justify-between pl-[10px] py-[10px] rounded-[10px] border cursor-pointer transition border-primary-line
-                                `}
+                                    className={`flex items-center justify-between pl-[10px] py-[10px] rounded-[10px] border transition
+                ${isDisabled
+                                            ? "border-gray-200 bg-gray-100 cursor-not-allowed"
+                                            : "border-primary-line cursor-pointer hover:bg-gray-50"
+                                        }
+            `}
                                     key={idx}
-                                    onClick={() => { onClose(); setEnterPetModal(true); setPetType(pet?.label) }}
+                                    onClick={() => {
+                                        if (isDisabled) return;
+
+                                        onClose();
+                                        setEnterPetModal(true);
+                                        setPetType(pet.label);
+                                    }}
                                 >
                                     <div className="flex items-center gap-3">
                                         <img
@@ -74,7 +91,7 @@ const AddPetModal = ({ open, onClose, description }) => {
 
                                     <ChevronRight
                                         size={30}
-                                        className="text-primary-light cursor-pointer"
+                                        className={isDisabled ? "text-gray-300" : "text-primary-light"}
                                     />
                                 </div>
                             );

@@ -82,6 +82,7 @@ function App() {
             <Route path={RoutePath.BOOK_PETS} element={<BookedPets />} />
             <Route path={RoutePath.EXISTING_PETS} element={<ExistingPets />} />
             <Route path={RoutePath.SLOTS} element={<Slots />} />
+            <Route path={RoutePath.SLOT_WITH_GROOMER} element={<Slots />} />
             <Route path={RoutePath.CHECKOUT} element={<Checkout />} />
             <Route path={RoutePath.PAGE_404} element={<Page404 />} />
             <Route path="*" element={<Navigate to={RoutePath.PAGE_404} replace />} />

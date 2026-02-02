@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Box, IconButton, styled, TextField } from "@mui/material";
 import Close from "../../assets/icon/close.svg";
-import { addPetDraft, addUpdatePet, getPetList, savePetBooking } from "@/utils/store/slices/petList/petListSlice";
+import { getPetList, saveLocalPetBooking } from "@/utils/store/slices/petList/petListSlice";
 import { useDispatch } from "react-redux";
 import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 import { CustomInput } from "../CustomInput";
@@ -43,14 +43,22 @@ const EnterPetModal = ({ open, onClose, petType = "Pet" }) => {
         showLoader();
 
         try {
+            // await dispatch(
+            //     savePetBooking({
+            //         type: petType.toLowerCase(),
+            //         name: name.trim(),
+            //     })
+            // ).unwrap();
+
+            // dispatch(getPetList());
+
             await dispatch(
-                savePetBooking({
+                saveLocalPetBooking({
                     type: petType.toLowerCase(),
                     name: name.trim(),
+                    pet_id: null
                 })
-            ).unwrap();
-
-            dispatch(getPetList());
+            );
 
             onClose();
         } catch (err) {

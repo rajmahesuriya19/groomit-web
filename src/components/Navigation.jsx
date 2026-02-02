@@ -58,7 +58,7 @@ const Navigation = () => {
               <Link to="/" className="flex items-center">
                 <img
                   className="h-12 w-40"
-                  src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
+                  src="https://groomit.me/v7/images/web_logo.svg"
                   alt="Groomit.me"
                 />
               </Link>
@@ -70,7 +70,7 @@ const Navigation = () => {
               {!showRating ? <Link to="/" className="flex items-center">
                 <img
                   className="h-10 w-40"
-                  src="https://raj.dev.groomit.me/v7/images/web_logo.svg"
+                  src="https://groomit.me/v7/images/web_logo.svg"
                   alt="Groomit.me"
                 />
               </Link> : location.pathname.includes("/user/account/edit") ?
@@ -140,7 +140,7 @@ const Navigation = () => {
             <div className='flex items-center gap-2'>
               {!showRating && <div className="md:hidden items-center flex gap-1 w-100">
                 <img src={Rating} className="w-5 h-5" alt="Star" />
-                <a href="https://raj.dev.groomit.me/reviews">
+                <a href="https://groomit.me/reviews">
                   <div className="font-inter text-sm font-bold underline">
                     4.9 (147)
                   </div>

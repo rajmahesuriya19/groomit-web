@@ -19,11 +19,11 @@ import PetInfo from "@/components/Modals/PetInfo";
 import AddPetModal from "@/components/Modals/AddPetModal";
 import Card from "@/common/Booking-Flow/Card";
 import BookingFooter from "../BookingFooter";
-import { initializePetFlow, setPetCounts, setServiceType, togglePet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { getPetServiceType, initializePetFlow, setPetCounts, setServiceType, togglePet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 
 const SERVICE_TYPES = {
-    MOBILE: "MOBILE VAN",
-    HOME: "HOME",
+    MOBILE: "mobile-van",
+    HOME: "in-home",
 };
 
 const MAX_PETS = 6;
@@ -37,7 +37,7 @@ const ServiceTypePets = () => {
         dogPets = [],
         catPets = [],
     } = useSelector((state) => state.pets?.pets || {});
-
+    const token = useSelector((state) => state.auth.unique_token);
     const bookingFlow = useSelector((state) => state.bookingFlow || {});
 
     const {
@@ -45,7 +45,19 @@ const ServiceTypePets = () => {
         selectedPetIds = [],
         petCounts = { dog: 0, cat: 0 },
         address: bookingAddress,
+        getPetServiceTypeApi
     } = bookingFlow;
+
+    const disabledServices = getPetServiceTypeApi?.isDisabledService || [];
+    const disabledPets = getPetServiceTypeApi?.isDisabledPet || [];
+
+    const isMobileDisabled = disabledServices.includes("mobile-van");
+    const isHomeDisabled = disabledServices.includes("in-home");
+
+    const isDogDisabled = disabledPets.includes("dog");
+    const isCatDisabled = disabledPets.includes("cat");
+
+    const canAddAnyPet = getPetServiceTypeApi?.canAddDog || getPetServiceTypeApi?.canAddCat;
 
     const dogCount = petCounts?.dog || 0;
     const catCount = petCounts?.cat || 0;
@@ -108,6 +120,31 @@ const ServiceTypePets = () => {
         };
     }, [dispatch]);
 
+    useEffect(() => {
+        if (!displayAddress?.address_id || !token) return;
+
+        dispatch(getPetServiceType({
+            address_id: displayAddress.address_id,
+            booking_session_token: token
+        }));
+    }, [dispatch, displayAddress?.address_id, token]);
+
+    useEffect(() => {
+        if (!getPetServiceTypeApi || !allPets.length) return;
+
+        selectedPetIds.forEach((id) => {
+            const pet = allPets.find(p => p.pet_id === id);
+            if (!pet) return;
+
+            if (
+                (pet.type === "dog" && isDogDisabled) ||
+                (pet.type === "cat" && isCatDisabled)
+            ) {
+                dispatch(togglePet(id));
+            }
+        });
+    }, [getPetServiceTypeApi, isDogDisabled, isCatDisabled, allPets]);
+
     /* ---------------- Counter Flow ---------------- */
     const updateCounts = (dog, cat) => {
         if (dog + cat > MAX_PETS) {
@@ -118,10 +155,16 @@ const ServiceTypePets = () => {
         dispatch(setPetCounts({ dog, cat, flag: true }));
     };
 
-    const incrementDog = () => updateCounts(dogCount + 1, catCount);
+    const incrementDog = () => {
+        if (isDogDisabled) return;
+        updateCounts(dogCount + 1, catCount);
+    };
     const decrementDog = () => updateCounts(Math.max(dogCount - 1, 0), catCount);
 
-    const incrementCat = () => updateCounts(dogCount, catCount + 1);
+    const incrementCat = () => {
+        if (isCatDisabled) return;
+        updateCounts(dogCount, catCount + 1);
+    };
     const decrementCat = () => updateCounts(dogCount, Math.max(catCount - 1, 0));
 
     /* ---------------- Submit ---------------- */
@@ -197,7 +240,11 @@ const ServiceTypePets = () => {
                 >
                     <ServiceOption
                         active={serviceType === SERVICE_TYPES.MOBILE}
-                        onClick={() => dispatch(setServiceType(SERVICE_TYPES.MOBILE))}
+                        disabled={isMobileDisabled}
+                        onClick={() => {
+                            if (isMobileDisabled) return;
+                            dispatch(setServiceType(SERVICE_TYPES.MOBILE));
+                        }}
                         icon={Mobilevan}
                         title="Mobile Van"
                         badge="POPULAR"
@@ -206,11 +253,21 @@ const ServiceTypePets = () => {
 
                     <ServiceOption
                         active={serviceType === SERVICE_TYPES.HOME}
-                        onClick={() => dispatch(setServiceType(SERVICE_TYPES.HOME))}
+                        disabled={isHomeDisabled}
+                        onClick={() => {
+                            if (isHomeDisabled) return;
+                            dispatch(setServiceType(SERVICE_TYPES.HOME));
+                        }}
                         icon={HomeIcon}
                         title="In-Home"
                         description="Groomer comes to your home"
                     />
+
+                    {isMobileDisabled && isHomeDisabled && (
+                        <div className="text-xs font-normal pt-2 text-brand">
+                            No services are available in your area
+                        </div>
+                    )}
                 </Card>
 
                 {/* Pets */}
@@ -219,7 +276,7 @@ const ServiceTypePets = () => {
                         <>
                             <Card
                                 title="Pet(s) Being Serviced"
-                                action={
+                                action={canAddAnyPet &&
                                     <div
                                         className="flex items-center gap-1 text-[#3064A3] cursor-pointer"
                                         onClick={() => { AddPetModalOpen(true) }}
@@ -229,57 +286,67 @@ const ServiceTypePets = () => {
                                     </div>
                                 }
                             >
-                                {allPets.map((pet) => (
-                                    <div
-                                        key={pet.pet_id}
-                                        className="flex justify-between items-center py-3 border-b border-[#E4E4E4] last:border-b-0 last:pb-0"
-                                    >
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-1">
-                                                <span className="font-bold text-sm">{pet.name}</span>
-                                                {((pet?.age && pet?.gender) || (pet.breed_name && pet.size_name)) && (
-                                                    <img
-                                                        src={infoGrey}
-                                                        alt=""
-                                                        className="w-5 h-5 cursor-pointer"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedPet(pet);
-                                                            setPetInfoModal(true);
-                                                        }}
-                                                    />
-                                                )}
+                                {allPets.map((pet) => {
+                                    const isPetDisabled =
+                                        (pet.type === "dog" && isDogDisabled) ||
+                                        (pet.type === "cat" && isCatDisabled);
+
+                                    return (
+                                        <div
+                                            key={pet.pet_id}
+                                            className="flex justify-between items-center py-3 border-b border-[#E4E4E4] last:border-b-0 last:pb-0"
+                                        >
+                                            <div className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-1">
+                                                    <span className="font-bold text-sm">{pet.name}</span>
+                                                    {((pet?.age && pet?.gender) || (pet.breed_name && pet.size_name)) && (
+                                                        <img
+                                                            src={infoGrey}
+                                                            alt=""
+                                                            className="w-5 h-5 cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedPet(pet);
+                                                                setPetInfoModal(true);
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                <span className="text-sm">
+                                                    {pet?.type === "cat"
+                                                        ? "Cat"
+                                                        : pet.breed_name && pet.size_name
+                                                            ? `${pet.breed_name}, ${pet.size_name}`
+                                                            : "Dog"}
+                                                </span>
                                             </div>
 
-                                            <span className="text-sm">
-                                                {pet?.type === "cat"
-                                                    ? "Cat"
-                                                    : pet.breed_name && pet.size_name
-                                                        ? `${pet.breed_name}, ${pet.size_name}`
-                                                        : "Dog"}
-                                            </span>
+                                            <Checkbox
+                                                checked={selectedPetIds.includes(pet.pet_id)}
+                                                disabled={isPetDisabled}
+                                                onChange={() => {
+                                                    if (isPetDisabled) return;
+                                                    togglePetSelection(pet.pet_id);
+                                                }}
+                                                disableRipple
+                                                sx={{
+                                                    padding: 0,
+                                                    color: "#7C868A",
+                                                    "&.Mui-checked": {
+                                                        color: "#FF314A",
+                                                    },
+                                                    "&:hover": {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    "&.Mui-focusVisible": {
+                                                        outline: "none",
+                                                    },
+                                                }}
+                                            />
                                         </div>
-
-                                        <Checkbox
-                                            checked={selectedPetIds.includes(pet.pet_id)}
-                                            onChange={() => togglePetSelection(pet.pet_id)}
-                                            disableRipple
-                                            sx={{
-                                                padding: 0,
-                                                color: "#7C868A",
-                                                "&.Mui-checked": {
-                                                    color: "#FF314A",
-                                                },
-                                                "&:hover": {
-                                                    backgroundColor: "transparent",
-                                                },
-                                                "&.Mui-focusVisible": {
-                                                    outline: "none",
-                                                },
-                                            }}
-                                        />
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </Card>
 
                             {allPets?.length > 6 && <div className="text-sm">
@@ -319,7 +386,7 @@ const ServiceTypePets = () => {
 
                                         <button
                                             onClick={incrementDog}
-                                            disabled={totalPets === MAX_PETS}
+                                            disabled={isDogDisabled || totalPets === MAX_PETS}
                                             className={`w-[36px] h-[36px] rounded-[10px] border flex justify-center items-center
                         ${totalPets === MAX_PETS
                                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -359,7 +426,7 @@ const ServiceTypePets = () => {
 
                                         <button
                                             onClick={incrementCat}
-                                            disabled={totalPets === MAX_PETS}
+                                            disabled={isCatDisabled || totalPets === MAX_PETS}
                                             className={`w-[36px] h-[36px] rounded-[10px] border flex justify-center items-center
                         ${totalPets === MAX_PETS
                                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -404,13 +471,13 @@ const ServiceTypePets = () => {
 
 /* ================= Reusable UI ================= */
 
-const ServiceOption = ({ active, onClick, icon, title, badge, description }) => (
+const ServiceOption = ({ active, onClick, disabled, icon, title, badge, description }) => (
     <div
         onClick={onClick}
-        className={`flex gap-3 items-center p-3 rounded-xl border cursor-pointer transition
-      ${active
-                ? "border-brand"
-                : "border-primary-light"
+        className={`flex gap-3 items-center p-3 rounded-xl border  transition
+      ${disabled ? "bg-[#F2F2F2] border-primary-light cursor-not-allowed" : active
+                ? "border-brand cursor-pointer"
+                : "border-primary-light cursor-pointer"
             }`}
     >
         <div className="bg-[#F2F2F2] rounded-lg w-9 h-9 flex items-center justify-center">
@@ -419,7 +486,7 @@ const ServiceOption = ({ active, onClick, icon, title, badge, description }) => 
 
         <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-1">
-                <span className="text-sm font-bold">{title}</span>
+                <span className={`text-sm font-bold`}>{title}</span>
                 {badge && (
                     <span className="text-[10px] px-2 py-[2px] bg-[#9449CE] text-white rounded-full font-bold">
                         {badge}

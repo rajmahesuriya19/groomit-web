@@ -23,6 +23,7 @@
     "dayjs": "^1.11.19",
     "dotenv": "^16.0.3",
     "formik": "^2.2.9",
+    "framer-motion": "^12.29.2",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "lodash": "^4.17.21",

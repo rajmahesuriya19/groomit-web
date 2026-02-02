@@ -117,11 +117,12 @@ export const savePetBooking = createAsyncThunk(
 // Fetch pet breeds for booking
 export const getBookingPetBreeds = createAsyncThunk(
     'pets/getBookingPetBreeds',
-    async ({ bookingId, booking_session_token }, { rejectWithValue }) => {
+    async ({ pet_type, booking_session_token }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.post(
-                `api/user/booking/pet/get/${bookingId}`,
+                `api/user/booking/pet/get`,
                 {
+                    pet_type,
                     booking_session_token
                 }
             );
@@ -134,11 +135,33 @@ export const getBookingPetBreeds = createAsyncThunk(
     }
 );
 
+// Fetch pet breeds size from breed_id for booking
+export const getBookingPetSizes = createAsyncThunk(
+    'pets/getBookingPetSizes',
+    async ({ breed_id, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/breed-sizes/get`,
+                {
+                    breed_id,
+                    booking_session_token
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
 const petsSlice = createSlice({
     name: 'pets',
     initialState: {
         pets: [],
         petBreeds: [],
+        petSizes: [],
         selectedPet: null,
         loading: false,
         error: null,
@@ -151,6 +174,17 @@ const petsSlice = createSlice({
         clearSelectedPet: (state) => {
             state.selectedPet = null;
         },
+        saveLocalPetBooking: (state, action) => {
+            const { type, ...petData } = action.payload;
+
+            if (type === "dog") {
+                state.pets.dogPets.unshift(action.payload);
+            }
+
+            if (type === "cat") {
+                state.pets.catPets.unshift(action.payload);
+            }
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -249,6 +283,21 @@ const petsSlice = createSlice({
                 toast.error(state.error);
             })
 
+            // Get Booking Pet Size from breed Id
+            .addCase(getBookingPetSizes.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookingPetSizes.fulfilled, (state, action) => {
+                state.loading = false;
+                state.petSizes = action.payload;
+            })
+            .addCase(getBookingPetSizes.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
             // Save Pet Name (Booking Flow)
             .addCase(savePetBooking.pending, (state) => {
                 state.loading = true;
@@ -267,5 +316,5 @@ const petsSlice = createSlice({
     },
 });
 
-export const { clearPets, clearSelectedPet, addPetDraft } = petsSlice.actions;
+export const { clearPets, clearSelectedPet, saveLocalPetBooking } = petsSlice.actions;
 export default petsSlice.reducer;
