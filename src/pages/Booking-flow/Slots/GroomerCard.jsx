@@ -7,8 +7,11 @@ import FallbackGroomer from '../../../assets/icon/user-photo-empty.jpg';
 import { useNavigate } from "react-router";
 import BookingGroomerDetailsModal from "@/components/Modals/BookingGroomerDetailsModal";
 import GroomerReviewsModal from "@/components/Modals/GroomerReviewsModal";
+import { setSelectedGroomerr } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { useDispatch } from "react-redux";
 
 const GroomerCard = ({ groomer }) => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [selectedGroomer, setSelectedGroomer] = useState(null);
     const [groomerModalOpen, setGroomerModalOpen] = useState(false);
@@ -83,7 +86,10 @@ const GroomerCard = ({ groomer }) => {
                         <ChevronRight
                             size={30}
                             className="cursor-pointer text-primary-light"
-                            onClick={() => navigate(`/book/slot/groomer/${id}`)}
+                            onClick={() => {
+                                dispatch(setSelectedGroomerr(groomer));
+                                navigate(`/book/slot/groomer/${id}`);
+                            }}
                         />
                     </div>
                 </div>

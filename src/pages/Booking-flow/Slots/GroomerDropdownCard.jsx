@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
 import FillStar from "@/assets/icon/fill-red-star.svg";
+import FallbackGroomer from '../../../assets/icon/user-photo-empty.jpg';
 import PetPaw from "@/assets/icon/pet.svg";
 import Location from "@/assets/icon/location.svg";
 import Clock from "@/assets/icon/clock-black.svg";
@@ -48,7 +49,12 @@ const GroomerDropdownCard = ({ onChange }) => {
                 }}
             >
                 <div className="flex items-center gap-3">
-                    <div className="w-[45px] h-[45px] rounded-[10px] bg-gray-200" />
+                    {/* Avatar placeholder */}
+                    <img
+                        src={FallbackGroomer}
+                        alt={'Sandra D.' || 'Groomer'}
+                        className="w-[45px] h-[45px] rounded-[10px] object-cover shadow-sm"
+                    />
 
                     <div className="flex flex-col">
                         <div className="text-base font-bold capitalize">Sandra D.</div>

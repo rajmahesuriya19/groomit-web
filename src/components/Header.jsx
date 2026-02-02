@@ -28,7 +28,7 @@ const Header = () => {
                             <Link to="/" className="flex items-center">
                                 <img
                                     className="h-12 w-40"
-                                    src="https://raj.dev.groomit.me/v7/images/home/groomit-logo.svg"
+                                    src="https://groomit.me/v7/images/home/groomit-logo.svg"
                                     alt="Groomit.me"
                                 />
                             </Link>
@@ -40,7 +40,7 @@ const Header = () => {
                             <Link to="/" className="flex items-center">
                                 <img
                                     className="h-10 w-40"
-                                    src="https://raj.dev.groomit.me/v7/images/home/groomit-logo.svg"
+                                    src="https://groomit.me/v7/images/home/groomit-logo.svg"
                                     alt="Groomit.me"
                                 />
                             </Link>
@@ -49,7 +49,7 @@ const Header = () => {
                         <div className='flex items-center gap-4'>
                             <div className="md:hidden items-center flex gap-1 w-100">
                                 <img src={Rating} className="w-5 h-5" alt="Star" />
-                                <a href="https://raj.dev.groomit.me/reviews">
+                                <a href="https://groomit.me/reviews">
                                     <div className="font-inter text-sm font-bold underline">
                                         4.9 (147)
                                     </div>

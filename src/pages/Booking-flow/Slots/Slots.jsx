@@ -10,6 +10,7 @@ import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 import { useDispatch, useSelector } from "react-redux";
 import GroomerCard from "./GroomerCard";
 import GroomerDropdownCard from "./GroomerDropdownCard";
+import { setSelectedSlott } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 
 const DAYS_TO_SHOW = 7;
 const PAGE_SIZE = 2;
@@ -33,6 +34,10 @@ const slideVariants = {
 };
 
 const slotsData = [
+    {
+        date: "2026-03-07",
+        slots: [],
+    },
     {
         date: "2026-03-06",
         slots: [
@@ -94,7 +99,7 @@ const Slots = () => {
 
     const [openPriceTotalModal, setOpenPriceTotalModal] = useState(false);
     const [openTaxModal, setOpenTaxModal] = useState(false);
-    const [activeTab, setActiveTab] = useState(1);
+    const [activeTab, setActiveTab] = useState(0);
 
     const tabs = [{ title: "Best Match", label: 'Most Booked' }, { title: "Choose Groomer" }];
 
@@ -217,33 +222,35 @@ const Slots = () => {
     };
 
     const handleSlotSelect = ({ date, slot, id }) => {
+        dispatch(setSelectedSlott({ date, slot, id }));
         setSelectedSlot({ date, slot, id });
         jumpCalendarToDate(date);
     };
 
     const handleChange = () => {
         setSelectedSlot(null);
+        dispatch(setSelectedSlott(null));
         setSelectedDate(today);
         setActiveTab(1);
     };
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             showLoader();
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                showLoader();
 
-    //             await Promise.all([
-    //                 dispatch(getGroomersList())
-    //             ]);
-    //         } catch (error) {
-    //             console.error("Error fetching dashboard data:", error);
-    //         } finally {
-    //             hideLoader();
-    //         }
-    //     };
+                await Promise.all([
+                    dispatch(getGroomersList())
+                ]);
+            } catch (error) {
+                console.error("Error fetching dashboard data:", error);
+            } finally {
+                hideLoader();
+            }
+        };
 
-    //     fetchData();
-    // }, [dispatch]);
+        fetchData();
+    }, [dispatch]);
 
     useEffect(() => {
         if (id) {
@@ -302,6 +309,7 @@ const Slots = () => {
                                             onClick={() => {
                                                 setActiveTab(index);
                                                 if (index === 1) {
+                                                    dispatch(setSelectedSlott(null));
                                                     setSelectedSlot(null);
                                                     jumpCalendarToDate(today);
                                                     setSelectedDate(today);

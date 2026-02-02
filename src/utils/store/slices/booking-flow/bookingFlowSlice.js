@@ -1,9 +1,93 @@
-import { createSlice } from "@reduxjs/toolkit";
+import axiosInstance from "@/services/api/axios";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { toast } from "react-toastify";
+
+// Fetch pet breeds for booking
+export const getBookingPetBreeds = createAsyncThunk(
+    'bookingFlow/getBookingPetBreeds',
+    async ({ pet_type, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/get`,
+                {
+                    pet_type,
+                    booking_session_token
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.data?.pet_breeds || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Fetch pet breeds size from breed_id for booking
+export const getBookingPetSizes = createAsyncThunk(
+    'bookingFlow/getBookingPetSizes',
+    async ({ breed_id, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/breed-sizes/get`,
+                {
+                    breed_id,
+                    booking_session_token
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Get Pet Service Type
+export const getPetServiceType = createAsyncThunk(
+    'bookingFlow/getPetServiceType',
+    async ({ address_id, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/service_type/get`,
+                {
+                    address_id,
+                    booking_session_token
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Get Package Details
+export const getPackageDetails = createAsyncThunk(
+    'bookingFlow/getPackageDetails',
+    async ({ id, breed_id, size_id, pet_type, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/package/get`,
+                { breed_id, size_id, pet_type, booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data?.pet_breeds || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
 
 const initialState = {
     /* ---------------- Address & Service ---------------- */
     address: null,
     serviceType: null,
+    getPetServiceTypeApi: null,
 
     /* ---------------- Page-2 (Selection) ---------------- */
     selectedPetIds: [],
@@ -11,11 +95,20 @@ const initialState = {
         dog: 0,
         cat: 0,
     },
+    petBreeds: [],
+    petSizes: [],
+    loading: false,
+    error: null,
 
     /* ---------------- Page-3+ (Creation Flow) ---------------- */
     petQueue: [],
     currentPetIndex: 0,
     petsDraft: [],
+    packageDetails: [],
+
+    /* ---------------- Calender ---------------- */
+    selectedSlot: null,
+    selectedGroomer: null,
 
     /* ---------------- Appointment ---------------- */
     appointment: null,
@@ -161,7 +254,7 @@ const bookingFlowSlice = createSlice({
                     state.petQueue[petIndex]
                 );
             }
-            console.log(1);
+
             state.petsDraft[petIndex].stepData[step] = {
                 ...state.petsDraft[petIndex].stepData[step],
                 ...data,
@@ -231,6 +324,15 @@ const bookingFlowSlice = createSlice({
             state.currentPetIndex = petIndex;
         },
 
+        /* ================= Calender ================= */
+        setSelectedSlott(state, action) {
+            state.selectedSlot = action.payload;
+        },
+
+        setSelectedGroomerr(state, action) {
+            state.selectedGroomer = action.payload;
+        },
+
         /* ================= Appointment ================= */
         setAppointment(state, action) {
             state.appointment = action.payload;
@@ -241,6 +343,68 @@ const bookingFlowSlice = createSlice({
             return initialState;
         }
     },
+    extraReducers: (builder) => {
+        builder
+            // Get Booking Pet Breeds
+            .addCase(getBookingPetBreeds.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookingPetBreeds.fulfilled, (state, action) => {
+                state.loading = false;
+                state.petBreeds = action.payload;
+            })
+            .addCase(getBookingPetBreeds.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Booking Pet Size from breed Id
+            .addCase(getBookingPetSizes.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookingPetSizes.fulfilled, (state, action) => {
+                state.loading = false;
+                state.petSizes = action.payload;
+            })
+            .addCase(getBookingPetSizes.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Pet Service Type
+            .addCase(getPetServiceType.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getPetServiceType.fulfilled, (state, action) => {
+                state.loading = false;
+                state.getPetServiceTypeApi = action.payload;
+            })
+            .addCase(getPetServiceType.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Package Details
+            .addCase(getPackageDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getPackageDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.packageDetails = action.payload;
+            })
+            .addCase(getPackageDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+    }
 });
 
 export const {
@@ -257,6 +421,9 @@ export const {
     updateTotalPrice,
     completePetStep,
     moveToNextPet,
+
+    setSelectedGroomerr,
+    setSelectedSlott,
 
     setAppointment,
     clearBookingFlow,

@@ -79,14 +79,14 @@ const MobileMenuHeader = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             <img
               className="h-10 w-40"
-              src="https://raj.dev.groomit.me/v7/images/home/groomit-logo.svg"
+              src="https://groomit.me/v7/images/home/groomit-logo.svg"
               alt="Groomit.me"
             />
 
             <div className='flex items-center gap-4'>
               <div class="md:hidden items-center flex gap-1 w-100">
                 <img src={Rating} className="w-5 h-5" alt="Star" />
-                <a href="https://raj.dev.groomit.me/reviews">
+                <a href="https://groomit.me/reviews">
                   <div class="font-inter text-sm font-bold underline">
                     4.9 (147)
                   </div>

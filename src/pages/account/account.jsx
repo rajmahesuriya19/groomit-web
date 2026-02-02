@@ -206,7 +206,7 @@ const Account = () => {
               alt="Profile"
               className="h-[80px] rounded-[10px] w-[80px]"
             />) : (<img
-              src='https://dev.groomit.me/v6/images/profile-avatar.svg'
+              src='https://groomit.me/v6/images/profile-avatar.svg'
               alt="Profile"
               className="h-[80px] rounded-[10px] w-[80px]"
             />)}
@@ -269,7 +269,7 @@ const Account = () => {
                   </div>
 
                   <div>
-                    <img src="https://dev.groomit.me/v7/images/webapp/icons/banner-cat.svg" alt="Cat" />
+                    <img src="https://groomit.me/v7/images/webapp/icons/banner-cat.svg" alt="Cat" />
                   </div>
                 </div>
               </div>

@@ -66,7 +66,7 @@ const CanceledByYou = ({ appointment }) => {
                 {/* Actions */}
                 <div className="mt-4 pt-3 border-t border-gray-200 flex flex-col gap-3">
                     <div className="flex gap-3">
-                        <ActionButton label="Rate Service" icon={Star} onClick={() => {setRateModal(true)}} />
+                        <ActionButton label="Rate Service" icon={Star} onClick={() => { setRateModal(true) }} />
                         <ActionButton label="Refund Status" />
                     </div>
                     <ActionButton label="Rebook" variant="brand" />
@@ -126,10 +126,10 @@ const PreferredGroomer = ({ groomer, onInfoClick }) => {
 
                 <div className="flex gap-2">
                     <ActionIcon
-                        icon={isAllowedMessage ? Message : 'https://dev.groomit.me/v7/images/webapp/icons/message-gray.svg'}
+                        icon={isAllowedMessage ? Message : 'https://groomit.me/v7/images/webapp/icons/message-gray.svg'}
                     />
                     <ActionIcon
-                        icon={isAllowedCall ? Call : 'https://dev.groomit.me/v7/images/webapp/icons/call-gray.svg'}
+                        icon={isAllowedCall ? Call : 'https://groomit.me/v7/images/webapp/icons/call-gray.svg'}
                     />
                 </div>
             </div>

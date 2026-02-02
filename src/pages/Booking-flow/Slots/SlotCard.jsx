@@ -47,7 +47,7 @@ const SlotCard = ({ date, slots, selectedSlot, onSelect }) => {
     };
 
     return (
-        <div className="flex flex-col p-[15px] gap-[10px] rounded-[15px] bg-white">
+        <div className={`flex flex-col p-[15px] ${slots.length > 0 ? 'gap-[10px]' : ''} rounded-[15px] bg-white`}>
             <div className="text-xs font-bold uppercase">
                 {new Date(date).toLocaleDateString("en-US", {
                     weekday: "long",
@@ -60,7 +60,7 @@ const SlotCard = ({ date, slots, selectedSlot, onSelect }) => {
                 <motion.div layout className="flex flex-col gap-2">
                     {/* ROW 1 */}
                     <div className="flex gap-2">
-                        {firstRow.map((slot) => (
+                        {firstRow && firstRow.map((slot) => (
                             <SlotButton
                                 key={slot}
                                 id={makeId(slot)}

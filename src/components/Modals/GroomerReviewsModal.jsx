@@ -36,7 +36,7 @@ const STATIC_GROOMER = {
             date: '23 Oct, 2025',
             petName: 'Buddy',
             petBreed: 'American Golden Retriever',
-            petAvatar: 'https://raj.dev.groomit.me/v7/images/icons/dog-avatar.svg',
+            petAvatar: 'https://groomit.me/v7/images/icons/dog-avatar.svg',
         },
         {
             rating: 4,
@@ -46,7 +46,7 @@ const STATIC_GROOMER = {
             date: '12 Sep, 2025',
             petName: 'Rocky',
             petBreed: 'Labrador',
-            petAvatar: 'https://raj.dev.groomit.me/v7/images/icons/dog-avatar.svg',
+            petAvatar: 'https://groomit.me/v7/images/icons/dog-avatar.svg',
         },
         {
             rating: 3,
@@ -56,7 +56,7 @@ const STATIC_GROOMER = {
             date: '02 Aug, 2025',
             petName: 'Coco',
             petBreed: 'Poodle',
-            petAvatar: 'https://raj.dev.groomit.me/v7/images/icons/dog-avatar.svg',
+            petAvatar: 'https://groomit.me/v7/images/icons/dog-avatar.svg',
         },
         {
             rating: 2,
@@ -66,7 +66,7 @@ const STATIC_GROOMER = {
             date: '15 Jul, 2025',
             petName: 'Max',
             petBreed: 'Beagle',
-            petAvatar: 'https://raj.dev.groomit.me/v7/images/icons/dog-avatar.svg',
+            petAvatar: 'https://groomit.me/v7/images/icons/dog-avatar.svg',
         },
         {
             rating: 1,
@@ -76,7 +76,7 @@ const STATIC_GROOMER = {
             date: '01 Jun, 2025',
             petName: 'Leo',
             petBreed: 'Husky',
-            petAvatar: 'https://raj.dev.groomit.me/v7/images/icons/dog-avatar.svg',
+            petAvatar: 'https://groomit.me/v7/images/icons/dog-avatar.svg',
         },
     ],
 };

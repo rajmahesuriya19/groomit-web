@@ -128,7 +128,7 @@ const CreateEditAccount2 = () => {
                     <div className="space-y-4">
                         <div className='bg-white shadow-md flex gap-3 flex-col justify-center items-center self-stretch p-[15px] rounded-[15px]'>
                             <div className="relative">
-                                <img src={avatarImage ? avatarImage : 'https://dev.groomit.me/v6/images/profile-avatar.svg'} alt="Profile" className="rounded-[10px] w-[100px] h-[100px] object-cover" />
+                                <img src={avatarImage ? avatarImage : 'https://groomit.me/v6/images/profile-avatar.svg'} alt="Profile" className="rounded-[10px] w-[100px] h-[100px] object-cover" />
                                 <input
                                     type="file"
                                     id="avatarUpload"

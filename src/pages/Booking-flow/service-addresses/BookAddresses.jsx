@@ -245,7 +245,7 @@ const BookAddresses = () => {
             await dispatch(addAddress(payload)).unwrap();
             await dispatch(fetchAddresses()).unwrap();
             // ✅ success
-            setSuccessModal(true);
+            // setSuccessModal(true);
             setAddService(false);
             reset();
         } catch (err) {
@@ -357,7 +357,7 @@ const BookAddresses = () => {
                                                 checked={selectedAddressId === address?.address_id}
                                                 onChange={() => {
                                                     setSelectedAddressId(address.address_id);
-                                                    dispatch(setBookingAddress(address));
+                                                    // dispatch(setBookingAddress(address));
                                                 }}
                                                 sx={{
                                                     p: 0,
@@ -424,7 +424,7 @@ const BookAddresses = () => {
                 </form>
             </AddServiceAddressModal>
 
-            <SuccessModal
+            {/* <SuccessModal
                 open={successModal}
                 onClose={() => setSuccessModal(false)}
                 onConfirm={() => {
@@ -433,7 +433,7 @@ const BookAddresses = () => {
                 }}
                 icon={SuccessIcon}
                 title="Address added successfully"
-            />
+            /> */}
 
             <VerifyServiceArea
                 open={verifyService}

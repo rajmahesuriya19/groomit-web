@@ -116,12 +116,12 @@ const PreferredGroomer = ({ groomer, onInfoClick }) => {
 
                 <div className="flex gap-2">
                     <ActionIcon icon={isAllowedMessage
-                        ? 'https://dev.groomit.me/v7/images/webapp/icons/message-color.svg'
-                        : 'https://dev.groomit.me/v7/images/webapp/icons/message-gray.svg'}
+                        ? 'https://groomit.me/v7/images/webapp/icons/message-color.svg'
+                        : 'https://groomit.me/v7/images/webapp/icons/message-gray.svg'}
                     />
                     <ActionIcon icon={isAllowedCall
-                        ? 'https://dev.groomit.me/v7/images/webapp/icons/call-color.svg'
-                        : 'https://dev.groomit.me/v7/images/webapp/icons/call-gray.svg'}
+                        ? 'https://groomit.me/v7/images/webapp/icons/call-color.svg'
+                        : 'https://groomit.me/v7/images/webapp/icons/call-gray.svg'}
                     />
                 </div>
             </div>

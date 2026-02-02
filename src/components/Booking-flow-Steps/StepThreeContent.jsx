@@ -24,7 +24,13 @@ const SHAMPOO_OPTIONS = [
 
 /* -------------------- component -------------------- */
 
-const StepThreeContent = ({ showSuccess }) => {
+const StepThreeContent = ({
+    showSuccess,
+    conditionError,
+    behaviorError,
+    setConditionError,
+    setBehaviorError,
+}) => {
     const dispatch = useDispatch();
     const fileInputRef = React.useRef(null);
 
@@ -53,11 +59,9 @@ const StepThreeContent = ({ showSuccess }) => {
 
     const [behaviourModal, setBehaviourModal] = React.useState(false);
     const [pendingBehaviour, setPendingBehaviour] = React.useState(null);
-    const [behaviourError, setBehaviourError] = React.useState("");
 
     const [mattingModal, setMattingModal] = React.useState(false);
     const [pendingCondition, setPendingCondition] = React.useState(null);
-    const [conditionError, setConditionError] = React.useState("");
 
     /* -------------------- helpers -------------------- */
 
@@ -92,7 +96,7 @@ const StepThreeContent = ({ showSuccess }) => {
     };
 
     const handleBehaviourSelect = (val) => {
-        setBehaviourError("");
+        setBehaviorError("");
 
         if (val === "Hard to Handle") {
             updateGrooming({ behavior: null });
@@ -110,7 +114,7 @@ const StepThreeContent = ({ showSuccess }) => {
 
         setPendingBehaviour(null);
         setBehaviourModal(false);
-        setBehaviourError("");
+        setBehaviorError("");
     };
 
     const handleBehaviourModalClose = () => {
@@ -118,7 +122,7 @@ const StepThreeContent = ({ showSuccess }) => {
 
         if (pendingBehaviour) {
             setPendingBehaviour(null);
-            setBehaviourError("Please confirm pet’s behaviour");
+            setBehaviorError("Please confirm pet’s behaviour");
         }
     };
 
@@ -250,9 +254,9 @@ const StepThreeContent = ({ showSuccess }) => {
                     <h3 className="font-bold">Behavior</h3>
                     {renderPills(BEHAVIOUR, behavior, handleBehaviourSelect)}
 
-                    {behaviourError && (
+                    {behaviorError && (
                         <p className="text-xs text-brand mt-1">
-                            {behaviourError}
+                            {behaviorError}
                         </p>
                     )}
                 </section>
