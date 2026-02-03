@@ -65,18 +65,107 @@ export const getPetServiceType = createAsyncThunk(
     }
 );
 
+// Save Pet Service Type
+export const SavePetServiceType = createAsyncThunk(
+    'bookingFlow/SavePetServiceType',
+    async ({
+        address_id,
+        book_pet_ids,
+        pet_type,
+        service_type,
+        total_cats,
+        total_dogs,
+        total_pets,
+        booking_session_token
+    }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/service_type/save`,
+                {
+                    address_id,
+                    book_pet_ids,
+                    pet_type,
+                    service_type,
+                    total_cats,
+                    total_dogs,
+                    total_pets,
+                    booking_session_token
+                }
+            );
+
+            // Only return pet_breeds
+            return data?.bookingSessionPetId || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Fetch pet profile by Generated ID
+export const getPetProfileGeneratedID = createAsyncThunk(
+    'bookingFlow/getPetProfileGeneratedID',
+    async ({ petId, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/get/${petId}`,
+                { booking_session_token }
+            );
+
+            return data.data || {};
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch pet profile' });
+        }
+    }
+);
+
 // Get Package Details
 export const getPackageDetails = createAsyncThunk(
     'bookingFlow/getPackageDetails',
     async ({ id, breed_id, size_id, pet_type, booking_session_token }, { rejectWithValue }) => {
         try {
             const { data } = await axiosInstance.post(
-                `api/user/booking/pet/package/get`,
+                `api/user/booking/pet/package/get/${id}`,
                 { breed_id, size_id, pet_type, booking_session_token }
             );
 
             // Only return pet_breeds
-            return data?.data?.pet_breeds || [];
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Get Package Details
+export const savePackageDetails = createAsyncThunk(
+    'bookingFlow/savePackageDetails',
+    async ({ pet_id, package_product_id, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/package/save`,
+                { pet_id, package_product_id, booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Get Package Details
+export const getGroomingDetails = createAsyncThunk(
+    'bookingFlow/getGroomingDetails',
+    async ({ id, breed_id, size_id, pet_type, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/groom-detail/${id}`,
+                { breed_id, size_id, pet_type, booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
         }
@@ -90,6 +179,8 @@ const initialState = {
     getPetServiceTypeApi: null,
 
     /* ---------------- Page-2 (Selection) ---------------- */
+    selectedPet: null,
+    selectedPetIdsfromAPI: [],
     selectedPetIds: [],
     petCounts: {
         dog: 0,
@@ -105,6 +196,7 @@ const initialState = {
     currentPetIndex: 0,
     petsDraft: [],
     packageDetails: [],
+    groomingDetails: [],
 
     /* ---------------- Calender ---------------- */
     selectedSlot: null,
@@ -144,6 +236,7 @@ const bookingFlowSlice = createSlice({
 
             // FULL reset only when service actually changes
             state.selectedPetIds = [];
+            state.selectedPetIdsfromAPI = [];
             state.petCounts = { dog: 0, cat: 0 };
             state.petQueue = [];
             state.currentPetIndex = 0;
@@ -264,46 +357,62 @@ const bookingFlowSlice = createSlice({
         updateTotalPrice(state, action) {
             const { petIndex } = action.payload;
 
-            const petDraft = state.petsDraft[petIndex];
+            const petDraft = state.petsDraft?.[petIndex];
             if (!petDraft) return;
 
             let total = 0;
 
             /* ---------------- PACKAGE PRICE ---------------- */
 
-            const pkg = petDraft.stepData.package;
+            const pkg = petDraft.stepData?.package;
 
-            if (pkg?.type === "one-time") {
-                total += Number(pkg.price.replace(/[^0-9.]/g, ""));
+            if (pkg?.pricingType === "one-time") {
+                total += Number(
+                    String(pkg?.price || 0).replace(/[^0-9.]/g, "")
+                );
             }
 
-            if (pkg?.type === "recurring" && pkg.recurringConfig) {
-                const { billing, annualTotal, perAppointment } = pkg.recurringConfig;
+            if (pkg?.pricingType === "recurring" && pkg?.recurringConfig) {
+                const { billing, annualTotal, perAppointment } =
+                    pkg.recurringConfig;
 
-                total +=
+                total += Number(
                     billing === "annual"
-                        ? Number(annualTotal)
-                        : Number(perAppointment);
+                        ? annualTotal || 0
+                        : perAppointment || 0
+                );
             }
+
+            /* ---------------- SAFETY INSURANCE ---------------- */
+
+            if (pkg?.safetyInsuranceFee) {
+                total += Number(pkg.safetyInsuranceFee);
+            }
+
+            if (pkg?.taxAmount) {
+                total += Number(pkg.taxAmount);
+            }
+
+            Math.floor(total);
 
             /* ---------------- ADD-ONS PRICE ---------------- */
 
-            const addons = petDraft.stepData.addons?.items || [];
+            const addons = petDraft.stepData?.addons?.items || [];
 
-            const addonsTotal = addons.reduce(
-                (sum, addon) => sum + Number(addon.price || 0),
+            total += addons.reduce(
+                (sum, addon) => sum + Number(addon?.price || 0),
                 0
             );
 
-            total += addonsTotal;
-
-            /* ---------------- SAVE ---------------- */
+            /* ---------------- SAVE PET TOTAL ---------------- */
 
             petDraft.stepData.totalPrice = total;
 
-            // 🧮 Booking-level total
+            /* ---------------- BOOKING TOTAL ---------------- */
+
             state.totalPrice = state.petsDraft.reduce(
-                (sum, pet) => sum + (pet.stepData.totalPrice || 0),
+                (sum, pet) =>
+                    sum + Number(pet?.stepData?.totalPrice || 0),
                 0
             );
         },
@@ -390,6 +499,37 @@ const bookingFlowSlice = createSlice({
                 toast.error(state.error);
             })
 
+            // Save Pet Service Type
+            .addCase(SavePetServiceType.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(SavePetServiceType.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedPetIdsfromAPI = action.payload;
+            })
+            .addCase(SavePetServiceType.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Pet Profile by Generated ID
+            .addCase(getPetProfileGeneratedID.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getPetProfileGeneratedID.fulfilled, (state, action) => {
+                state.loading = false;
+                state.petBreeds = action.payload?.pet_breeds;
+                state.selectedPet = action.payload?.pets;
+            })
+            .addCase(getPetProfileGeneratedID.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
             // Get Package Details
             .addCase(getPackageDetails.pending, (state) => {
                 state.loading = true;
@@ -400,6 +540,36 @@ const bookingFlowSlice = createSlice({
                 state.packageDetails = action.payload;
             })
             .addCase(getPackageDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Save Package Details
+            .addCase(savePackageDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(savePackageDetails.fulfilled, (state, action) => {
+                state.loading = false;
+            })
+            .addCase(savePackageDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+
+            // Get Grooming Details
+            .addCase(getGroomingDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getGroomingDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.groomingDetails = action.payload;
+            })
+            .addCase(getGroomingDetails.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);

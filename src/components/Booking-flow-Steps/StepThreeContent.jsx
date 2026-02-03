@@ -1,26 +1,15 @@
 import Card from "@/common/Booking-Flow/Card";
-import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
+import { Radio } from "@mui/material";
 import React, { useState } from "react";
 
 import Info from "../../assets/icon/info-circle-grey.svg";
 import FillGallery from "../../assets/icon/fill-black-gallery.svg";
-import PremiumModal from "../Modals/PremiumModal";
-import HypoallergenicModal from "../Modals/HypoallergenicModal";
+import ShampooModal from "../Modals/ShampooModal";
 import SuccessIcon from "../../assets/icon/tick-green.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { updatePetStepData } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 import MattingInfoModal from "../Modals/MattingInfoModal";
 import HardToHandleModal from "../Modals/HardToHandleModal";
-
-/* -------------------- constants -------------------- */
-
-const CONDITIONS = ["Not Matted", "Matted", "Severe Matted"];
-const BEHAVIOUR = ["Friendly", "Anxious", "Hard to Handle"];
-
-const SHAMPOO_OPTIONS = [
-    { label: "Premium (Scented)", value: "premium" },
-    { label: "Hypoallergenic (Fragrance Free)", value: "hypoallergenic" },
-];
 
 /* -------------------- component -------------------- */
 
@@ -34,8 +23,23 @@ const StepThreeContent = ({
     const dispatch = useDispatch();
     const fileInputRef = React.useRef(null);
 
-    const currentPetIndex = useSelector(
-        (state) => state.bookingFlow.currentPetIndex
+    const { currentPetIndex, groomingDetails, petsDraft } = useSelector(
+        (state) => state.bookingFlow
+    );
+
+    console.log(groomingDetails);
+    const COAT_TYPE_LABELS = groomingDetails?.coatTypes;
+    const BEHAVIOR_LABELS = groomingDetails?.behaviors;
+
+    const SHAMPOO_OPTIONS = groomingDetails?.shampoos;
+    const coatProducts = groomingDetails?.coatAndBehaviorProducts || {};
+
+    const COAT_KEYS = ["not-matted", "matted", "severe"].filter(
+        (key) => key in coatProducts
+    );
+
+    const BEHAVIOR_KEYS = ["friendly", "anxious", "aggressive"].filter(
+        (key) => key in coatProducts
     );
 
     const grooming =
@@ -47,6 +51,7 @@ const StepThreeContent = ({
     const {
         condition,
         behavior,
+        shampooId,
         shampoo = "premium",
         note = "",
         images = [],
@@ -54,8 +59,9 @@ const StepThreeContent = ({
     } = grooming;
 
     const [localNote, setLocalNote] = React.useState(note);
-    const [premiumModal, setPremiumModal] = React.useState(false);
-    const [hypoModal, setHypoModal] = React.useState(false);
+    const [shampooModal, setShampooModal] = React.useState(false);
+    const [shampooDecs, setShampooDecs] = React.useState(false);
+    const [shampooTitle, setShampooTitle] = React.useState(false);
 
     const [behaviourModal, setBehaviourModal] = React.useState(false);
     const [pendingBehaviour, setPendingBehaviour] = React.useState(null);
@@ -77,40 +83,44 @@ const StepThreeContent = ({
 
     /* -------------------- coat condition logic -------------------- */
 
-    const handleConditionSelect = (item) => {
+    const handleConditionSelect = (key) => {
         setConditionError("");
 
-        // ✅ Not Matted = immediate + clear consent
-        if (item === "Not Matted") {
+        // Not matted → no modal, no product
+        if (key === "not-matted") {
             updateGrooming({
-                condition: "Not Matted",
+                condition: key,
+                conditionProduct: null,
                 mattingInfo: null,
             });
-            setPendingCondition(null);
             return;
         }
 
-        // 🔒 Matted / Severe Matted requires confirmation
-        setPendingCondition(item);
+        // Matted / Severe → needs approval
+        setPendingCondition(key);
         setMattingModal(true);
     };
 
-    const handleBehaviourSelect = (val) => {
+    const handleBehaviourSelect = (key) => {
         setBehaviorError("");
 
-        if (val === "Hard to Handle") {
-            updateGrooming({ behavior: null });
-
-            setPendingBehaviour(val);
+        if (key === "aggressive") {
+            setPendingBehaviour(key);
             setBehaviourModal(true);
             return;
         }
 
-        updateGrooming({ behavior: val });
+        updateGrooming({
+            behavior: key,
+            behaviorProduct: coatProducts[key] || null,
+        });
     };
 
     const handleBehaviourSubmit = () => {
-        updateGrooming({ behavior: "Hard to Handle" });
+        updateGrooming({
+            behavior: "aggressive",
+            behaviorProduct: coatProducts["aggressive"],
+        });
 
         setPendingBehaviour(null);
         setBehaviourModal(false);
@@ -129,6 +139,7 @@ const StepThreeContent = ({
     const handleMattingModalSubmit = (approval) => {
         updateGrooming({
             condition: pendingCondition,
+            conditionProduct: coatProducts[pendingCondition],
             mattingInfo: { approval },
         });
 
@@ -193,18 +204,24 @@ const StepThreeContent = ({
 
     /* -------------------- UI helpers -------------------- */
 
-    const renderPills = (options, selected, onClick) => (
+    const renderPills = ({
+        options = [],
+        selectedKey,
+        labelMap = {},
+        onSelect,
+    }) => (
         <div className="flex gap-2">
-            {options.map((item) => (
+            {options.map((key) => (
                 <button
-                    key={item}
-                    onClick={() => onClick(item)}
-                    className={`w-full py-3 rounded-[10px] border transition ${selected === item
-                        ? "border-brand shadow-md font-bold"
-                        : "border-primary-light"
+                    key={key}
+                    onClick={() => onSelect(key)}
+                    className={`w-full py-3 rounded-[10px] border transition
+                    ${selectedKey === key
+                            ? "border-brand shadow-md font-bold"
+                            : "border-primary-light"
                         }`}
                 >
-                    {item}
+                    {labelMap[key] || key}
                 </button>
             ))}
         </div>
@@ -227,7 +244,12 @@ const StepThreeContent = ({
                 <section className="space-y-2">
                     <h3 className="font-bold">Coat Conditions</h3>
 
-                    {renderPills(CONDITIONS, condition, handleConditionSelect)}
+                    {renderPills({
+                        options: COAT_KEYS,
+                        selectedKey: condition,
+                        labelMap: COAT_TYPE_LABELS,
+                        onSelect: handleConditionSelect,
+                    })}
 
                     {mattingInfo?.approval && (
                         <div
@@ -252,7 +274,12 @@ const StepThreeContent = ({
                 {/* Behavior */}
                 <section className="pt-4 space-y-2">
                     <h3 className="font-bold">Behavior</h3>
-                    {renderPills(BEHAVIOUR, behavior, handleBehaviourSelect)}
+                    {renderPills({
+                        options: BEHAVIOR_KEYS,
+                        selectedKey: behavior,
+                        labelMap: BEHAVIOR_LABELS,
+                        onSelect: handleBehaviourSelect,
+                    })}
 
                     {behaviorError && (
                         <p className="text-xs text-brand mt-1">
@@ -268,13 +295,13 @@ const StepThreeContent = ({
                     <div className="flex flex-col gap-2">
                         {SHAMPOO_OPTIONS.map((option) => (
                             <div
-                                key={option.value}
+                                key={option.id}
                                 className="flex items-center gap-2"
                             >
                                 <Radio
-                                    checked={shampoo === option.value}
+                                    checked={shampooId === option.id}
                                     onChange={() =>
-                                        updateGrooming({ shampoo: option.value })
+                                        updateGrooming({ shampooId: option.id, shampoo: option?.prod_name })
                                     }
                                     sx={{
                                         p: 0,
@@ -285,31 +312,21 @@ const StepThreeContent = ({
 
                                 <span
                                     className="text-sm cursor-pointer"
-                                    onClick={() => updateGrooming({ shampoo: option.value })}
+                                    onClick={() => updateGrooming({ shampooId: option.id, shampoo: option?.prod_name })}
                                 >
-                                    {option.label}
+                                    {option.prod_name} {""} ({option.prod_desc})
                                 </span>
 
-                                {option.value === "premium" && (
+                                {(option.prod_desc_html || option.prod_short_desc) && (
                                     <img
                                         src={Info}
                                         alt="Info"
                                         className="w-[22px] h-[22px] cursor-pointer"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            setPremiumModal(true);
-                                        }}
-                                    />
-                                )}
-
-                                {option.value === "hypoallergenic" && (
-                                    <img
-                                        src={Info}
-                                        alt="Info"
-                                        className="w-[22px] h-[22px] cursor-pointer"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setHypoModal(true);
+                                            setShampooModal(true);
+                                            setShampooDecs(option.prod_desc_html || option.prod_short_desc)
+                                            setShampooTitle(option.prod_name)
                                         }}
                                     />
                                 )}
@@ -381,14 +398,11 @@ const StepThreeContent = ({
                 </section>
             </Card>
 
-            <PremiumModal
-                open={premiumModal}
-                onClose={() => setPremiumModal(false)}
-            />
-
-            <HypoallergenicModal
-                open={hypoModal}
-                onClose={() => setHypoModal(false)}
+            <ShampooModal
+                open={shampooModal}
+                onClose={() => setShampooModal(false)}
+                shampooTitle={shampooTitle}
+                shampooDecs={shampooDecs}
             />
 
             <MattingInfoModal

@@ -16,7 +16,7 @@ const modalStyle = {
     outline: "none",
 };
 
-const PremiumModal = ({ open, onClose }) => {
+const ShampooModal = ({ open, onClose, shampooTitle, shampooDecs }) => {
     return (
         <Modal open={open} onClose={onClose}>
             <Box sx={modalStyle} className="relative font-inter">
@@ -33,15 +33,13 @@ const PremiumModal = ({ open, onClose }) => {
                 {/* Header */}
                 <div className="mt-2 space-y-1">
                     <h2 className="text-xl font-bold text-primary-dark">
-                        Premium
+                        {shampooTitle}
                     </h2>
                 </div>
 
                 {/* Body */}
                 <div className="mt-4 text-base leading-relaxed text-primary-dark space-y-3">
-                    <p>
-                        Our groomers use a variety of premium, high-quality shampoos—handpicked based on their professional experience and your pet's unique needs. While many of them choose trusted brands like Pura Vida, the exact product may vary to ensure the best results for each dog. This scented shampoo leaves your pet clean, refreshed, and smelling great after every groom.
-                    </p>
+                    <p>{shampooDecs}</p>
                 </div>
 
                 {/* Footer */}
@@ -59,4 +57,4 @@ const PremiumModal = ({ open, onClose }) => {
     );
 };
 
-export default PremiumModal;
+export default ShampooModal;
