@@ -124,7 +124,7 @@ const PackageCard = ({
 
 /* -------------------- Main Component -------------------- */
 
-const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
+const StepTwoContent2 = ({ showSuccess, setPackageError, packageError }) => {
     const dispatch = useDispatch();
     const { currentPetIndex, packageDetails, petsDraft } = useSelector(
         (state) => state.bookingFlow
@@ -141,6 +141,8 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
 
 
     const { packages } = packageDetails || {};
+
+    console.log(packages);
 
     const [activeTab, setActiveTab] = useState(0);
     const [selectedPackage, setSelectedPackage] = useState(null);
@@ -161,7 +163,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
     /* -------------------- Handlers -------------------- */
 
     const handleOneTimeSelect = (pkg) => {
-        // setSelectedPackage(pkg);
+        setSelectedPackage(pkg);
         // setSelectedPricingType('one-time');
         setRecurringPackage(null);
         setRecurringModal(false);
@@ -255,7 +257,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
 
         if (!pkg) return;
 
-        // setSelectedPackage(pkg);
+        setSelectedPackage(pkg);
         // setSelectedPricingType(savedPackage.pricingType);
     }, [savedPackage, packages]);
 
@@ -371,4 +373,4 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
     );
 };
 
-export default StepTwoContent;
+export default StepTwoContent2;

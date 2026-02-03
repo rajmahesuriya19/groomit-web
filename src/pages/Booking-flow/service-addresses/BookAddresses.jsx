@@ -247,8 +247,27 @@ const BookAddresses = () => {
             // ✅ success
             // setSuccessModal(true);
             setAddService(false);
-            reset();
+            reset({
+                street: '',
+                apartment_number: '',
+                city: '',
+                state: '',
+                zip: '',
+                isDefault: false,
+            })
         } catch (err) {
+            console.log(err);
+            if (!err?.success) {
+                reset({
+                    street: '',
+                    apartment_number: '',
+                    city: '',
+                    state: '',
+                    zip: '',
+                    isDefault: false,
+                })
+            }
+
             // ❌ service not available in zip
             if (err?.isZipNotExists) {
                 setVerifyService(true);
@@ -330,7 +349,7 @@ const BookAddresses = () => {
 
             {addresses.length ? (
                 <form onSubmit={(e) => e.preventDefault()}>
-                    <div className="flex justify-center min-h-screen px-3 py-4">
+                    <div className="flex justify-center min-h-screen px-3 py-4 pb-32">
                         <div className="w-full max-w-md md:max-w-lg lg:max-w-xl">
                             <div className="rounded-[15px] bg-white shadow-md p-4 space-y-2">
 

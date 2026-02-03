@@ -19,7 +19,7 @@ import PetInfo from "@/components/Modals/PetInfo";
 import AddPetModal from "@/components/Modals/AddPetModal";
 import Card from "@/common/Booking-Flow/Card";
 import BookingFooter from "../BookingFooter";
-import { getPetServiceType, initializePetFlow, setPetCounts, setServiceType, togglePet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { getPetServiceType, initializePetFlow, SavePetServiceType, setPetCounts, setServiceType, togglePet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 
 const SERVICE_TYPES = {
     MOBILE: "mobile-van",
@@ -43,6 +43,7 @@ const ServiceTypePets = () => {
     const {
         serviceType,
         selectedPetIds = [],
+        selectedPetIdsfromAPI = [],
         petCounts = { dog: 0, cat: 0 },
         address: bookingAddress,
         getPetServiceTypeApi
@@ -62,6 +63,16 @@ const ServiceTypePets = () => {
     const dogCount = petCounts?.dog || 0;
     const catCount = petCounts?.cat || 0;
     const totalPets = dogCount + catCount;
+
+    let pet_type = "";
+
+    if (dogCount > 0 && catCount > 0) {
+        pet_type = "both";
+    } else if (dogCount > 0) {
+        pet_type = "dog";
+    } else if (catCount > 0) {
+        pet_type = "cat";
+    }
 
     const [serviceTypeModal, setServiceTypeModal] = useState(false);
     const [petInfoModal, setPetInfoModal] = useState(false);
@@ -167,8 +178,9 @@ const ServiceTypePets = () => {
     };
     const decrementCat = () => updateCounts(dogCount, Math.max(catCount - 1, 0));
 
-    /* ---------------- Submit ---------------- */
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        showLoader();
+
         // CASE 1: Existing pets
         if (allPets.length > 0) {
             if (!selectedPetIds.length) {
@@ -176,8 +188,32 @@ const ServiceTypePets = () => {
                 return;
             }
 
-            const [firstPetId] = selectedPetIds;
-            navigate(`/book/pet/${firstPetId}`);
+            try {
+                const res = await dispatch(
+                    SavePetServiceType({
+                        address_id: displayAddress?.address_id,
+                        book_pet_ids: selectedPetIds,
+                        service_type: serviceType,
+                        pet_type,
+                        total_cats: catCount,
+                        total_dogs: dogCount,
+                        total_pets: totalPets,
+                        booking_session_token: token,
+                    })
+                ).unwrap();
+
+                // const [firstPetId] = selectedPetIds;
+                // navigate(`/book/pet/${firstPetId}`);
+
+                const petId = res?.[0] || selectedPetIdsfromAPI[0];
+
+                if (petId) {
+                    navigate(`/book/pet/${petId}`);
+                }
+            } catch (err) {
+                toast.error(err?.message || "Something went wrong");
+            }
+            hideLoader();
             return;
         }
 
@@ -187,18 +223,22 @@ const ServiceTypePets = () => {
             return;
         }
 
-        // 🔥 NEW FLOW STARTS HERE
-        // Build petQueue + currentPetType in store
-        dispatch(
-            initializePetFlow({
-                dog: petCounts.dog,
-                cat: petCounts.cat,
-            })
-        );
+        try {
+            dispatch(
+                initializePetFlow({
+                    dog: petCounts.dog,
+                    cat: petCounts.cat,
+                })
+            );
 
-        // Navigate only once
-        navigate("/book/pet/details");
+            navigate("/book/pet/details");
+            hideLoader();
+        } catch (err) {
+            hideLoader();
+            toast.error(err?.message || "Something went wrong");
+        }
     };
+    ;
 
     const isNextDisabled = allPets.length
         ? selectedPetIds.length === 0

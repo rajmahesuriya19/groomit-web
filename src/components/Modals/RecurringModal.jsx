@@ -2,6 +2,27 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Modal, Box, IconButton, Radio } from "@mui/material";
 import Close from "../../assets/icon/close.svg";
 
+import Gift from "../../assets/icon/gift-yellow.svg"
+import Info from "../../assets/icon/info-circle-white.svg"
+import FICollarModal from "./FICollarModal";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePetStepData } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+
+const InfoSection = ({ items = [] }) => (
+    <div className="w-full flex mt-3">
+        <ul className={`list-disc pl-6 space-y-1 text-primary-dark w-full text-xs font-medium`}>
+            {items.map((item, i) => (
+                <li
+                    key={i}
+                    className={"text-primary-light"}
+                >
+                    {item.label}
+                </li>
+            ))}
+        </ul>
+    </div>
+)
+
 /* -------------------- styles -------------------- */
 
 const modalStyle = {
@@ -20,62 +41,53 @@ const modalStyle = {
     outline: "none",
 };
 
-/* -------------------- constants -------------------- */
-
-const FREQUENCIES = [
-    { label: "4 Weeks", value: 4 },
-    { label: "6 Weeks", value: 6, recommended: true },
-    { label: "8 Weeks", value: 8 },
-    { label: "12 Weeks", value: 12 },
-];
-
-const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const TIMES = ["Morning", "Afternoon", "Evening"];
-
 /* -------------------- helpers -------------------- */
 
-const formatPrice = (price) => {
-    if (price == null) return "";
-    const value = String(price).trim();
-    return value.startsWith("$") ? value : `$${value}`;
-};
-
-const getAppointmentCount = (frequency) => Number(frequency) || 0;
-
-const getAnnualTotal = (price, frequency) => {
-    return getAppointmentCount(frequency) * Number(price || 0);
-};
+const formatPrice = (price) => `$${Number(price || 0)}`;
 
 /* -------------------- component -------------------- */
 
 const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
-    const [frequency, setFrequency] = useState(6);
-    const [billing, setBilling] = useState("annual");
-    const [day, setDay] = useState("Mon");
-    const [time, setTime] = useState("Morning");
+    const dispatch = useDispatch();
+    const [collarModal, setCollarModal] = useState(false)
 
-    const annualPrice = 97;
-
-    const appointmentCount = useMemo(
-        () => getAppointmentCount(frequency),
-        [frequency]
+    const { currentPetIndex, petsDraft } = useSelector(
+        (state) => state.bookingFlow
     );
 
-    const annualTotal = useMemo(
-        () => getAnnualTotal(annualPrice, frequency),
-        [annualPrice, frequency]
-    );
+    const pkgDraft =
+        petsDraft?.[currentPetIndex]?.stepData?.package || {};
 
-    const resetState = () => {
-        setFrequency(6);
-        setBilling("annual");
-        setDay("Mon");
-        setTime("Morning");
-    };
+    const recurringConfig = pkgDraft.recurringConfig || {};
 
-    useEffect(() => {
-        if (!open) resetState();
-    }, [open]);
+    const intervals = packageData?.recurringIntervalsWithPrices || [];
+
+    const flexibleIntervals = intervals.filter(i => i.type === "flexible");
+    const annualIntervals = intervals.filter(i => i.type === "annual");
+
+    const getDefaultInterval = (intervals) =>
+        intervals.find(i => String(i.weeks) === "4") ||
+        intervals.find(i => i.recommended === "1") ||
+        intervals[0];
+
+    const selectedInterval = useMemo(() => {
+        if (!intervals.length) return null;
+
+        const current =
+            intervals.find(i => i.id === recurringConfig.intervalId);
+
+        return current || getDefaultInterval(intervals);
+    }, [intervals, recurringConfig.intervalId]);
+
+    const billing = recurringConfig.billing || selectedInterval?.type || "flexible";
+    const day = recurringConfig.preferredDay || "Mon";
+    const time = recurringConfig.preferredTime || "Morning";
+
+    const availableIntervals =
+        billing === "annual" ? annualIntervals : flexibleIntervals;
+
+    const annualTotal =
+        selectedInterval?.packageTotalAppointmentsPriceWithMobileVanFee;
 
     const selectedCard = "border-brand shadow-md font-bold";
     const unselectedCard = "border-primary-light";
@@ -85,209 +97,268 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
             key: "flexible",
             title: "Flexible",
             subtitle: "Pay Per Appointment",
-            oldPrice: packageData?.closedPrice ?? 120,
-            price: packageData?.price ?? 114,
+            priceRange: formatPrice(packageData?.recurringPriceMaxWithMobileVanFee),
+            priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
         },
         {
             key: "annual",
             title: "Annual",
             subtitle: "Prepay for Year",
-            oldPrice: packageData?.closedPrice ?? 120,
-            price: annualPrice,
-            note: `Total ${appointmentCount} appts – ${formatPrice(annualTotal)}`,
-            benefits: [
-                "Fully refundable annual plan",
-                "Hassle-free cancellations anytime",
-            ],
+            priceRange: formatPrice(packageData?.recurringPriceMinWithMobileVanFee),
+            priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
         },
     ];
 
+    /* ---------------- Redux updater ---------------- */
+
+    const updateRecurringConfig = (updates) => {
+        dispatch(
+            updatePetStepData({
+                petIndex: currentPetIndex,
+                step: "package",
+                data: {
+                    ...pkgDraft,
+                    pricingType: "recurring",
+                    recurringConfig: {
+                        ...recurringConfig,
+                        ...updates,
+                    },
+                },
+            })
+        );
+    };
+
+    /* ---------------- confirm ---------------- */
+
     const handleConfirm = () => {
+        console.log(selectedInterval.weeks);
+        if (selectedInterval.weeks) {
+
+        }
         onConfirm?.({
-            frequency,
+            intervalId: selectedInterval.id,
             billing,
+            weeks: selectedInterval.weeks,
+            days: selectedInterval.days,
+            totalAppointments: selectedInterval.total_appointments,
+            perAppointment: selectedInterval.packagePriceWithMobileVanFee,
+            annualTotal,
+            safetyInsuranceFee: selectedInterval.safetyInsuranceFee,
             preferredDay: day,
             preferredTime: time,
-            annualTotal,
-            perAppointment: annualPrice,
         });
     };
 
-    const handleClose = () => {
-        resetState();
-        onClose();
-    };
-
     return (
-        <Modal open={open} onClose={handleClose}>
-            <Box sx={modalStyle} className="relative font-inter">
-                {/* Close */}
-                <IconButton
-                    onClick={handleClose}
-                    className="!absolute !top-4 !right-4"
-                    size="small"
-                >
-                    <img src={Close} alt="close" className="w-6 h-6" />
-                </IconButton>
+        <>
+            <Modal open={open} onClose={onClose}>
+                <Box sx={modalStyle} className="relative font-inter">
+                    {/* Close */}
+                    <IconButton
+                        onClick={() => {
+                            // If user already applied recurring earlier → just close
+                            if (pkgDraft?.recurringConfig) {
+                                onClose();
+                                return;
+                            }
 
-                {/* Header */}
-                <div className="space-y-2">
-                    <h2 className="text-xl font-bold">Groomit Recurring</h2>
-
-                    {packageData && (
-                        <div className="text-sm font-bold">
-                            {packageData.title} · {packageData.name}
-                        </div>
-                    )}
-
-                    <p className="text-sm">
-                        Keeps your pet’s grooming on autopilot.
-                        <br />
-                        Scheduled, paid, and cared for without the hassle.
-                    </p>
-                </div>
-
-                {/* Frequency */}
-                <section className="mt-3 space-y-2">
-                    <h3 className="font-bold">Grooming Frequency</h3>
-
-                    <div className="grid grid-cols-2 gap-2">
-                        {FREQUENCIES.map((f) => (
-                            <button
-                                key={f.value}
-                                onClick={() => setFrequency(f.value)}
-                                className={`h-[45px] rounded-[10px] border flex flex-col justify-center items-center transition
-                                    ${frequency === f.value ? selectedCard : unselectedCard}`}
-                            >
-                                <span className="text-sm">{f.label}</span>
-                                {f.recommended && (
-                                    <span className="text-[10px]">
-                                        Recommended
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Billing */}
-                <section className="mt-5 space-y-3">
-                    <h3 className="font-bold">Billing Type</h3>
-
-                    {BILLING_OPTIONS.map((b) => (
-                        <button
-                            key={b.key}
-                            onClick={() => setBilling(b.key)}
-                            className={`w-full rounded-[10px] border p-[15px] transition
-                                ${billing === b.key ? selectedCard : "border-primary-line"}`}
-                        >
-                            <div className="flex justify-between items-start">
-                                <div className="space-y-2 text-left">
-                                    <div className="font-bold">
-                                        {b.title}{" "}
-                                        <span className="font-normal">
-                                            – {b.subtitle}
-                                        </span>
-                                    </div>
-
-                                    <div>
-                                        <span className="line-through text-primary-light">
-                                            {formatPrice(b.oldPrice)}
-                                        </span>{" "}
-                                        <span className="font-bold">
-                                            {formatPrice(b.price)}
-                                        </span>
-                                        <span className="text-sm"> /Appt.</span>
-                                    </div>
-
-                                    {b.note && (
-                                        <div className="text-xs">{b.note}</div>
-                                    )}
-                                </div>
-
-                                <Radio
-                                    checked={billing === b.key}
-                                    sx={{
-                                        p: 0,
-                                        color: "#7C868A",
-                                        "&.Mui-checked": {
-                                            color: "#FF314A",
-                                        },
-                                    }}
-                                />
-                            </div>
-
-                            {b.benefits && (
-                                <ul className="list-disc pl-6 mt-3 text-xs space-y-1 text-start">
-                                    {b.benefits.map((item) => (
-                                        <li key={item}>{item}</li>
-                                    ))}
-                                </ul>
-                            )}
-                        </button>
-                    ))}
-                </section>
-
-                {/* Preferred Day */}
-                <section className="mt-5 space-y-1">
-                    <h3 className="font-bold">Preferred Day</h3>
-                    <p className="text-sm">
-                        We’ll auto-schedule — you can change anytime.
-                    </p>
-
-                    <div className="flex gap-2 pt-2 flex-wrap">
-                        {DAYS.map((d) => (
-                            <button
-                                key={d}
-                                onClick={() => setDay(d)}
-                                className={`px-[10px] py-3 rounded-[10px] border uppercase text-sm transition
-                                    ${day === d ? selectedCard : unselectedCard}`}
-                            >
-                                {d}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Preferred Time */}
-                <section className="mt-5 space-y-2">
-                    <h3 className="font-bold">Preferred Time</h3>
-
-                    <div className="flex gap-2">
-                        {TIMES.map((t) => (
-                            <button
-                                key={t}
-                                onClick={() => setTime(t)}
-                                className={`w-full py-3 rounded-[10px] border transition
-                                    ${time === t ? selectedCard : unselectedCard}`}
-                            >
-                                {t}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                {/* Info Box */}
-                <div className="mt-6 bg-[#F2F2F2] rounded-[10px] p-[15px]">
-                    <h4 className="text-sm font-bold">Made Easy For You</h4>
-                    <ul className="list-disc pl-6 mt-2 text-xs space-y-1">
-                        <li>Fully refundable plans</li>
-                        <li>Hassle-free cancellations</li>
-                        <li>Change, skip, or pause anytime</li>
-                    </ul>
-                </div>
-
-                {/* Footer */}
-                <Box className="flex gap-2 w-full mt-6">
-                    <button
-                        onClick={handleConfirm}
-                        className="bg-primary-dark text-white font-bold rounded-[10px] h-[50px] w-full"
+                            // First-time open, user cancels → nothing committed
+                            onClose();
+                        }}
+                        className="!absolute !top-4 !right-4"
+                        size="small"
                     >
-                        Next
-                    </button>
+                        <img src={Close} alt="close" className="w-6 h-6" />
+                    </IconButton>
+
+                    {/* Header */}
+                    <div className="mt-4">
+                        <h2 className="text-xl font-bold">Save More with Recurring</h2>
+                        <p className="text-sm">How most pet parents book.</p>
+                    </div>
+
+                    <div className="my-4 flex justify-between py-2 px-[15px] items-center rounded-[10px] bg-black">
+                        <div className="flex gap-4 items-center">
+                            <img src={Gift} alt="Gift" className="w-6 h-6" />
+                            <div className="flex flex-col">
+                                <div className="text-sm font-bold text-white">FREE Fi GPS Collar +</div>
+                                <div className="text-sm font-bold text-white">6 Months of Membership</div>
+                            </div>
+                        </div>
+                        <img
+                            src={Info}
+                            alt="Info"
+                            className="w-5 h-5 cursor-pointer"
+                            onClick={() => { onClose(); setCollarModal(true) }}
+                        />
+                    </div>
+
+                    <InfoSection
+                        items={[
+                            { label: "Priority scheduling during peak seasons" },
+                            { label: "Adjust skip, or remove your Recurring bookings anytime" },
+                            { label: "Automatic reminders help you never miss an appointment" },
+                        ]}
+                    />
+
+                    {/* Frequency */}
+                    <section className="mt-4 space-y-2">
+                        <h3 className="font-bold">Select Grooming Frequency</h3>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            {availableIntervals.map((interval) => (
+                                <button
+                                    key={interval.id}
+                                    onClick={() =>
+                                        updateRecurringConfig({
+                                            intervalId: interval.id,
+                                            billing,
+                                            weeks: interval.weeks,
+                                            days: interval.days,
+                                            totalAppointments: interval.total_appointments,
+                                            perAppointment: interval.packagePriceWithMobileVanFee,
+                                            annualTotal:
+                                                interval.packageTotalAppointmentsPriceWithMobileVanFee,
+                                            safetyInsuranceFee: interval.safetyInsuranceFee,
+                                        })
+                                    }
+                                    className={`h-[50px] rounded-[10px] border flex flex-col justify-center items-center
+                                    ${selectedInterval?.id === interval.id
+                                            ? selectedCard
+                                            : unselectedCard}`}
+                                >
+                                    <span className="text-sm">{interval.label}</span>
+                                    {interval.recommended === "1" && (
+                                        <span className="text-[10px]">Recommended</span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Billing */}
+                    <section className="mt-5 space-y-3">
+                        <h3 className="font-bold">Select Billing Type</h3>
+
+                        <div className="flex w-full  gap-2">
+                            {BILLING_OPTIONS.map((b) => (
+                                <button
+                                    key={b.key}
+                                    onClick={() => {
+                                        const targetIntervals =
+                                            b.key === "annual" ? annualIntervals : flexibleIntervals;
+
+                                        const validInterval =
+                                            targetIntervals.find(i => i.id === recurringConfig.intervalId) ||
+                                            getDefaultInterval(targetIntervals);
+
+                                        updateRecurringConfig({
+                                            billing: b.key,
+                                            intervalId: validInterval.id,
+                                            weeks: validInterval.weeks,
+                                            days: validInterval.days,
+                                            totalAppointments: validInterval.total_appointments,
+                                            perAppointment: validInterval.packagePriceWithMobileVanFee,
+                                            annualTotal:
+                                                validInterval.packageTotalAppointmentsPriceWithMobileVanFee,
+                                            safetyInsuranceFee: validInterval.safetyInsuranceFee,
+                                        });
+                                    }}
+                                    className={`w-full flex flex-col justify-between gap-8 items-start rounded-[10px] border p-[15px]
+                                ${billing === b.key ? selectedCard : "border-[#BDC3C4]"}`}
+                                >
+                                    <div className="flex justify-between items-start w-full">
+                                        <div className="text-left">
+                                            <div className="font-bold text-base">
+                                                {b.title}
+                                            </div>
+                                            <span className="font-normal text-sm">
+                                                {b.subtitle}
+                                            </span>
+                                        </div>
+
+                                        <Radio
+                                            checked={billing === b.key}
+                                            sx={{
+                                                p: 0,
+                                                color: "#7C868A",
+                                                "&.Mui-checked": {
+                                                    color: "#FF314A",
+                                                },
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col items-start gap-1">
+                                        <div className="font-normal text-base">
+                                            <span className="text-primary-light line-through pe-1 original_package_price_flexible">{b.priceDiscount} {""}</span>
+                                            <b className="font-bold flexible_package_price">{b.priceRange} {""}</b>
+                                            <span className="text-xs">/App</span>
+                                        </div>
+
+                                        {b.title === "Annual" && <h6 class="font-normal text-xs">Total {""}
+                                            <span>{selectedInterval?.weeks}</span> appts | <span>${annualTotal}</span></h6>}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Preferred Day */}
+                    <section className="mt-5 pb-5">
+                        <h3 className="font-bold text-base">Select preferred Day & Time for future bookings</h3>
+                        <div className="font-normal text-xs mt-1">We'll auto-schedule your visits - you can change or skip anytime.</div>
+                        <div className="flex gap-2 flex-wrap mt-3">
+                            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => (
+                                <button
+                                    key={d}
+                                    onClick={() =>
+                                        updateRecurringConfig({ preferredDay: d })
+                                    }
+                                    className={`px-3 py-2 rounded-[10px] border
+                                    ${day === d ? selectedCard : unselectedCard}`}
+                                >
+                                    {d}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Preferred Time */}
+                    <section className="py-5 border-t border-primary-line">
+                        <div className="flex gap-2">
+                            {["Morning", "Afternoon", "Evening"].map(t => (
+                                <button
+                                    key={t}
+                                    onClick={() =>
+                                        updateRecurringConfig({ preferredTime: t })
+                                    }
+                                    className={`w-full py-3 rounded-[10px] border
+                                    ${time === t ? selectedCard : unselectedCard}`}
+                                >
+                                    {t}
+                                </button>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <Box className="mt-1">
+                        <button
+                            onClick={handleConfirm}
+                            className="bg-primary-dark text-white font-bold rounded-[10px] h-[50px] w-full"
+                        >
+                            Next
+                        </button>
+                    </Box>
                 </Box>
-            </Box>
-        </Modal>
+            </Modal>
+
+            <FICollarModal
+                open={collarModal}
+                onClose={() => { setCollarModal(false) }}
+            />
+        </>
     );
 };
 
