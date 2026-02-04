@@ -18,7 +18,7 @@ import { StepOneContentCat } from '@/components/Booking-flow-Steps/StepOneConten
 import { normalizeDOB } from '@/pages/my-pets/add-update-cat/AddUpdateCat2';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { toast } from 'react-toastify';
-import { clearBookingFlow, completePetStep, getBookingPetBreeds, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import { clearBookingFlow, completePetStep, getAddonsDetails, getBookingPetBreeds, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, saveAddonsDetails, saveGroomingDetails, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 import CancelBookingFlowModal from '@/components/Modals/CancelBookingFlowModal';
 import BookingFooter from '../BookingFooter';
 import StepTwoContent2 from '@/components/Booking-flow-Steps/StepTwoContent2';
@@ -96,7 +96,7 @@ const PetsDetails = () => {
         petCounts = { dog: 0, cat: 0 },
         address: bookingAddress,
         totalPrice,
-        petBreeds,
+        petBreeds = [],
         selectedPet: selectedPetBooking
     } = bookingFlow;
 
@@ -136,7 +136,7 @@ const PetsDetails = () => {
 
     /* ---------------- Effects ---------------- */
     useEffect(() => {
-        if (!petProfileLoaded || selectedPetBooking?.type == 'cat') return;
+        if (!petProfileLoaded) return;
 
         // dispatch(
         //     getBookingPetBreeds({
@@ -583,7 +583,7 @@ const PetsDetails = () => {
         }
     };
 
-    const handleStepThree = () => {
+    const handleStepThree = async () => {
         const grooming = currentPetDraft?.stepData?.grooming;
 
         let hasError = false;
@@ -613,17 +613,73 @@ const PetsDetails = () => {
             );
         }
 
-        if (shouldMarkDirty) {
-            completeStepAndMove(3);
-            navigate("/book/pets");
-            return;
-        }
+        // 🔑 Common values
+        const petId = Number(selectedPetBooking?.id || id);
+        const details =
+            petsDraft?.[currentPetIndex]?.stepData?.details || {};
 
-        completeStepAndMove(3);
+        const breedId =
+            selectedPetBooking?.breed?.breed_id ||
+            details?.breed_id ||
+            details?.breed?.breed_id;
+
+        const sizeId =
+            selectedPetBooking?.size?.id ||
+            details?.size_id ||
+            details?.size?.id;
+
+        try {
+            // 🔄 START LOADER
+            showLoader();
+
+            // 💾 Save Grooming Details
+            dispatch(
+                saveGroomingDetails({
+                    booking_session_token: token,
+                    pet_id: petId,
+                    coat_type: grooming.condition,
+                    behavior: grooming.behavior,
+                    shampoo_product_id: grooming.shampooId,
+                    notes: grooming.note,
+                    shave_down_status: grooming.shave_down_status || "pending",
+                    images: grooming?.images?.map(img => img.file),
+                })
+            );
+
+            // 🐶 Fetch Addons details
+            await dispatch(
+                getAddonsDetails({
+                    id: petId,
+                    breed_id: breedId,
+                    size_id: sizeId,
+                    pet_type: selectedPetBooking?.type,
+                    booking_session_token: token,
+                })
+            ).unwrap();
+
+            // ✏️ EDIT MODE → go back to pets list
+            if (shouldMarkDirty) {
+                completeStepAndMove(3);
+                navigate("/book/pets");
+                return;
+            }
+
+            // ➡️ Normal flow
+            completeStepAndMove(3);
+        } catch (error) {
+            console.error("Step 2 failed:", error);
+        } finally {
+            // ✅ STOP LOADER (always)
+            hideLoader();
+        }
     };
 
 
-    const handleStepFour = () => {
+    const handleStepFour = async () => {
+        const isLastPet =
+            currentPetIndex === selectedPetIdsfromAPI.length - 1;
+
+        // ✅ Mark step complete (only once)
         if (!currentPetDraft?.completedSteps?.includes("addons")) {
             dispatch(
                 completePetStep({
@@ -633,48 +689,63 @@ const PetsDetails = () => {
             );
         }
 
-        // ✅ EDIT MODE: save & go back to pets list
-        if (shouldMarkDirty) {
-            // mark local step as completed & move forward
-            navigate("/book/pets");
+        const bundleIds = addons
+            .filter(a => a.category === "BUNDLES")
+            .map(a => a.id);
 
+        const addonIds = addons
+            .filter(a => a.category !== "BUNDLES")
+            .map(a => a.id);
+
+        try {
+            showLoader();
+
+            // 💾 Save Addons details
+            await dispatch(
+                saveAddonsDetails({
+                    booking_session_token: token,
+                    pet_id: Number(selectedPetBooking?.id || id),
+                    bundle_product_ids: bundleIds,
+                    addon_product_ids: addonIds,
+                })
+            ).unwrap();
+
+            // ✏️ EDIT MODE → exit early
+            if (shouldMarkDirty) {
+                navigate("/book/pets");
+                return;
+            }
+        } catch (error) {
+            console.error("Step 4 failed:", error);
             return;
+        } finally {
+            hideLoader();
         }
 
-        const isLastPet =
-            currentPetIndex === selectedPetIdsfromAPI.length - 1;
-
-        // 🐾 MOVE TO NEXT PET
-        console.log(isLastPet);
-
+        // 🐾 Move to next pet
         if (!isLastPet) {
-            dispatch(clearSelectedPet());
             const nextPetIndex = currentPetIndex + 1;
-            console.log(nextPetIndex);
             const nextPetId = selectedPetIdsfromAPI[nextPetIndex];
 
-            console.log(nextPetId);
+            dispatch(clearSelectedPet());
 
+            dispatch(
+                moveToNextPet({
+                    petIndex: nextPetIndex,
+                })
+            );
 
-            // ensure fresh draft FIRST
-            dispatch(moveToNextPet({
-                petIndex: currentPetIndex + 1,
-            }));
-
-
-            // 🔄 reset UI state for next pet
+            // 🔄 Reset local UI state
             setCompletedSteps([]);
             setCurrentStep(1);
             setOpenStep(1);
             reset();
 
-            // 🚀 navigate to next pet URL
             navigate(`/book/pet/${nextPetId}`);
-
             return;
         }
 
-        // ✅ ALL PETS DONE
+        // ✅ All pets completed
         navigate("/book/pets");
     };
 
@@ -797,16 +868,31 @@ const PetsDetails = () => {
     const stepThreeDesc = useMemo(() => {
         if (!completedSteps.includes(3)) return "";
 
-        const g = currentPetDraft?.stepData?.grooming;
-        if (!g) return "";
+        const grooming = currentPetDraft?.stepData?.grooming;
+        if (!grooming) return "";
 
-        const parts = [g.condition, g.behavior].filter(Boolean);
+        const CONDITION_LABELS = {
+            "not-matted": "Not Matted",
+            "matted": "Matted",
+            "severe": "Severe Matted",
+        };
+
+        const BEHAVIOR_LABELS = {
+            "friendly": "Friendly",
+            "anxious": "Anxious",
+            "aggressive": "Hard to Handle",
+        };
+
+        const parts = [
+            CONDITION_LABELS[grooming.condition],
+            BEHAVIOR_LABELS[grooming.behavior],
+        ].filter(Boolean);
 
         return parts.join(", ");
     }, [currentPetDraft, completedSteps]);
 
     const stepFourDescription = (() => {
-        if (addons.length === 0) return "";
+        if (addons.length === 0) return 'A little extra care for the ones you love';
 
         const names = addons
             .map(a => a?.name)

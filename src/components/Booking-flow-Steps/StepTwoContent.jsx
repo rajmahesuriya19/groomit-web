@@ -182,12 +182,16 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                 step: 'package',
                 data: {
                     id: pkg.productId,
+                    packageTitle: pkg?.title,
+                    service: pkg?.service,
                     productType: pkg.productType,
                     pricingType: 'one-time',
                     price: pkg.price,
                     safetyInsuranceFee: insuranceFee,
                     taxAmount: Number(taxAmount.toFixed(2)),
                     totalWithTax,
+                    disabledCoatType: pkg?.disabledCoatType,
+                    disabledCoatTypeMessage: pkg?.disabledCoatTypeMessage,
                     recurringConfig: null, // explicitly cleared
                 },
             })
@@ -230,11 +234,15 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                 step: 'package',
                 data: {
                     id: recurringPackage.productId,
+                    packageTitle: recurringPackage?.title,
+                    service: recurringPackage?.service,
                     productType: recurringPackage.productType,
                     pricingType: 'recurring',
                     safetyInsuranceFee: insuranceFee,
                     taxAmount,
                     totalWithTax,
+                    disabledCoatType: recurringData?.disabledCoatType,
+                    disabledCoatTypeMessage: recurringData?.disabledCoatTypeMessage,
                     recurringConfig: {
                         ...recurringData,
                         subTotal,

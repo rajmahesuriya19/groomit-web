@@ -29,3 +29,6 @@ export const formatDate = (dateString) => {
     return `${d.getDate()} ${months[d.getMonth()]}, ${d.getFullYear()}`;
 };
 
+export const capitalize = (str = "") =>
+    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+

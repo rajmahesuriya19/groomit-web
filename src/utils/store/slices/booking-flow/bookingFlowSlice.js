@@ -136,7 +136,7 @@ export const getPackageDetails = createAsyncThunk(
     }
 );
 
-// Get Package Details
+// Save Package Details
 export const savePackageDetails = createAsyncThunk(
     'bookingFlow/savePackageDetails',
     async ({ pet_id, package_product_id, booking_session_token }, { rejectWithValue }) => {
@@ -154,7 +154,7 @@ export const savePackageDetails = createAsyncThunk(
     }
 );
 
-// Get Package Details
+// Get Grooming Details
 export const getGroomingDetails = createAsyncThunk(
     'bookingFlow/getGroomingDetails',
     async ({ id, breed_id, size_id, pet_type, booking_session_token }, { rejectWithValue }) => {
@@ -168,6 +168,125 @@ export const getGroomingDetails = createAsyncThunk(
             return data?.data || [];
         } catch (error) {
             return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Save Grooming Details
+export const saveGroomingDetails = createAsyncThunk(
+    "bookingFlow/saveGroomingDetails",
+    async (
+        {
+            booking_session_token,
+            pet_id,
+            coat_type,
+            behavior,
+            shampoo_product_id,
+            notes,
+            shave_down_status,
+            images = [],
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const formData = new FormData();
+
+            // required fields
+            formData.append("booking_session_token", booking_session_token);
+            formData.append("pet_id", pet_id);
+            formData.append("coat_type", coat_type);
+            formData.append("behavior", behavior);
+            formData.append("shampoo_product_id", shampoo_product_id);
+
+            // optional fields
+            if (notes) {
+                formData.append("notes", notes);
+            }
+
+            if (shave_down_status) {
+                formData.append("shave_down_status", shave_down_status);
+            }
+
+            images.forEach((file) => {
+                if (file instanceof File) {
+                    formData.append(
+                        "reference_style_images[]",
+                        file,
+                        file.name
+                    );
+                }
+            });
+
+            const { data } = await axiosInstance.post("api/user/booking/pet/groom-detail/save", formData);
+
+            return data?.data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data || { message: "Failed to save grooming details" }
+            );
+        }
+    }
+);
+
+// Get Addons Details
+export const getAddonsDetails = createAsyncThunk(
+    'bookingFlow/getAddonsDetails',
+    async ({ id, breed_id, size_id, pet_type, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/addons/get/${id}`,
+                { breed_id, size_id, pet_type, booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
+// Save Addons Details
+export const saveAddonsDetails = createAsyncThunk(
+    "bookingFlow/saveAddonsDetails",
+    async (
+        {
+            booking_session_token,
+            pet_id,
+            bundle_product_ids = [],
+            addon_product_ids = [],
+        },
+        { rejectWithValue }
+    ) => {
+        try {
+            const formData = new FormData();
+
+            // 🔹 Required fields
+            formData.append("booking_session_token", booking_session_token);
+            formData.append("pet_id", pet_id);
+
+            // 🔹 Bundle IDs
+            bundle_product_ids.forEach((id) => {
+                formData.append("bundle_product_ids[]", id);
+            });
+
+            // 🔹 Addon IDs
+            addon_product_ids.forEach((id) => {
+                formData.append("addon_product_ids[]", id);
+            });
+
+            const { data } = await axiosInstance.post(
+                "api/user/booking/pet/addons/save",
+                formData
+            );
+
+            return data?.data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data || {
+                    message: "Failed to save addons details",
+                }
+            );
         }
     }
 );
@@ -197,6 +316,7 @@ const initialState = {
     petsDraft: [],
     packageDetails: [],
     groomingDetails: [],
+    addonsDetails: [],
 
     /* ---------------- Calender ---------------- */
     selectedSlot: null,
@@ -395,14 +515,60 @@ const bookingFlowSlice = createSlice({
 
             Math.floor(total);
 
-            /* ---------------- ADD-ONS PRICE ---------------- */
+            /* ---------------- COAT CONDITION PRICE ---------------- */
+
+            const grooming = petDraft.stepData?.grooming;
+
+            if (grooming?.conditionProduct?.price) {
+                total += Number(grooming.conditionProduct.price);
+            }
+
+            /* ---------------- BEHAVIOR PRICE ---------------- */
+
+            if (grooming?.behaviorProduct?.price) {
+                total += Number(grooming.behaviorProduct.price);
+            }
+
+            /* ---------------- SHAMPOO PRICE ---------------- */
+
+            if (grooming?.shampooPrice) {
+                total += Number(grooming.shampooPrice);
+            }
+
+            /* ---------------- ADD-ONS & BUNDLES PRICE ---------------- */
 
             const addons = petDraft.stepData?.addons?.items || [];
+            const addonsWithBundles =
+                state.addonsDetails?.addonsWithBundles || {};
 
-            total += addons.reduce(
-                (sum, addon) => sum + Number(addon?.price || 0),
-                0
+            // Separate bundles & addons
+            const selectedBundles = addons.filter(
+                (item) => item.category === "BUNDLES"
             );
+
+            const selectedAddons = addons.filter(
+                (item) => item.category !== "BUNDLES"
+            );
+
+            // 1️⃣ Add bundle prices
+            selectedBundles.forEach((bundle) => {
+                total += Number(bundle.price || 0);
+            });
+
+            // 2️⃣ Collect addon IDs covered by bundles
+            const addonIdsCoveredByBundles = new Set();
+
+            selectedBundles.forEach((bundle) => {
+                const ids = addonsWithBundles[bundle.id] || [];
+                ids.forEach((id) => addonIdsCoveredByBundles.add(String(id)));
+            });
+
+            // 3️⃣ Add addon prices ONLY if not covered by bundle
+            selectedAddons.forEach((addon) => {
+                if (!addonIdsCoveredByBundles.has(String(addon.id))) {
+                    total += Number(addon.price || 0);
+                }
+            });
 
             /* ---------------- SAVE PET TOTAL ---------------- */
 
@@ -545,21 +711,6 @@ const bookingFlowSlice = createSlice({
                 toast.error(state.error);
             })
 
-            // Save Package Details
-            .addCase(savePackageDetails.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(savePackageDetails.fulfilled, (state, action) => {
-                state.loading = false;
-            })
-            .addCase(savePackageDetails.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload?.message || 'Something went wrong';
-                toast.error(state.error);
-            })
-
-
             // Get Grooming Details
             .addCase(getGroomingDetails.pending, (state) => {
                 state.loading = true;
@@ -570,6 +721,21 @@ const bookingFlowSlice = createSlice({
                 state.groomingDetails = action.payload;
             })
             .addCase(getGroomingDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Addons Details
+            .addCase(getAddonsDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getAddonsDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.addonsDetails = action.payload;
+            })
+            .addCase(getAddonsDetails.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);

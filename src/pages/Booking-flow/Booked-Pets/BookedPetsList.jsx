@@ -3,8 +3,11 @@ import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import { ChevronDown } from "lucide-react";
 
+import Gold from '../../../assets/package/Gold-package-booking.svg';
+import Eco from '../../../assets/package/eco-package-booking.svg';
+import Silver from '../../../assets/package/silver-package-booking.svg';
+
 import EditIcon from "../../../assets/icon/edit-3.svg";
-import Calender from "../../../assets/icon/calendar-black.svg";
 import ScissorIcon from "../../../assets/icon/scissor-black.svg";
 import Delete from "../../../assets/icon/trash-black.svg";
 import PackageBox from "../../../assets/icon/package-box.svg";
@@ -12,19 +15,19 @@ import Heart from "../../../assets/icon/heart-black.svg";
 import ClockIcon from "../../../assets/icon/clock-black.svg";
 import StarIcon from "../../../assets/icon/star-black.svg";
 import FragranceIcon from "../../../assets/icon/fragrance-black.svg";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { useLoader } from "@/contexts/loaderContext/LoaderContext";
-import { deletePetDraft, moveToNextPet, setPetID } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { deletePetDraft, moveToNextPet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 import { useDispatch, useSelector } from "react-redux";
 import DeletePetModal from "@/components/Modals/DeletePetModal";
+import { capitalize } from "@/common/helpers";
 
-const InfoRow = ({ icon, title, subtitle, uploadedImages = [] }) => (
+const InfoRow = ({ index = false, isSingle = false, icon, title, subtitle, uploadedImages = [] }) => (
     <>
         <div className="px-[15px]">
-            <div className="border-t border-[#E4E4E4] py-[15px]">
+            <div className={`pb-[15px]`}>
                 <div className="flex items-start">
-                    {icon && (
+                    {(icon && !index) && (
                         <div className="flex bg-[#F2F2F2] items-center justify-center rounded-[10px] me-3 w-[35px] h-[35px]">
                             <img
                                 src={icon}
@@ -34,7 +37,15 @@ const InfoRow = ({ icon, title, subtitle, uploadedImages = [] }) => (
                         </div>
                     )}
 
-                    <div>
+                    {(icon && index) && (
+                        <img
+                            src={icon}
+                            alt=""
+                            className="w-[35px] h-[35px] me-3"
+                        />
+                    )}
+
+                    <div className="w-full">
                         <p className="font-inter font-bold text-sm">
                             {title}
                         </p>
@@ -76,12 +87,19 @@ export default function BookedPetsList({ petDraft, isSingle }) {
 
     const bookingFlow = useSelector((state) => state.bookingFlow);
 
-    const { currentPetIndex } = bookingFlow;
+    const { selectedPetIdsfromAPI, groomingDetails } = bookingFlow;
 
     const { stepData } = petDraft || {};
-    const { details = {}, package: pkg = {}, grooming = {} } = stepData || {};
+    const { details = {}, package: pkg = {}, grooming = {}, addons = {} } = stepData || {};
 
-    const { showLoader, hideLoader } = useLoader();
+    const COAT_TYPE_LABELS = groomingDetails?.coatTypes;
+    const BEHAVIOR_LABELS = groomingDetails?.behaviors;
+
+    const getCoatLabel = (key) =>
+        COAT_TYPE_LABELS?.[key] || key;
+
+    const getBehaviorLabel = (key) =>
+        BEHAVIOR_LABELS?.[key] || key;
 
     const [expanded, setExpanded] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -89,14 +107,18 @@ export default function BookedPetsList({ petDraft, isSingle }) {
 
     const {
         name,
-        gender_show,
-        ageFull,
+        breed_name,
+        size_name,
+        breed,
+        size,
+        petType
     } = details;
 
     const {
-        title: packageTitle,
-        name: packageName,
-        type: packageType,
+        productType,
+        service,
+        pricingType,
+        packageTitle
     } = pkg;
 
     const {
@@ -105,25 +127,59 @@ export default function BookedPetsList({ petDraft, isSingle }) {
         shampoo,
         note,
         images = [],
-        addons = [],
     } = grooming;
+
+    const { items = [] } = addons;
 
     /* ---------- Helpers ---------- */
     const serviceLabel =
-        packageType === "recurring" ? "Recurring" : "One-Time";
+        pricingType === "recurring" ? "Recurring" : "One-Time";
 
-    const addonsLabel = (() => {
-        if (!addons.length) return "";
-        if (addons.length <= 3) return addons.map(a => a.name).join(", ");
-        return `${addons.slice(0, 3).map(a => a.name).join(", ")} + ${addons.length - 3} more`;
-    })();
+    const addonsLabel = useMemo(() => {
+        if (!items?.length) return "";
 
-    const shampooLabel =
-        shampoo === "premium"
-            ? "Hypoallergenic (Fragrance Free)"
-            : shampoo || "";
+        const bundles = items.filter(i => i.category === "BUNDLES");
+        const addons = items.filter(i => i.category !== "BUNDLES");
 
-    const uploadedImages = images.map(img => img.preview);
+        const bundledAddonNames = new Set();
+
+        bundles.forEach(bundle => {
+            const html =
+                bundle?.raw?.prod_desc_html ||
+                bundle?.raw?.prod_desc ||
+                "";
+
+            addons.forEach(addon => {
+                if (
+                    html.toLowerCase().includes(addon.name.toLowerCase())
+                ) {
+                    bundledAddonNames.add(addon.name);
+                }
+            });
+        });
+
+        const filteredAddons = addons.filter(
+            addon => !bundledAddonNames.has(addon.name)
+        );
+
+        return [...bundles, ...filteredAddons]
+            .map(i => i.name?.replace(/\s+/g, " ").trim())
+            .join(", ");
+    }, [items]);
+
+    const uploadedImages = useMemo(
+        () => images.map(img => img.preview),
+        [images]
+    );
+
+    const PACKAGE_ICONS = {
+        gold: Gold,
+        eco: Eco,
+        silver: Silver,
+    };
+
+    const packageIcon =
+        PACKAGE_ICONS[productType] || PackageBox;
 
     // keep expanded in sync if pet list changes
     useEffect(() => {
@@ -158,7 +214,7 @@ export default function BookedPetsList({ petDraft, isSingle }) {
             })
         );
 
-        navigate(`/book/pet/${petDraft?.petId}/from_pets`);
+        navigate(`/book/pet/${selectedPetIdsfromAPI[petDraft?.petIndex]}/from_pets`);
     };
 
     const handleDeletePet = () => {
@@ -196,7 +252,9 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                             <div>
                                 <h2 className="font-bold text-base capitalize text-primary-dark">{name}</h2>
                                 <span className="font-inter text-sm text-primary-dark capitalize">
-                                    {packageTitle || packageName}
+                                    {petType === "cat"
+                                        ? "Cat"
+                                        : `${breed?.breed_name || breed_name}, ${size?.size || size_name}`}
                                 </span>
                             </div>
                         </div>
@@ -240,11 +298,11 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                 {/* BODY */}
                 <AccordionDetails>
                     <div className="bg-white rounded-b-[15px] overflow-hidden">
-
                         <InfoRow
-                            icon={PackageBox}
-                            title={`${packageTitle} | ${packageName}`}
+                            icon={packageIcon}
+                            title={`${service} | ${capitalize(packageTitle)}`}
                             subtitle="Package"
+                            index={true}
                         />
 
                         <InfoRow
@@ -252,6 +310,15 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                             title={serviceLabel}
                             subtitle="Service"
                         />
+
+                        {/* SHAMPOO */}
+                        {shampoo && (
+                            <InfoRow
+                                icon={FragranceIcon}
+                                title={shampoo}
+                                subtitle="Shampoo"
+                            />
+                        )}
 
                         {/* ADD-ONS */}
                         {addonsLabel && (
@@ -262,28 +329,11 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                             />
                         )}
 
-                        {/* SHAMPOO */}
-                        {shampooLabel && (
-                            <InfoRow
-                                icon={FragranceIcon}
-                                title={shampooLabel}
-                                subtitle="Shampoo"
-                            />
-                        )}
-
-                        {ageFull && gender_show && (
-                            <InfoRow
-                                icon={Calender}
-                                title={`${ageFull}, ${gender_show}`}
-                                subtitle="Gender & Age"
-                            />
-                        )}
-
                         {/* COAT */}
                         {condition && (
                             <InfoRow
                                 icon={ScissorIcon}
-                                title={condition}
+                                title={getCoatLabel(condition)}
                                 subtitle="Coat Conditions"
                             />
                         )}
@@ -292,13 +342,13 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                         {behavior && (
                             <InfoRow
                                 icon={Heart}
-                                title={behavior}
+                                title={getBehaviorLabel(behavior)}
                                 subtitle="Behavior"
                             />
                         )}
 
                         {/* NOTES + IMAGES */}
-                        {(note) && (
+                        {!!note && (
                             <InfoRow
                                 title="Notes & Styling References"
                                 subtitle={note}

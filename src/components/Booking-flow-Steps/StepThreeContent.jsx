@@ -7,7 +7,7 @@ import FillGallery from "../../assets/icon/fill-black-gallery.svg";
 import ShampooModal from "../Modals/ShampooModal";
 import SuccessIcon from "../../assets/icon/tick-green.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { updatePetStepData } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { updatePetStepData, updateTotalPrice } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 import MattingInfoModal from "../Modals/MattingInfoModal";
 import HardToHandleModal from "../Modals/HardToHandleModal";
 
@@ -27,7 +27,19 @@ const StepThreeContent = ({
         (state) => state.bookingFlow
     );
 
-    console.log(groomingDetails);
+    const savedPackage = petsDraft?.[currentPetIndex]?.stepData?.package || {};
+
+    const disabledCoatTypes = savedPackage?.disabledCoatType || [];
+
+    const isCoatDisabled = (key) => disabledCoatTypes.includes(key);
+
+    const getFirstAllowedCoat = () => {
+        return COAT_KEYS.find(
+            (key) => !disabledCoatTypes.includes(key)
+        );
+    };
+
+    console.log(savedPackage);
     const COAT_TYPE_LABELS = groomingDetails?.coatTypes;
     const BEHAVIOR_LABELS = groomingDetails?.behaviors;
 
@@ -58,7 +70,7 @@ const StepThreeContent = ({
         mattingInfo,
     } = grooming;
 
-    const [localNote, setLocalNote] = React.useState(note);
+    const [localNote, setLocalNote] = React.useState(note || "");
     const [shampooModal, setShampooModal] = React.useState(false);
     const [shampooDecs, setShampooDecs] = React.useState(false);
     const [shampooTitle, setShampooTitle] = React.useState(false);
@@ -71,7 +83,7 @@ const StepThreeContent = ({
 
     /* -------------------- helpers -------------------- */
 
-    const updateGrooming = (data) => {
+    const updateGrooming = (data, shouldUpdatePrice = false) => {
         dispatch(
             updatePetStepData({
                 petIndex: currentPetIndex,
@@ -79,9 +91,77 @@ const StepThreeContent = ({
                 data,
             })
         );
+
+        if (shouldUpdatePrice) {
+            dispatch(updateTotalPrice({ petIndex: currentPetIndex }));
+        }
     };
 
+    /* -------------------- Effect logic -------------------- */
+
+    React.useEffect(() => {
+        if (!COAT_KEYS.length) return;
+
+        // if no condition selected OR selected one is disabled
+        if (!condition || disabledCoatTypes.includes(condition)) {
+            const fallback = COAT_KEYS.find(
+                (key) => !disabledCoatTypes.includes(key)
+            );
+
+            if (!fallback) return;
+
+            updateGrooming({
+                condition: fallback,
+                conditionProduct:
+                    fallback === "not-matted" ? null : coatProducts[fallback],
+                mattingInfo: null,
+                shave_down_status: groomingDetails?.pets?.shave_down_status,
+            }, true);
+        }
+    }, [
+        disabledCoatTypes,
+        COAT_KEYS,
+        condition,
+    ]);
+
     /* -------------------- coat condition logic -------------------- */
+
+    // const handleConditionSelect = (key) => {
+    //     setConditionError("");
+
+    //     // 🚫 If disabled by package → auto-select allowed one
+    //     if (isCoatDisabled(key)) {
+    //         const fallback = getFirstAllowedCoat();
+
+    //         if (!fallback) return; // safety guard
+
+    //         updateGrooming({
+    //             condition: fallback,
+    //             conditionProduct: fallback === "not-matted"
+    //                 ? null
+    //                 : coatProducts[fallback],
+    //             mattingInfo: null,
+    //             shave_down_status: groomingDetails?.pets?.shave_down_status,
+    //         }, true);
+
+    //         return;
+    //     }
+
+    //     // ✅ Not matted → no modal
+    //     if (key === "not-matted") {
+    //         updateGrooming({
+    //             condition: key,
+    //             conditionProduct: null,
+    //             mattingInfo: null,
+    //             shave_down_status: groomingDetails?.pets?.shave_down_status,
+    //         }, true);
+    //         return;
+    //     }
+
+    //     // ⚠️ Matted / Severe → approval modal
+    //     setPendingCondition(key);
+    //     setMattingModal(true);
+    // };
 
     const handleConditionSelect = (key) => {
         setConditionError("");
@@ -113,14 +193,16 @@ const StepThreeContent = ({
         updateGrooming({
             behavior: key,
             behaviorProduct: coatProducts[key] || null,
-        });
+            shave_down_status: groomingDetails?.pets?.shave_down_status
+        }, true);
     };
 
     const handleBehaviourSubmit = () => {
         updateGrooming({
             behavior: "aggressive",
             behaviorProduct: coatProducts["aggressive"],
-        });
+            shave_down_status: groomingDetails?.pets?.shave_down_status
+        }, true);
 
         setPendingBehaviour(null);
         setBehaviourModal(false);
@@ -132,7 +214,9 @@ const StepThreeContent = ({
 
         if (pendingBehaviour) {
             setPendingBehaviour(null);
-            setBehaviorError("Please confirm pet’s behaviour");
+            if (!behavior) {
+                setBehaviorError("Please confirm pet’s behaviour");
+            }
         }
     };
 
@@ -141,7 +225,8 @@ const StepThreeContent = ({
             condition: pendingCondition,
             conditionProduct: coatProducts[pendingCondition],
             mattingInfo: { approval },
-        });
+            shave_down_status: groomingDetails?.pets?.shave_down_status
+        }, true);
 
         setPendingCondition(null);
         setMattingModal(false);
@@ -154,7 +239,9 @@ const StepThreeContent = ({
         // ❌ First-time close without submit
         if (pendingCondition && !mattingInfo) {
             setPendingCondition(null);
-            setConditionError("Please select pet's coat conditions");
+            if (!condition) {
+                setConditionError("Please select pet's coat conditions");
+            }
         }
         // ✅ If consent already exists → do nothing
     };
@@ -175,25 +262,57 @@ const StepThreeContent = ({
         return () => clearTimeout(timer);
     }, [localNote]);
 
+    /* -------------------- useEffect -------------------- */
+
+    React.useEffect(() => {
+        if (
+            SHAMPOO_OPTIONS?.length &&
+            !shampooId
+        ) {
+            const first = SHAMPOO_OPTIONS[0];
+
+            updateGrooming({
+                shampooId: first.id,
+                shampoo: first.prod_name,
+                shampooPrice: first?.price,
+                shave_down_status: groomingDetails?.pets?.shave_down_status
+            }, true);
+        }
+    }, [SHAMPOO_OPTIONS, shampooId]);
+
     /* -------------------- images -------------------- */
 
     const handleImageUpload = async (e) => {
-        const files = Array.from(e.target.files);
+        const input = e.target;
+        const files = Array.from(input.files || []);
+
+        console.log("FILES:", e.target.files);
+        console.log("ARRAY:", Array.from(e.target.files || []));
+
+
+        if (!files.length) return;
 
         const toBase64 = (file) =>
-            new Promise((resolve) => {
+            new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
                 reader.readAsDataURL(file);
             });
 
-        const newImages = await Promise.all(
+        const uploadedImages = await Promise.all(
             files.map(async (file) => ({
+                file,
                 preview: await toBase64(file),
             }))
         );
 
-        updateGrooming({ images: [...images, ...newImages] });
+        updateGrooming({
+            images: [...images, ...uploadedImages],
+        });
+
+        // ✅ RESET INPUT (critical)
+        input.value = "";
     };
 
     const removeImage = (index) => {
@@ -209,21 +328,34 @@ const StepThreeContent = ({
         selectedKey,
         labelMap = {},
         onSelect,
+        disabledKeys = [],
     }) => (
         <div className="flex gap-2">
-            {options.map((key) => (
-                <button
-                    key={key}
-                    onClick={() => onSelect(key)}
-                    className={`w-full py-3 rounded-[10px] border transition
-                    ${selectedKey === key
-                            ? "border-brand shadow-md font-bold"
-                            : "border-primary-light"
-                        }`}
-                >
-                    {labelMap[key] || key}
-                </button>
-            ))}
+            {options.map((key) => {
+                const isDisabled = disabledKeys.includes(key);
+                const isSelected = selectedKey === key;
+
+                return (
+                    <button
+                        key={key}
+                        disabled={isDisabled}
+                        onClick={() => {
+                            if (!isDisabled) onSelect(key);
+                        }}
+                        className={`w-full py-3 rounded-[10px] border transition
+                    ${isSelected
+                                ? "border-brand shadow-md font-bold"
+                                : "border-primary-light"
+                            }
+                            ${isDisabled
+                                ? "opacity-40 cursor-not-allowed bg-gray-50"
+                                : "hover:border-brand"
+                            }`}
+                    >
+                        {labelMap[key] || key}
+                    </button>
+                )
+            })}
         </div>
     );
 
@@ -249,6 +381,7 @@ const StepThreeContent = ({
                         selectedKey: condition,
                         labelMap: COAT_TYPE_LABELS,
                         onSelect: handleConditionSelect,
+                        disabledKeys: disabledCoatTypes,
                     })}
 
                     {mattingInfo?.approval && (
@@ -262,6 +395,12 @@ const StepThreeContent = ({
                                 ? "I approve the shave-down for my pet"
                                 : "I do not approve the shave-down for my pet"}
                         </div>
+                    )}
+
+                    {savedPackage?.disabledCoatTypeMessage && (
+                        <p className="text-xs mt-1">
+                            {savedPackage?.disabledCoatTypeMessage}
+                        </p>
                     )}
 
                     {conditionError && (
@@ -301,7 +440,7 @@ const StepThreeContent = ({
                                 <Radio
                                     checked={shampooId === option.id}
                                     onChange={() =>
-                                        updateGrooming({ shampooId: option.id, shampoo: option?.prod_name })
+                                        updateGrooming({ shampooId: option.id, shampoo: option?.prod_name, shampooPrice: option?.price, shave_down_status: groomingDetails?.pets?.shave_down_status }, true)
                                     }
                                     sx={{
                                         p: 0,
@@ -312,7 +451,7 @@ const StepThreeContent = ({
 
                                 <span
                                     className="text-sm cursor-pointer"
-                                    onClick={() => updateGrooming({ shampooId: option.id, shampoo: option?.prod_name })}
+                                    onClick={() => updateGrooming({ shampooId: option.id, shampoo: option?.prod_name, shampooPrice: option?.price, shave_down_status: groomingDetails?.pets?.shave_down_status }, true)}
                                 >
                                     {option.prod_name} {""} ({option.prod_desc})
                                 </span>

@@ -1,79 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import Card from "@/common/Booking-Flow/Card";
 import { Checkbox } from "@mui/material";
 import Info from "../../assets/icon/info-circle-grey.svg";
 import SuccessIcon from "../../assets/icon/tick-green.svg";
 import BundlesModal from "../Modals/BundlesModal";
 import { useDispatch, useSelector } from "react-redux";
-import { updatePetStepData, updateTotalPrice } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import {
+    updatePetStepData,
+    updateTotalPrice,
+} from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 
-const ADD_ON_SECTIONS = [
-    {
-        sectionId: "bundles",
-        title: "Bundles",
-        items: [
-            {
-                id: 1,
-                label: "Recurring Bundle",
-                badge: "Save $20",
-                badgeColor: "bg-[#0A7170]",
-                oldPrice: 40,
-                price: 20,
-                info: {
-                    title: "Recurring Bundle",
-                    description: (
-                        <>
-                            <strong>Includes all the recommended necessities</strong> to maintain the
-                            hygiene of your dog. Including{" "}
-                            <strong>Gland Expression, Teeth Brushing & Paw Balm</strong>.
-                        </>
-                    ),
-                },
-            },
-        ],
-    },
-    {
-        sectionId: "skin-coat",
-        title: "Skin & Coat",
-        items: [
-            {
-                id: 5,
-                label: "Oatmeal Treatment",
-                price: 15,
-            },
-        ],
-    },
-    {
-        sectionId: "skin-coated",
-        title: "Skin & Coated",
-        items: [
-            {
-                id: 6,
-                label: "New Treatment",
-                price: 15,
-            },
-        ],
-    },
-    {
-        sectionId: "treatments",
-        title: "Treatments",
-        items: [
-            {
-                id: 9,
-                label: "Flea Treatment",
-                oldPrice: 25,
-                price: 18,
-                badge: "Popular",
-                badgeColor: "bg-[#3064A3]",
-            },
-        ],
-    },
-];
-
-const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
+/* ---------------- Reusable Row ---------------- */
+export const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
     return (
         <div className="flex justify-between items-center gap-3">
-            {/* Left */}
             <div className="flex items-center gap-2 flex-wrap">
                 <Checkbox
                     checked={checked}
@@ -86,33 +26,25 @@ const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
                     }}
                 />
 
-                <span
-                    className="text-base cursor-pointer"
-                    onClick={onToggle}
-                >
-                    {item.label}
+                <span className="text-base cursor-pointer" onClick={onToggle}>
+                    {item.prod_name}
                 </span>
 
-                {item.badge && (
-                    <span
-                        className={`text-[10px] px-2 py-[2px] ${item.badgeColor ?? "bg-[#3064A3]"} text-white rounded-full font-bold`}
-                    >
-                        {item.badge}
+                {item.saves && (
+                    <span className="text-[10px] px-2 py-[2px] bg-[#3064A3] text-white rounded-full uppercase">
+                        Save <span className="font-bold">${item.saves}</span>
                     </span>
                 )}
             </div>
 
-            {/* Right */}
             <div className="flex items-center gap-2">
-                {item.oldPrice && (
+                {/* {item.oldPrice && (
                     <span className="text-base text-primary-light line-through">
                         ${item.oldPrice}
                     </span>
-                )}
+                )} */}
 
-                <span className="text-base font-bold">
-                    ${item.price}
-                </span>
+                <span className="text-base font-bold">${item.price}</span>
 
                 <img
                     src={Info}
@@ -120,7 +52,10 @@ const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
                     className="w-[22px] h-[22px] cursor-pointer"
                     onClick={(e) => {
                         e.stopPropagation();
-                        onInfo(item.info);
+                        onInfo({
+                            title: item.prod_name,
+                            description: item.prod_desc_html,
+                        });
                     }}
                 />
             </div>
@@ -128,64 +63,187 @@ const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
     );
 };
 
+/* ---------------- Main Component ---------------- */
 const StepFourContent = ({ showSuccess }) => {
     const dispatch = useDispatch();
     const [infoModal, setInfoModal] = useState(null);
 
-    const currentPetIndex = useSelector(
-        (state) => state.bookingFlow.currentPetIndex
+    const { currentPetIndex, addonsDetails, petsDraft } = useSelector(
+        (state) => state.bookingFlow
     );
 
-    const addons =
-        useSelector(
-            (state) =>
-                state.bookingFlow.petsDraft[currentPetIndex]?.stepData?.addons
-                    ?.items
-        ) || [];
+    /* ---------------- Redux Data ---------------- */
+    const selectedAddons =
+        petsDraft[currentPetIndex]?.stepData?.addons?.items || [];
 
-    const toggleItem = (item) => {
-        console.log(item);
+    const bundles = addonsDetails?.bundles || [];
+    const addonsArray = addonsDetails?.addonsArray || {};
+    const addonsWithBundles = addonsDetails?.addonsWithBundles || {};
 
-        const exists = addons.some((x) => x.id === item.id);
 
-        const updated = exists
-            ? addons.filter((x) => x.id !== item.id)
-            : [...addons, { id: item.id, price: item.price, name: item?.label }];
+    console.log(addonsDetails);
+
+    /* ---------------- Helpers ---------------- */
+    const isChecked = (id) =>
+        selectedAddons.some((item) => item.id === id);
+
+    const toggleItem = (item, category = null) => {
+        const isBundle = category === "BUNDLES";
+        const exists = selectedAddons.some((x) => x.id === item.id);
+
+        let updatedItems = [...selectedAddons];
+
+        if (isBundle) {
+            const bundleAddonIds = addonsWithBundles[item.id] || [];
+
+            if (exists) {
+                const remainingBundles = updatedItems.filter(
+                    (x) => x.category === "BUNDLES" && x.id !== item.id
+                );
+
+                const addonIdsUsedByOtherBundles = new Set();
+
+                remainingBundles.forEach((bundle) => {
+                    const ids = addonsWithBundles[bundle.id] || [];
+                    ids.forEach((id) =>
+                        addonIdsUsedByOtherBundles.add(String(id))
+                    );
+                });
+
+                updatedItems = updatedItems.filter((x) => {
+                    // remove bundle itself
+                    if (x.id === item.id) return false;
+
+                    // if addon belongs to removed bundle
+                    if (bundleAddonIds.includes(String(x.id))) {
+                        // keep it ONLY if another bundle still uses it
+                        return addonIdsUsedByOtherBundles.has(String(x.id));
+                    }
+
+                    return true;
+                });
+            } else {
+                // ✅ Add bundle
+                updatedItems.push({
+                    id: item.id,
+                    name: item.prod_name,
+                    price: item.price,
+                    category: "BUNDLES",
+                    raw: item,
+                });
+
+                // ✅ Auto-add bundle addons
+                bundleAddonIds.forEach((addonId) => {
+                    const addonExists = updatedItems.some(
+                        (x) => String(x.id) === String(addonId)
+                    );
+
+                    if (!addonExists) {
+                        const addonObj = allAddonsFlat.find(
+                            (a) => String(a.id) === String(addonId)
+                        );
+
+                        if (addonObj) {
+                            updatedItems.push({
+                                id: addonObj.id,
+                                name: addonObj.prod_name,
+                                price: addonObj.price,
+                                category: addonObj.prod_kwd,
+                                raw: addonObj,
+                            });
+                        }
+                    }
+                });
+            }
+        } else {
+            // 🔁 Normal addon toggle (unchanged behavior)
+            updatedItems = exists
+                ? updatedItems.filter((x) => x.id !== item.id)
+                : [
+                    ...updatedItems,
+                    {
+                        id: item.id,
+                        name: item.prod_name,
+                        price: item.price,
+                        category,
+                        raw: item,
+                    },
+                ];
+        }
 
         dispatch(
             updatePetStepData({
                 petIndex: currentPetIndex,
                 step: "addons",
-                data: { items: updated },
+                data: { items: updatedItems },
             })
         );
 
         dispatch(updateTotalPrice({ petIndex: currentPetIndex }));
     };
 
+    /* ---------------- Memoized Categories ---------------- */
+    const addonCategories = useMemo(() => {
+        return Object.entries(addonsArray);
+    }, [addonsArray]);
+
+    const allAddonsFlat = useMemo(() => {
+        return Object.values(addonsArray).flat();
+    }, [addonsArray]);
+
+    /* ---------------- Render ---------------- */
     return (
         <>
-            <Card title="Add-ons"
-                action={showSuccess &&
-                    <div
-                        className="flex items-center gap-1 text-[#3064A3] cursor-pointer"
-                    >
-                        <img src={SuccessIcon} alt="Success" className="w-6 h-6 cursor-pointer" />
-                    </div>
+            <Card
+                title="Add-ons"
+                action={
+                    showSuccess && (
+                        <div className="flex items-center gap-1 text-[#3064A3] cursor-pointer">
+                            <img
+                                src={SuccessIcon}
+                                alt="Success"
+                                className="w-6 h-6"
+                            />
+                        </div>
+                    )
                 }
             >
-                {ADD_ON_SECTIONS.map((section) => (
-                    <section key={section.sectionId} className="pt-4 space-y-2">
-                        <h3 className="font-bold">{section.title}</h3>
+                {/* -------- Bundles -------- */}
+                {bundles.length > 0 && (
+                    <section className=" space-y-2">
+                        <h3 className="font-bold">Bundles</h3>
 
-                        <div className="flex flex-col gap-3">
-                            {section.items.map((item) => (
+                        <div className="flex flex-col gap-2">
+                            {bundles.map((item) => (
                                 <AddOnRow
                                     key={item.id}
                                     item={item}
-                                    checked={addons.some((x) => x.id === item.id)}
-                                    onToggle={() => toggleItem(item)}
-                                    onInfo={(info) => setInfoModal(info)}
+                                    checked={isChecked(item.id)}
+                                    onToggle={() => toggleItem(item, "BUNDLES")}
+                                    onInfo={setInfoModal}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* -------- Addons by Category -------- */}
+                {addonCategories.map(([category, items]) => (
+                    <section key={category} className="pt-3 space-y-2">
+                        <h3 className="font-bold capitalize">
+                            {category === "SKIN&COAT" ? 'Skin & Coat' : category.toLocaleLowerCase().replace(/_/g, " ")}
+                        </h3>
+
+                        <div className="flex flex-col gap-3">
+                            {items.map((item) => (
+                                <AddOnRow
+                                    key={item.id}
+                                    item={item}
+                                    checked={isChecked(item.id)}
+                                    onToggle={() =>
+                                        toggleItem(item, category)
+                                    }
+                                    onInfo={setInfoModal}
                                 />
                             ))}
                         </div>
@@ -193,12 +251,13 @@ const StepFourContent = ({ showSuccess }) => {
                 ))}
             </Card>
 
+            {/* -------- Info Modal -------- */}
             {infoModal && (
                 <BundlesModal
                     open
                     title={infoModal.title}
                     description={infoModal.description}
-                    onClose={() => setInfoModal(false)}
+                    onClose={() => setInfoModal(null)}
                 />
             )}
         </>
