@@ -9,9 +9,7 @@ import PetInfo from '@/components/Modals/PetInfo';
 import AddPetModal from '@/components/Modals/AddPetModal';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import { moveToNextPet, setPetCounts, togglePet } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
-
-const MAX_PETS = 6;
+import { moveToNextPet, SavePetServiceType, setPetCounts, toggleExistingPetSelection, togglePet } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 
 const ExistingPets = () => {
     const navigate = useNavigate();
@@ -27,10 +25,29 @@ const ExistingPets = () => {
     } = useSelector((state) => state.pets?.pets || {});
 
     const bookingFlow = useSelector((state) => state.bookingFlow);
+    const token = useSelector((state) => state.auth.unique_token);
 
-    const { petsDraft, selectedPetIds = [] } = bookingFlow;
+    const { serviceType, petCounts = { dog: 0, cat: 0 }, bookingAddress, petsDraft, selectedPetIds = [], selectedNewPetIdsExisting = [] } = bookingFlow;
 
     const pets = petsDraft || [];
+
+    const dogCount = petCounts?.dog || 0;
+    const catCount = petCounts?.cat || 0;
+    const totalPets = dogCount + catCount;
+
+    let pet_type = "";
+
+    if (dogCount > 0 && catCount > 0) {
+        pet_type = "both";
+    } else if (dogCount > 0) {
+        pet_type = "dog";
+    } else if (catCount > 0) {
+        pet_type = "cat";
+    }
+
+    const displayAddress = useMemo(() => {
+        return bookingAddress || null;
+    }, [bookingAddress]);
 
     const allPets = useMemo(
         () => [...dogPets, ...catPets],
@@ -56,7 +73,7 @@ const ExistingPets = () => {
         const isRemoving = selectedPetIds.includes(petId);
 
         // 🔹 Update Redux pet list
-        dispatch(togglePet(petId));
+        dispatch(toggleExistingPetSelection(petId));
 
         // 🔹 Increment / decrement counts
         dispatch(
@@ -67,36 +84,69 @@ const ExistingPets = () => {
         );
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        // 🔒 Max pets guard
         if (selectedPetIds.length > 6) {
             toast.error("We are allowing 6 pets for now");
             return;
         }
 
-        if (allPets.length > 0 && !selectedPetIds.length) {
+        // 🔒 Must select at least one NEW pet on this screen
+        if (allPets.length > 0 && selectedNewPetIdsExisting.length === 0) {
             toast.error("Please select at least one pet");
             return;
         }
 
-        // Get already processed petIds
-        const processedPetIds = new Set(petsDraft.map(p => p.petId));
-
-        // Find first unprocessed selected pet
-        const nextPetId = selectedPetIds.find(id => !processedPetIds.has(id));
-
-        if (!nextPetId) {
-            toast.error("Please select at least one pet");
-            return;
-        }
-
-        dispatch(
-            moveToNextPet({
-                petIndex: petsDraft.length
-            })
+        // 🔍 Already processed pets
+        const processedPetIds = new Set(
+            petsDraft.map(p => p.petId).filter(Boolean)
         );
 
-        // 🔥 Navigate to first unprocessed pet
-        navigate(`/book/pet/${nextPetId}`);
+        // 👉 First newly selected pet not yet processed
+        const nextPetId = selectedNewPetIdsExisting.find(
+            id => !processedPetIds.has(id)
+        );
+
+        if (!nextPetId) {
+            toast.error("Something went wrong. Please try again.");
+            return;
+        }
+
+        try {
+            const res = await dispatch(
+                SavePetServiceType({
+                    address_id: displayAddress?.address_id,
+                    book_pet_ids: selectedNewPetIdsExisting,
+                    service_type: serviceType,
+                    pet_type,
+                    total_cats: catCount,
+                    total_dogs: dogCount,
+                    total_pets: totalPets,
+                    booking_session_token: token,
+                })
+            ).unwrap();
+
+            const petId = res?.[0];
+
+            console.log(petId);
+
+            if (petId) {
+                navigate(`/book/pet/${petId}`);
+            }
+
+            // ✅ Move booking flow forward
+            dispatch(
+                moveToNextPet({
+                    petIndex: petsDraft.length,
+                })
+            );
+
+            // 🔜 Optional navigation
+            // navigate(`/book/pet/${nextPetId}`);
+        } catch (error) {
+            console.error("SavePetServiceType failed", error);
+            toast.error("Unable to save pets. Please try again.");
+        }
     };
 
     const filteredPetTypeMap = useMemo(() => {
@@ -122,7 +172,10 @@ const ExistingPets = () => {
                 if (petType === "cat") catRemove += 1;
 
                 // remove from selected list
-                dispatch(togglePet(id));
+                // dispatch(togglePet(id));
+                // dispatch(toggleNewPetExisting(id));
+
+                dispatch(toggleExistingPetSelection(id));
 
                 console.log(id);
                 console.log(dogRemove);

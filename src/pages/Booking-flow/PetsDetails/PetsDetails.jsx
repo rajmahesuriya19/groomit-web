@@ -272,28 +272,6 @@ const PetsDetails = () => {
             })
         );
 
-        /* ---------------- React Hook Form ---------------- */
-        Object.entries(detailsPayload).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                setValue(key, value, { shouldDirty: false });
-            }
-        });
-
-        /* ---------------- Breed name (DOG only) ---------------- */
-        if (
-            selectedPetBooking.type == "dog" &&
-            selectedPetBooking?.breed?.breed_id &&
-            petBreeds?.length
-        ) {
-            const foundBreed = petBreeds.find(
-                (b) => b.breed_id?.toString() === selectedPetBooking?.breed?.breed_id?.toString()
-            );
-
-            if (foundBreed) {
-                setSelectedBreedName(foundBreed?.breed_name);
-            }
-        }
-
         if (selectedPet?.isDetailsAdded == true && !shouldMarkDirty) {
             dispatch(
                 completePetStep({
@@ -321,6 +299,28 @@ const PetsDetails = () => {
             );
 
             completeStepAndMove(2);
+        }
+
+        /* ---------------- React Hook Form ---------------- */
+        Object.entries(detailsPayload).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                setValue(key, value, { shouldDirty: false });
+            }
+        });
+
+        /* ---------------- Breed name (DOG only) ---------------- */
+        if (
+            selectedPetBooking.type == "dog" &&
+            selectedPetBooking?.breed?.breed_id &&
+            petBreeds?.length
+        ) {
+            const foundBreed = petBreeds.find(
+                (b) => b.breed_id?.toString() === selectedPetBooking?.breed?.breed_id?.toString()
+            );
+
+            if (foundBreed) {
+                setSelectedBreedName(foundBreed?.breed_name);
+            }
         }
     }, [
         isEdit,

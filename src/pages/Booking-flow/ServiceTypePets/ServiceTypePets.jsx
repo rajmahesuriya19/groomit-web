@@ -238,7 +238,6 @@ const ServiceTypePets = () => {
             toast.error(err?.message || "Something went wrong");
         }
     };
-    ;
 
     const isNextDisabled = allPets.length
         ? selectedPetIds.length === 0

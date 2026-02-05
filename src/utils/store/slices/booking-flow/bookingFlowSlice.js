@@ -301,6 +301,7 @@ const initialState = {
     selectedPet: null,
     selectedPetIdsfromAPI: [],
     selectedPetIds: [],
+    selectedNewPetIdsExisting: [],
     petCounts: {
         dog: 0,
         cat: 0,
@@ -374,6 +375,36 @@ const bookingFlowSlice = createSlice({
             } else {
                 state.selectedPetIds.push(petId);
             }
+        },
+
+        toggleExistingPetSelection(state, action) {
+            // Normalize payload → always an array of ids
+            const petIds = Array.isArray(action.payload)
+                ? action.payload
+                : [action.payload];
+
+            state.selectedPetIds ??= [];
+            state.selectedNewPetIdsExisting ??= [];
+
+            petIds.forEach((petId) => {
+                const isSelected = state.selectedPetIds.includes(petId);
+
+                if (isSelected) {
+                    // REMOVE from both
+                    state.selectedPetIds = state.selectedPetIds.filter(id => id !== petId);
+                    state.selectedNewPetIdsExisting =
+                        state.selectedNewPetIdsExisting.filter(id => id !== petId);
+                } else {
+                    // ADD to both (avoid duplicates)
+                    if (!state.selectedPetIds.includes(petId)) {
+                        state.selectedPetIds.push(petId);
+                    }
+
+                    if (!state.selectedNewPetIdsExisting.includes(petId)) {
+                        state.selectedNewPetIdsExisting.push(petId);
+                    }
+                }
+            });
         },
 
         setPetCounts(state, action) {
@@ -672,7 +703,15 @@ const bookingFlowSlice = createSlice({
             })
             .addCase(SavePetServiceType.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedPetIdsfromAPI = action.payload;
+
+                state.selectedPetIdsfromAPI = [
+                    ...(state.selectedPetIdsfromAPI || []),
+                    ...action.payload,
+                ];
+
+                if (state.selectedNewPetIdsExisting.length > 0) {
+                    state.selectedNewPetIdsExisting = [];
+                }
             })
             .addCase(SavePetServiceType.rejected, (state, action) => {
                 state.loading = false;
@@ -747,6 +786,7 @@ export const {
     setBookingAddress,
     setServiceType,
     togglePet,
+    toggleExistingPetSelection,
     setPetCounts,
 
     deletePetDraft,

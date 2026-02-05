@@ -41,6 +41,7 @@ const PACKAGE_META = {
 
 const PackageCard = ({
     data,
+    show,
     isOneTimeSelected,
     isRecurringSelected,
     error,
@@ -91,12 +92,12 @@ const PackageCard = ({
                 {data.price && (
                     <div
                         onClick={onSelectOneTime}
-                        className={`w-full h-[45px] rounded-[10px] border
+                        className={`w-full ${show ? 'h-[45px]' : 'h-[30px]'} rounded-[10px] border
             flex flex-col items-center justify-center cursor-pointer
             ${isOneTimeSelected ? 'border-brand' : 'border-primary-line'}`}
                     >
                         <div className="text-sm">${data.price}</div>
-                        <div className="text-xs">One Time</div>
+                        {show && <div className="text-xs">One Time</div>}
                     </div>
                 )}
 
@@ -104,7 +105,7 @@ const PackageCard = ({
                 {data.allowRecurring && (
                     <div
                         onClick={onSelectRecurring}
-                        className={`w-full h-[45px] rounded-[10px] border
+                        className={`w-full ${show ? 'h-[45px]' : 'h-[30px]'} rounded-[10px] border
             flex items-center justify-between px-3 cursor-pointer
             ${isRecurringSelected ? 'border-brand' : 'border-primary-line'}`}
                     >
@@ -112,7 +113,7 @@ const PackageCard = ({
                             <div className="text-sm">
                                 ${data.recurringPriceMin} – ${data.recurringPriceMax}
                             </div>
-                            <div className="text-xs">Recurring</div>
+                            {show && <div className="text-xs">Recurring</div>}
                         </div>
                         <ChevronRight size={28} className="text-primary-light" />
                     </div>
@@ -312,6 +313,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                             <PackageCard
                                 key={pkg.productId}
                                 data={pkg}
+                                show={petsDraft?.[currentPetIndex]?.stepData?.details?.type === 'dog'}
                                 error={packageError}
                                 isOneTimeSelected={
                                     isOneTimeApplied &&
@@ -334,6 +336,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                             <PackageCard
                                 key={pkg.productId}
                                 data={pkg}
+                                show={petsDraft?.[currentPetIndex]?.stepData?.details?.type === 'dog'}
                                 error={packageError}
                                 isOneTimeSelected={
                                     isOneTimeApplied &&

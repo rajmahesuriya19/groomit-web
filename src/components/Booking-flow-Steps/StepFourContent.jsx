@@ -9,24 +9,73 @@ import {
     updatePetStepData,
     updateTotalPrice,
 } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { Check } from "lucide-react";
 
 /* ---------------- Reusable Row ---------------- */
-export const AddOnRow = ({ item, checked, onToggle, onInfo }) => {
+const UncheckedIcon = (
+    <span
+        style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            border: "2px solid #BFC5C8",
+            backgroundColor: "#FFFFFF",
+            display: "inline-block",
+        }}
+    />
+);
+
+const DisabledCheckedIcon = (
+    <span
+        style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            backgroundColor: "#E5E7EB",
+            border: "2px solid #D1D5DB",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    />
+);
+
+const EnabledCheckedIcon = (
+    <span
+        style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            backgroundColor: "#FF314A",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Check size={14} color="#FFFFFF" strokeWidth={3} />
+    </span>
+);
+
+export const AddOnRow = ({ item, checked, disabled = false, onToggle, onInfo }) => {
     return (
         <div className="flex justify-between items-center gap-3">
             <div className="flex items-center gap-2 flex-wrap">
                 <Checkbox
                     checked={checked}
+                    disabled={disabled}
                     onChange={onToggle}
                     disableRipple
+                    icon={UncheckedIcon}
+                    checkedIcon={disabled ? DisabledCheckedIcon : EnabledCheckedIcon}
                     sx={{
                         p: 0,
-                        color: "#7C868A",
-                        "&.Mui-checked": { color: "#FF314A" },
                     }}
                 />
 
-                <span className="text-base cursor-pointer" onClick={onToggle}>
+                <span
+                    className={`text-base cursor-pointer`}
+                    onClick={!disabled ? onToggle : undefined}
+                >
                     {item.prod_name}
                 </span>
 
@@ -80,6 +129,18 @@ const StepFourContent = ({ showSuccess }) => {
     const addonsArray = addonsDetails?.addonsArray || {};
     const addonsWithBundles = addonsDetails?.addonsWithBundles || {};
 
+    const bundleLockedAddonIds = useMemo(() => {
+        const locked = new Set();
+
+        selectedAddons.forEach((item) => {
+            if (item.category === "BUNDLES") {
+                const addonIds = addonsWithBundles[item.id] || [];
+                addonIds.forEach((id) => locked.add(String(id)));
+            }
+        });
+
+        return locked;
+    }, [selectedAddons, addonsWithBundles]);
 
     console.log(addonsDetails);
 
@@ -235,17 +296,22 @@ const StepFourContent = ({ showSuccess }) => {
                         </h3>
 
                         <div className="flex flex-col gap-3">
-                            {items.map((item) => (
-                                <AddOnRow
-                                    key={item.id}
-                                    item={item}
-                                    checked={isChecked(item.id)}
-                                    onToggle={() =>
-                                        toggleItem(item, category)
-                                    }
-                                    onInfo={setInfoModal}
-                                />
-                            ))}
+                            {items.map((item) => {
+                                const isBundleLocked = bundleLockedAddonIds.has(String(item.id));
+
+                                return (
+                                    <AddOnRow
+                                        key={item.id}
+                                        item={item}
+                                        checked={isChecked(item.id)}
+                                        disabled={isBundleLocked}
+                                        onToggle={() =>
+                                            !isBundleLocked && toggleItem(item, category)
+                                        }
+                                        onInfo={setInfoModal}
+                                    />
+                                );
+                            })}
                         </div>
                     </section>
                 ))}
