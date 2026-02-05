@@ -39,7 +39,11 @@ const BundlesModal = ({ open, onClose, title, description }) => {
 
                 {/* Body */}
                 <div className="mt-4 text-base leading-relaxed text-primary-dark space-y-3">
-                    <p>{description}</p>
+                    <p
+                        dangerouslySetInnerHTML={{
+                            __html: description,
+                        }}
+                    />
                 </div>
 
                 {/* Footer */}

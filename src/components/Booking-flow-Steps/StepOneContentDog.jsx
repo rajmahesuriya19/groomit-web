@@ -7,7 +7,7 @@ import DogBlack from '../../assets/icon/dog-black.svg';
 import SuccessIcon from "../../assets/icon/tick-green.svg";
 import Searchh from '../../assets/icon/search-black.svg';
 import { useDispatch, useSelector } from "react-redux";
-import { getBookingPetSizes } from "@/utils/store/slices/petList/petListSlice";
+import { getBookingPetSizes } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 
 export const StepOneContentDog = ({
     showSuccess,
@@ -35,6 +35,19 @@ export const StepOneContentDog = ({
     const { petSizes } = useSelector((state) => state.bookingFlow);
 
     const selectedBreedId = watch("breed_id");
+
+    // 🔒 Normalize gender safely
+    const normalizedGender =
+        selectedGender === "m" || selectedGender === "M" || selectedGender === "F" || selectedGender === "f"
+            ? selectedGender
+            : null;
+
+    const genderLabel =
+        normalizedGender === "m" || normalizedGender === "M"
+            ? "Male"
+            : normalizedGender === "f" || normalizedGender === "F"
+                ? "Female"
+                : "";
 
     return (
         <Card title="Dog Details"
@@ -206,13 +219,7 @@ export const StepOneContentDog = ({
                             label="Gender"
                             variant="outlined"
                             fullWidth
-                            value={
-                                selectedGender?.toLowerCase() === "m"
-                                    ? "Male"
-                                    : selectedGender?.toLowerCase() === "f"
-                                        ? "Female"
-                                        : ""
-                            }
+                            value={genderLabel}
                             // placeholder="Select Gender"
                             error={!!errors.gender}
                             onClick={() => setGenderDropdownOpen((prev) => !prev)}
@@ -238,7 +245,7 @@ export const StepOneContentDog = ({
                                             setValue("gender", g.key, { shouldDirty: true });
                                             setGenderDropdownOpen(false);
                                         }}
-                                        className={`px-3 py-2 cursor-pointer rounded mb-1 ${selectedGender.toLowerCase() === g.key ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90" : "hover:bg-gray-100"
+                                        className={`px-3 py-2 cursor-pointer rounded mb-1 ${normalizedGender === g.key ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90" : "hover:bg-gray-100"
                                             }`}
                                     >
                                         {g.label}
