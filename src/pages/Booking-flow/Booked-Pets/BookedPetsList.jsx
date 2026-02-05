@@ -6,6 +6,7 @@ import { ChevronDown } from "lucide-react";
 import Gold from '../../../assets/package/Gold-package-booking.svg';
 import Eco from '../../../assets/package/eco-package-booking.svg';
 import Silver from '../../../assets/package/silver-package-booking.svg';
+import Info from "../../../assets/icon/info-circle-grey.svg";
 
 import EditIcon from "../../../assets/icon/edit-3.svg";
 import ScissorIcon from "../../../assets/icon/scissor-black.svg";
@@ -17,10 +18,89 @@ import StarIcon from "../../../assets/icon/star-black.svg";
 import FragranceIcon from "../../../assets/icon/fragrance-black.svg";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { deletePetDraft, moveToNextPet } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { deletePetDraft, moveToNextPet, updatePetStepData, updateTotalPrice } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 import { useDispatch, useSelector } from "react-redux";
 import DeletePetModal from "@/components/Modals/DeletePetModal";
 import { capitalize } from "@/common/helpers";
+import { Check } from "lucide-react";
+import { Checkbox } from "@mui/material";
+import BundlesModal from "@/components/Modals/BundlesModal";
+
+/* ---------- Icons ---------- */
+const UncheckedIcon = (
+    <span
+        style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            border: "2px solid #BFC5C8",
+            backgroundColor: "#FFFFFF",
+            display: "inline-block",
+        }}
+    />
+);
+
+const CheckedIcon = (
+    <span
+        style={{
+            width: 22,
+            height: 22,
+            borderRadius: 6,
+            backgroundColor: "#FF314A",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        }}
+    >
+        <Check size={14} color="#FFFFFF" strokeWidth={3} />
+    </span>
+);
+
+/* ---------- Row ---------- */
+export const RecommendedAddOnRow = ({
+    item,
+    checked,
+    onToggle,
+    onInfo,
+}) => (
+    <div
+        className="flex justify-between items-center pb-3 cursor-pointer"
+        onClick={onToggle}
+    >
+        <div className="flex items-center gap-2">
+            <Checkbox
+                checked={checked}
+                disableRipple
+                icon={UncheckedIcon}
+                checkedIcon={CheckedIcon}
+                sx={{ p: 0 }}
+            />
+
+            <span className="text-base font-medium">
+                {item.prod_name}
+            </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+            <span className="text-base font-bold">
+                ${item.price}
+            </span>
+
+            <img
+                src={Info}
+                alt="Info"
+                className="w-[22px] h-[22px] cursor-pointer"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onInfo({
+                        title: item.prod_name,
+                        description: item.prod_desc_html,
+                    });
+                }}
+            />
+        </div>
+    </div>
+);
 
 const InfoRow = ({ index = false, isSingle = false, icon, title, subtitle, uploadedImages = [] }) => (
     <>
@@ -87,10 +167,19 @@ export default function BookedPetsList({ petDraft, isSingle }) {
 
     const bookingFlow = useSelector((state) => state.bookingFlow);
 
-    const { selectedPetIdsfromAPI, groomingDetails } = bookingFlow;
+    const { selectedPetIdsfromAPI, groomingDetails, bookedPetDetails } = bookingFlow;
+
+    console.log(bookedPetDetails);
 
     const { stepData } = petDraft || {};
     const { details = {}, package: pkg = {}, grooming = {}, addons = {} } = stepData || {};
+
+    const selectedRecommendedAddons = Array.isArray(addons?.recommendedAddons)
+        ? addons.recommendedAddons
+        : [];
+
+    const isAddonChecked = (id) =>
+        selectedRecommendedAddons.some((x) => x.id === id);
 
     const COAT_TYPE_LABELS = groomingDetails?.coatTypes;
     const BEHAVIOR_LABELS = groomingDetails?.behaviors;
@@ -104,6 +193,7 @@ export default function BookedPetsList({ petDraft, isSingle }) {
     const [expanded, setExpanded] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [infoModal, setInfoModal] = useState(null);
 
     const {
         name,
@@ -226,6 +316,39 @@ export default function BookedPetsList({ petDraft, isSingle }) {
         setIsDeleteModalOpen(false);
     };
 
+    const toggleRecommendedAddon = (item) => {
+        const exists = selectedRecommendedAddons.some(
+            (x) => x.id === item.prod_id
+        );
+
+        const updatedRecommendedAddons = exists
+            ? selectedRecommendedAddons.filter(
+                (x) => x.id !== item.prod_id
+            )
+            : [
+                ...selectedRecommendedAddons,
+                {
+                    id: item.prod_id,
+                    name: item.prod_name,
+                    price: item.price,
+                    raw: item,
+                },
+            ];
+
+        dispatch(
+            updatePetStepData({
+                petIndex: petDraft.petIndex,
+                step: "addons",
+                data: {
+                    ...addons,
+                    recommendedAddons: updatedRecommendedAddons,
+                },
+            })
+        );
+
+        dispatch(updateTotalPrice({ petIndex: petDraft.petIndex }));
+    };
+
     return (
         <>
             <Accordion
@@ -254,7 +377,7 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                                 <span className="font-inter text-sm text-primary-dark capitalize">
                                     {petType === "cat"
                                         ? "Cat"
-                                        : `${breed?.breed_name || breed_name}, ${size?.size || size_name}`}
+                                        : `${breed?.breed_name || breed_name}, ${size?.size_name || size_name}`}
                                 </span>
                             </div>
                         </div>
@@ -355,6 +478,31 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                                 uploadedImages={uploadedImages}
                             />
                         )}
+
+                        {bookedPetDetails?.pets?.[petDraft?.petIndex]?.recommendedProducts.length > 0 && <div className="px-[15px] pb-[15px]">
+                            <div className="border border-black rounded-[10px] overflow-hidden">
+                                <div className="bg-black font-bold text-base px-[15px] py-[10px] text-white capitalize">
+                                    Commonly added for pets like {name}
+                                </div>
+
+                                <div className="flex flex-col px-[15px] pt-4 pb-2">
+                                    {Array.isArray(
+                                        bookedPetDetails?.pets?.[petDraft?.petIndex]?.recommendedProducts
+                                    ) &&
+                                        bookedPetDetails.pets[petDraft.petIndex].recommendedProducts.map(
+                                            (product) => (
+                                                <RecommendedAddOnRow
+                                                    key={product.prod_id}
+                                                    item={product}
+                                                    checked={isAddonChecked(product.prod_id)}
+                                                    onToggle={() => toggleRecommendedAddon(product)}
+                                                    onInfo={setInfoModal}
+                                                />
+                                            )
+                                        )}
+                                </div>
+                            </div>
+                        </div>}
                     </div>
                 </AccordionDetails>
             </Accordion>
@@ -366,6 +514,16 @@ export default function BookedPetsList({ petDraft, isSingle }) {
                 title={`Remove ${name}`}
                 decription={`Are you sure you want to remove ${name} from this appointment? Checkk's details will stay saved in your Groomit account.`}
             />
+
+            {/* -------- Info Modal -------- */}
+            {infoModal && (
+                <BundlesModal
+                    open
+                    title={infoModal.title}
+                    description={infoModal.description}
+                    onClose={() => setInfoModal(null)}
+                />
+            )}
         </>
     );
 }

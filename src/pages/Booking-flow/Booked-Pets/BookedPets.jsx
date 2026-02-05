@@ -1,17 +1,23 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, PlusIcon } from 'lucide-react'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import BookedPetsList from './BookedPetsList';
 import TotalPriceModal from '@/components/Modals/TotalPriceModal';
 import TaxInsuranceModal from '@/components/Modals/TaxInsuranceModal';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { getBookedPetsDetails } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 
 
 const BookedPets = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { showLoader, hideLoader } = useLoader();
+
     const [openPriceTotalModal, setOpenPriceTotalModal] = useState(false);
     const [openTaxModal, setOpenTaxModal] = useState(false);
 
+    const token = useSelector((state) => state.auth.unique_token);
     const bookingFlow = useSelector((state) => state.bookingFlow);
 
     const {
@@ -19,13 +25,11 @@ const BookedPets = () => {
         petsDraft,
         address: bookingAddress,
         totalPrice,
-        selectedPetIds
+        selectedPetIds,
+        bookedPetDetails
     } = bookingFlow;
 
     const pets = petsDraft || [];
-
-    console.log(pets);
-
 
     /* ---------------- Default Address ---------------- */
     const displayAddress = useMemo(() => {
@@ -35,6 +39,21 @@ const BookedPets = () => {
     const handlePetSubmit = () => {
         navigate("/book/slot/view-groomers");
     }
+
+    useEffect(() => {
+        const fetchPets = async () => {
+            showLoader();
+            try {
+                await dispatch(getBookedPetsDetails(
+                    { booking_session_token: token }
+                )).unwrap();
+            } finally {
+                hideLoader();
+            }
+        };
+
+        fetchPets();
+    }, [dispatch]);
 
     return (
         <>
@@ -72,7 +91,7 @@ const BookedPets = () => {
             {/* Content */}
             <div className="px-4 py-4 pb-32 max-w-xl mx-auto flex flex-col gap-4">
                 <div className="space-y-4">
-                    {pets.map((petDraft, idx) => (
+                    {bookedPetDetails && pets.map((petDraft, idx) => (
                         <BookedPetsList
                             key={idx}
                             petDraft={petDraft}

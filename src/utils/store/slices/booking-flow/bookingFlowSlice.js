@@ -291,6 +291,24 @@ export const saveAddonsDetails = createAsyncThunk(
     }
 );
 
+// Get Pets List on Booked Pets Details
+export const getBookedPetsDetails = createAsyncThunk(
+    'bookingFlow/getBookedPetsDetails',
+    async ({ booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/list`,
+                { booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
 const initialState = {
     /* ---------------- Address & Service ---------------- */
     address: null,
@@ -318,6 +336,8 @@ const initialState = {
     packageDetails: [],
     groomingDetails: [],
     addonsDetails: [],
+
+    bookedPetDetails: [],
 
     /* ---------------- Calender ---------------- */
     selectedSlot: null,
@@ -775,6 +795,21 @@ const bookingFlowSlice = createSlice({
                 state.addonsDetails = action.payload;
             })
             .addCase(getAddonsDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Addons Details
+            .addCase(getBookedPetsDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookedPetsDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.bookedPetDetails = action.payload;
+            })
+            .addCase(getBookedPetsDetails.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);
