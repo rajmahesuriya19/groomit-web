@@ -291,6 +291,24 @@ export const saveAddonsDetails = createAsyncThunk(
     }
 );
 
+// Get Pets List on Booked Pets Details
+export const getBookedPetsDetails = createAsyncThunk(
+    'bookingFlow/getBookedPetsDetails',
+    async ({ booking_session_token }, { rejectWithValue }) => {
+        try {
+            const { data } = await axiosInstance.post(
+                `api/user/booking/pet/list`,
+                { booking_session_token }
+            );
+
+            // Only return pet_breeds
+            return data?.data || [];
+        } catch (error) {
+            return rejectWithValue(error.response?.data || { message: 'Failed to fetch booking pet breeds' });
+        }
+    }
+);
+
 const initialState = {
     /* ---------------- Address & Service ---------------- */
     address: null,
@@ -318,6 +336,8 @@ const initialState = {
     packageDetails: [],
     groomingDetails: [],
     addonsDetails: [],
+
+    bookedPetDetails: [],
 
     /* ---------------- Calender ---------------- */
     selectedSlot: null,
@@ -508,26 +528,40 @@ const bookingFlowSlice = createSlice({
         updateTotalPrice(state, action) {
             const { petIndex } = action.payload;
 
-            const petDraft = state.petsDraft?.[petIndex];
-            if (!petDraft) return;
+            console.log("🟢 updateTotalPrice fired");
+            console.log("👉 petIndex:", petIndex);
 
-            let total = 0;
+            const petDraft = state.petsDraft?.[petIndex];
+            if (!petDraft) {
+                console.warn("❌ petDraft not found for index:", petIndex);
+                return;
+            }
+
+            console.log("🐶 petDraft:", JSON.parse(JSON.stringify(petDraft)));
+
+            let subTotal = 0;
 
             /* ---------------- PACKAGE PRICE ---------------- */
 
             const pkg = petDraft.stepData?.package;
+            console.log("📦 Package data:", pkg);
 
             if (pkg?.pricingType === "one-time") {
-                total += Number(
-                    String(pkg?.price || 0).replace(/[^0-9.]/g, "")
-                );
+                console.log("💵 One-time price:", pkg?.price);
+                console.log("🚐 Mobile van fee:", pkg?.mobileVanFee);
+
+                subTotal += Number(pkg?.price || 0);
+                subTotal += Number(pkg?.mobileVanFee || 0);
             }
 
             if (pkg?.pricingType === "recurring" && pkg?.recurringConfig) {
-                const { billing, annualTotal, perAppointment } =
-                    pkg.recurringConfig;
+                const { billing, annualTotal, perAppointment } = pkg.recurringConfig;
 
-                total += Number(
+                console.log("🔁 Recurring billing:", billing);
+                console.log("🔁 Annual total:", annualTotal);
+                console.log("🔁 Per appointment:", perAppointment);
+
+                subTotal += Number(
                     billing === "annual"
                         ? annualTotal || 0
                         : perAppointment || 0
@@ -537,42 +571,38 @@ const bookingFlowSlice = createSlice({
             /* ---------------- SAFETY INSURANCE ---------------- */
 
             if (pkg?.safetyInsuranceFee) {
-                total += Number(pkg.safetyInsuranceFee);
+                console.log("🛡 Safety insurance fee:", pkg.safetyInsuranceFee);
+                subTotal += Number(pkg.safetyInsuranceFee);
             }
 
-            if (pkg?.taxAmount) {
-                total += Number(pkg.taxAmount);
-            }
-
-            Math.floor(total);
-
-            /* ---------------- COAT CONDITION PRICE ---------------- */
+            /* ---------------- GROOMING ---------------- */
 
             const grooming = petDraft.stepData?.grooming;
+            console.log("✂️ Grooming data:", grooming);
 
             if (grooming?.conditionProduct?.price) {
-                total += Number(grooming.conditionProduct.price);
+                console.log("🐕 Coat condition price:", grooming.conditionProduct.price);
+                subTotal += Number(grooming.conditionProduct.price);
             }
-
-            /* ---------------- BEHAVIOR PRICE ---------------- */
 
             if (grooming?.behaviorProduct?.price) {
-                total += Number(grooming.behaviorProduct.price);
+                console.log("😾 Behavior price:", grooming.behaviorProduct.price);
+                subTotal += Number(grooming.behaviorProduct.price);
             }
-
-            /* ---------------- SHAMPOO PRICE ---------------- */
 
             if (grooming?.shampooPrice) {
-                total += Number(grooming.shampooPrice);
+                console.log("🧴 Shampoo price:", grooming.shampooPrice);
+                subTotal += Number(grooming.shampooPrice);
             }
 
-            /* ---------------- ADD-ONS & BUNDLES PRICE ---------------- */
+            /* ---------------- ADD-ONS & BUNDLES ---------------- */
 
             const addons = petDraft.stepData?.addons?.items || [];
-            const addonsWithBundles =
-                state.addonsDetails?.addonsWithBundles || {};
+            const addonsWithBundles = state.addonsDetails?.addonsWithBundles || {};
 
-            // Separate bundles & addons
+            console.log("➕ Selected addons:", addons);
+            console.log("🎁 Addons-with-bundles map:", addonsWithBundles);
+
             const selectedBundles = addons.filter(
                 (item) => item.category === "BUNDLES"
             );
@@ -581,37 +611,61 @@ const bookingFlowSlice = createSlice({
                 (item) => item.category !== "BUNDLES"
             );
 
-            // 1️⃣ Add bundle prices
             selectedBundles.forEach((bundle) => {
-                total += Number(bundle.price || 0);
+                console.log("🎁 Bundle price:", bundle.price);
+                subTotal += Number(bundle.price || 0);
             });
 
-            // 2️⃣ Collect addon IDs covered by bundles
-            const addonIdsCoveredByBundles = new Set();
+            const coveredAddonIds = new Set();
 
             selectedBundles.forEach((bundle) => {
-                const ids = addonsWithBundles[bundle.id] || [];
-                ids.forEach((id) => addonIdsCoveredByBundles.add(String(id)));
+                (addonsWithBundles[bundle.id] || []).forEach((id) => {
+                    coveredAddonIds.add(String(id));
+                });
             });
 
-            // 3️⃣ Add addon prices ONLY if not covered by bundle
+            console.log("🧠 Covered addon IDs:", [...coveredAddonIds]);
+
             selectedAddons.forEach((addon) => {
-                if (!addonIdsCoveredByBundles.has(String(addon.id))) {
-                    total += Number(addon.price || 0);
+                if (!coveredAddonIds.has(String(addon.id))) {
+                    console.log("➕ Addon added:", addon.id, addon.price);
+                    subTotal += Number(addon.price || 0);
+                } else {
+                    console.log("🚫 Addon skipped (covered by bundle):", addon.id);
                 }
             });
 
+            /* ---------------- SUBTOTAL CHECK ---------------- */
+
+            console.log("💰 Subtotal BEFORE tax:", subTotal);
+
+            /* ---------------- TAX (LAST STEP) ---------------- */
+
+            const TAX_RATE = 0.0887;
+
+            const taxAmount = Number((subTotal * TAX_RATE).toFixed(2));
+            const totalPrice = Number((subTotal + taxAmount).toFixed(2));
+
+            console.log("🧾 Tax rate:", TAX_RATE);
+            console.log("🧾 Tax amount:", taxAmount);
+            console.log("🧾 Final total:", totalPrice);
+
             /* ---------------- SAVE PET TOTAL ---------------- */
 
-            petDraft.stepData.totalPrice = total;
+            petDraft.stepData.subTotal = subTotal;
+            petDraft.stepData.taxAmount = taxAmount;
+            petDraft.stepData.totalPrice = totalPrice;
+
+            console.log("✅ Saved stepData:", petDraft.stepData);
 
             /* ---------------- BOOKING TOTAL ---------------- */
 
             state.totalPrice = state.petsDraft.reduce(
-                (sum, pet) =>
-                    sum + Number(pet?.stepData?.totalPrice || 0),
+                (sum, pet) => sum + Number(pet?.stepData?.totalPrice || 0),
                 0
             );
+
+            console.log("🏁 Booking total price:", state.totalPrice);
         },
 
         completePetStep(state, action) {
@@ -704,10 +758,12 @@ const bookingFlowSlice = createSlice({
             .addCase(SavePetServiceType.fulfilled, (state, action) => {
                 state.loading = false;
 
-                state.selectedPetIdsfromAPI = [
-                    ...(state.selectedPetIdsfromAPI || []),
-                    ...action.payload,
-                ];
+                state.selectedPetIdsfromAPI = action.payload;
+
+                // state.selectedPetIdsfromAPI = [
+                //     ...(state.selectedPetIdsfromAPI || []),
+                //     ...action.payload,
+                // ];
 
                 if (state.selectedNewPetIdsExisting.length > 0) {
                     state.selectedNewPetIdsExisting = [];
@@ -775,6 +831,21 @@ const bookingFlowSlice = createSlice({
                 state.addonsDetails = action.payload;
             })
             .addCase(getAddonsDetails.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || 'Something went wrong';
+                toast.error(state.error);
+            })
+
+            // Get Addons Details
+            .addCase(getBookedPetsDetails.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getBookedPetsDetails.fulfilled, (state, action) => {
+                state.loading = false;
+                state.bookedPetDetails = action.payload;
+            })
+            .addCase(getBookedPetsDetails.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || 'Something went wrong';
                 toast.error(state.error);

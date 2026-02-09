@@ -32,3 +32,21 @@ export const formatDate = (dateString) => {
 export const capitalize = (str = "") =>
     str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
+export const resolvePriceByServiceType = (serviceType, normal, mobileVan) => {
+    return Number(
+        serviceType === "mobile-van"
+            ? mobileVan ?? normal ?? 0
+            : normal ?? 0
+    );
+};
+
+export const resolveRecurringPrice = (serviceType, interval, key) => {
+    if (!interval) return 0;
+
+    if (serviceType === "mobile-van") {
+        return Number(interval[`${key}WithMobileVanFee`] || 0);
+    }
+
+    return Number(interval[key] || 0);
+};
+

@@ -10,10 +10,13 @@ import AddPetModal from '@/components/Modals/AddPetModal';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
 import { moveToNextPet, SavePetServiceType, setPetCounts, toggleExistingPetSelection, togglePet } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { CheckboxIcon } from '@/common/CustomCheckbox/CustomCheckboxIcons';
 
 const ExistingPets = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { showLoader, hideLoader } = useLoader();
 
     const [petInfoModal, setPetInfoModal] = useState(false);
     const [addPetModalOpen, setAddPetModalOpen] = useState(false);
@@ -27,7 +30,7 @@ const ExistingPets = () => {
     const bookingFlow = useSelector((state) => state.bookingFlow);
     const token = useSelector((state) => state.auth.unique_token);
 
-    const { serviceType, petCounts = { dog: 0, cat: 0 }, bookingAddress, petsDraft, selectedPetIds = [], selectedNewPetIdsExisting = [] } = bookingFlow;
+    const { serviceType, currentPetIndex, petCounts = { dog: 0, cat: 0 }, bookingAddress, petsDraft, selectedPetIds = [], selectedNewPetIdsExisting = [], selectedPetIdsfromAPI = [] } = bookingFlow;
 
     const pets = petsDraft || [];
 
@@ -85,30 +88,18 @@ const ExistingPets = () => {
     };
 
     const handleSubmit = async () => {
+        showLoader();
         // 🔒 Max pets guard
         if (selectedPetIds.length > 6) {
             toast.error("We are allowing 6 pets for now");
+            hideLoader();
             return;
         }
 
         // 🔒 Must select at least one NEW pet on this screen
         if (allPets.length > 0 && selectedNewPetIdsExisting.length === 0) {
             toast.error("Please select at least one pet");
-            return;
-        }
-
-        // 🔍 Already processed pets
-        const processedPetIds = new Set(
-            petsDraft.map(p => p.petId).filter(Boolean)
-        );
-
-        // 👉 First newly selected pet not yet processed
-        const nextPetId = selectedNewPetIdsExisting.find(
-            id => !processedPetIds.has(id)
-        );
-
-        if (!nextPetId) {
-            toast.error("Something went wrong. Please try again.");
+            hideLoader();
             return;
         }
 
@@ -116,7 +107,7 @@ const ExistingPets = () => {
             const res = await dispatch(
                 SavePetServiceType({
                     address_id: displayAddress?.address_id,
-                    book_pet_ids: selectedNewPetIdsExisting,
+                    book_pet_ids: selectedPetIds,
                     service_type: serviceType,
                     pet_type,
                     total_cats: catCount,
@@ -126,13 +117,13 @@ const ExistingPets = () => {
                 })
             ).unwrap();
 
-            const petId = res?.[0];
+            const nextPetIndex = currentPetIndex + 1;
+            const nextPetId = res[nextPetIndex]
 
-            console.log(petId);
-
-            if (petId) {
-                navigate(`/book/pet/${petId}`);
+            if (nextPetId) {
+                navigate(`/book/pet/${nextPetId}`);
             }
+            hideLoader();
 
             // ✅ Move booking flow forward
             dispatch(
@@ -140,12 +131,10 @@ const ExistingPets = () => {
                     petIndex: petsDraft.length,
                 })
             );
-
-            // 🔜 Optional navigation
-            // navigate(`/book/pet/${nextPetId}`);
         } catch (error) {
             console.error("SavePetServiceType failed", error);
             toast.error("Unable to save pets. Please try again.");
+            hideLoader();
         }
     };
 
@@ -170,10 +159,6 @@ const ExistingPets = () => {
 
                 if (petType === "dog") dogRemove += 1;
                 if (petType === "cat") catRemove += 1;
-
-                // remove from selected list
-                // dispatch(togglePet(id));
-                // dispatch(toggleNewPetExisting(id));
 
                 dispatch(toggleExistingPetSelection(id));
 
@@ -208,14 +193,14 @@ const ExistingPets = () => {
                             navigate(-1);
                         }}
                     />
-                    <h1 className="font-bold text-xl">
+                    <h1 className="font-bold text-xl w-full text-center">
                         Add Pet To Service
                     </h1>
-                    <PlusIcon
+                    {selectedPetIds.length < 6 && <PlusIcon
                         size={24}
                         className="cursor-pointer"
                         onClick={() => setAddPetModalOpen(true)}
-                    />
+                    />}
                 </div>
             </div>
 
@@ -267,25 +252,9 @@ const ExistingPets = () => {
                                     checked={isChecked}
                                     disabled={isDisabled}
                                     disableRipple
-                                    sx={{
-                                        padding: 0,
-                                        color: "#7C868A",
-
-                                        "&.Mui-checked": {
-                                            color: "#FF314A",
-                                        },
-
-                                        /* 👇 THIS targets the input */
-                                        "& input": {
-                                            cursor: isDisabled ? "not-allowed" : "pointer",
-                                            color: isDisabled && "#C4C4C4",
-                                        },
-
-                                        /* optional: keep icon cursor in sync */
-                                        "& .MuiSvgIcon-root": {
-                                            cursor: isDisabled ? "not-allowed" : "pointer",
-                                        },
-                                    }}
+                                    icon={<CheckboxIcon disabled={isDisabled} />}
+                                    checkedIcon={<CheckboxIcon checked />}
+                                    sx={{ p: 0 }}
                                 />
                             </div>
                         );

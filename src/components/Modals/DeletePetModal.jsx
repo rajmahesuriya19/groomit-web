@@ -25,7 +25,7 @@ const DeletePetModal = ({ open, onClose, onConfirm, title, decription }) => {
                         <img src={Close} alt="Close" className="w-[24px] h-[24px]" />
                     </IconButton>
 
-                    <h2 className="text-primary-dark text-xl font-bold leading-[26px] text-center font-inter mb-2 mt-4">
+                    <h2 className="text-primary-dark capitalize text-xl font-bold leading-[26px] text-center font-inter mb-2 mt-4">
                         {title}
                     </h2>
 

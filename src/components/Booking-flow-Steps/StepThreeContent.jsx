@@ -30,16 +30,6 @@ const StepThreeContent = ({
     const savedPackage = petsDraft?.[currentPetIndex]?.stepData?.package || {};
 
     const disabledCoatTypes = savedPackage?.disabledCoatType || [];
-
-    const isCoatDisabled = (key) => disabledCoatTypes.includes(key);
-
-    const getFirstAllowedCoat = () => {
-        return COAT_KEYS.find(
-            (key) => !disabledCoatTypes.includes(key)
-        );
-    };
-
-    console.log(savedPackage);
     const COAT_TYPE_LABELS = groomingDetails?.coatTypes;
     const BEHAVIOR_LABELS = groomingDetails?.behaviors;
 
@@ -125,43 +115,6 @@ const StepThreeContent = ({
     ]);
 
     /* -------------------- coat condition logic -------------------- */
-
-    // const handleConditionSelect = (key) => {
-    //     setConditionError("");
-
-    //     // 🚫 If disabled by package → auto-select allowed one
-    //     if (isCoatDisabled(key)) {
-    //         const fallback = getFirstAllowedCoat();
-
-    //         if (!fallback) return; // safety guard
-
-    //         updateGrooming({
-    //             condition: fallback,
-    //             conditionProduct: fallback === "not-matted"
-    //                 ? null
-    //                 : coatProducts[fallback],
-    //             mattingInfo: null,
-    //             shave_down_status: groomingDetails?.pets?.shave_down_status,
-    //         }, true);
-
-    //         return;
-    //     }
-
-    //     // ✅ Not matted → no modal
-    //     if (key === "not-matted") {
-    //         updateGrooming({
-    //             condition: key,
-    //             conditionProduct: null,
-    //             mattingInfo: null,
-    //             shave_down_status: groomingDetails?.pets?.shave_down_status,
-    //         }, true);
-    //         return;
-    //     }
-
-    //     // ⚠️ Matted / Severe → approval modal
-    //     setPendingCondition(key);
-    //     setMattingModal(true);
-    // };
 
     const handleConditionSelect = (key) => {
         setConditionError("");
