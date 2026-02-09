@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { persistor } from '@/utils/store';
 
-const UserDropdown = () => {
+const UserDropdown = ({ onProtectedAction }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,9 +74,18 @@ const UserDropdown = () => {
   }, []);
 
   const menuItems = [
-    { label: 'My Account', href: '/user/account' },
-    { label: 'Dashboard', href: '/user/dashboard' },
-    { label: 'Log Out', onClick: handleLogout },
+    {
+      label: 'My Account',
+      action: () => onProtectedAction?.('/user/account'),
+    },
+    {
+      label: 'Dashboard',
+      action: () => onProtectedAction?.('/user/dashboard'),
+    },
+    {
+      label: 'Log Out',
+      onClick: handleLogout,
+    },
   ];
 
   const menuItemsOffline = [
@@ -101,7 +110,13 @@ const UserDropdown = () => {
             }
             : {}
         }
-        onClick={() => !showDropdown ? setIsOpen(!isOpen) : navigate('/user/account')}
+        onClick={() => {
+          if (!showDropdown) {
+            setIsOpen(!isOpen);
+          } else {
+            onProtectedAction?.('/user/account');
+          }
+        }}
       >
         {/* Notification Icon */}
         {!showDropdown && <div className="flex items-center justify-center relative">
@@ -156,14 +171,16 @@ const UserDropdown = () => {
                     <span>{item.label}</span>
                   </button>
                 ) : (
-                  <Link
-                    to={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none"
+                  <button
+                    onClick={() => {
+                      item.action?.();
+                      setIsOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     <span>{item.label}</span>
                     <ChevronDown size={14} className="text-gray-400 -rotate-90" />
-                  </Link>
+                  </button>
                 )}
                 {index < activeMenu.length - 1 && <hr className="border-gray-100" />}
               </div>

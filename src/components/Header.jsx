@@ -1,18 +1,52 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import AddressSelector from './AddressSelector.jsx';
 import UserDropdown from './UserDropdown.jsx';
-import MobileMenu from './MobileMenu.jsx';
 import info from '../assets/icon/help-circle-black.svg';
 import Rating from '../assets/icon/fill-star.svg';
 import MobileMenuHeader from './MobileMenuHeader.jsx';
+import { useDispatch, useSelector } from 'react-redux';
+import CancelBookingFlowModal from './Modals/CancelBookingFlowModal.jsx';
+import { clearBookingFlow } from '@/utils/store/slices/booking-flow/bookingFlowSlice.js';
+import { clearSelectedPet } from '@/utils/store/slices/petList/petListSlice.js';
 
 const Header = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const bookingFlow = useSelector((state) => state.bookingFlow);
+
+    const {
+        selectedPetIdsfromAPI,
+        petsDraft,
+        petCounts = { dog: 0, cat: 0 }
+    } = bookingFlow;
+
+    const dogCount = petCounts?.dog || 0;
+    const catCount = petCounts?.cat || 0;
+    const totalPets = dogCount + catCount;
+
+    const shouldBlockNavigation =
+        totalPets > 0 &&
+        selectedPetIdsfromAPI?.length > 0 &&
+        petsDraft?.length > 0;
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [cancelBookingFlow, setCancelBookingFlow] = useState(false);
+    const [pendingRoute, setPendingRoute] = useState(null);
 
     const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const handleProtectedNavigation = (route) => {
+        console.log(route);
+
+        if (shouldBlockNavigation) {
+            setPendingRoute(route);
+            setCancelBookingFlow(true);
+        } else {
+            navigate(route);
+        }
     };
 
     const booking_flow = location.pathname.startsWith('/book');
@@ -25,7 +59,13 @@ const Header = () => {
                     <div className="flex justify-between items-center h-20">
 
                         <div className="flex-shrink-0 hidden md:block">
-                            <Link to="/" className="flex items-center">
+                            <Link
+                                to="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleProtectedNavigation("/");
+                                }}
+                            >
                                 <img
                                     className="h-12 w-40"
                                     src="https://groomit.me/v7/images/home/groomit-logo.svg"
@@ -82,21 +122,19 @@ const Header = () => {
                                 </div>}
 
                                 {/* User Dropdown */}
-                                <UserDropdown />
+                                <UserDropdown onProtectedAction={handleProtectedNavigation} />
 
                                 {/* Help Link */}
                                 <Link
-                                    to="/book/service-address"
-                                    className="flex items-center px-[12px] py-[10px] rounded-[10px] border border-[#7C868A80] transition-colors hover:text-red-600 group"
+                                    to="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        handleProtectedNavigation("/book/service-address");
+                                    }}
+                                    className="flex items-center px-[12px] py-[10px] rounded-[10px] border"
                                 >
-                                    <img
-                                        src={info}
-                                        alt="Help Icon"
-                                        className="w-[24px] h-[24px]"
-                                    />
-                                    <span className="text-sm font-semibold text-primary-dark leading-none tracking-[-0.01em]  font-inter px-2 py-0.5 rounded-sm">
-                                        Need Help?
-                                    </span>
+                                    <img src={info} alt="Help Icon" className="w-[24px] h-[24px]" />
+                                    <span className="text-sm font-semibold px-2">Need Help?</span>
                                 </Link>
                             </div>
                         </div>
@@ -111,6 +149,24 @@ const Header = () => {
                     onClose={() => setIsMobileMenuOpen(false)}
                 />
             )}
+
+            <CancelBookingFlowModal
+                open={cancelBookingFlow}
+                onClose={() => setCancelBookingFlow(false)}
+                title={'Exit Booking Confirmation'}
+                decs={'Are you sure you want to drop the booking process? All your booking selections will be erased.'}
+                onConfirm={() => {
+                    dispatch(clearBookingFlow());
+                    dispatch(clearSelectedPet());
+
+                    setCancelBookingFlow(false);
+
+                    if (pendingRoute) {
+                        navigate(pendingRoute);
+                        setPendingRoute(null);
+                    }
+                }}
+            />
         </>
     );
 };

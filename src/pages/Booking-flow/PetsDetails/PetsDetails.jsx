@@ -20,7 +20,7 @@ import { StepOneContentCat } from '@/components/Booking-flow-Steps/StepOneConten
 import { normalizeDOB } from '@/pages/my-pets/add-update-cat/AddUpdateCat2';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { toast } from 'react-toastify';
-import { clearBookingFlow, completePetStep, deletePetDraft, getAddonsDetails, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, saveAddonsDetails, saveGroomingDetails, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import { clearBookingFlow, completePetStep, deletePetDraft, deletePetDraftBooking, getAddonsDetails, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, saveAddonsDetails, saveGroomingDetails, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 import CancelBookingFlowModal from '@/components/Modals/CancelBookingFlowModal';
 import BookingFooter from '../BookingFooter';
 import TotalPriceModal from '@/components/Modals/TotalPriceModal';
@@ -915,13 +915,33 @@ const PetsDetails = () => {
         return `${visible} + ${remaining} more`;
     })();
 
-    const handleDeletePet = () => {
-        dispatch(
-            deletePetDraft({
-                petIndex: petDraft?.petIndex,
-            })
-        );
-        setIsDeleteModalOpen(false);
+    const handleDeletePet = async () => {
+        try {
+            showLoader();
+
+            await dispatch(
+                deletePetDraftBooking({
+                    id: id,
+                    booking_session_token: token,
+                })
+            ).unwrap();
+
+            // update local draft if needed
+            dispatch(
+                deletePetDraft({
+                    petIndex: petsDraft?.petIndex,
+                })
+            );
+
+            navigate("/book/pets");
+
+            setIsDeleteModalOpen(false);
+        } catch (error) {
+            console.error("Delete pet failed:", error);
+            toast.error(error?.message || "Failed to delete pet");
+        } finally {
+            hideLoader();
+        }
     };
 
     const canOpenStep = (stepId) =>
