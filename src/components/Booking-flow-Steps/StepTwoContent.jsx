@@ -4,7 +4,6 @@ import { Box } from '@mui/material';
 import { ChevronRight } from 'lucide-react';
 
 import Card from '@/common/Booking-Flow/Card';
-import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import {
     updatePetStepData,
     updateTotalPrice,
@@ -17,6 +16,7 @@ import SuccessIcon from '../../assets/icon/tick-green.svg';
 
 import FICollarModal from '../Modals/FICollarModal';
 import RecurringModal from '../Modals/RecurringModal';
+import { resolvePriceByServiceType } from '@/common/helpers';
 
 /* -------------------- Helpers -------------------- */
 
@@ -42,6 +42,7 @@ const PACKAGE_META = {
 const PackageCard = ({
     data,
     show,
+    serviceType,
     isOneTimeSelected,
     isRecurringSelected,
     error,
@@ -96,7 +97,7 @@ const PackageCard = ({
             flex flex-col items-center justify-center cursor-pointer
             ${isOneTimeSelected ? 'border-brand' : 'border-primary-line'}`}
                     >
-                        <div className="text-sm">${data.price}</div>
+                        <div className="text-sm">{`$${serviceType === 'mobile-van' ? data?.priceWithMobileVanFee : data?.price}`}</div>
                         {show && <div className="text-xs">One Time</div>}
                     </div>
                 )}
@@ -111,7 +112,7 @@ const PackageCard = ({
                     >
                         <div className="text-center w-full">
                             <div className="text-sm">
-                                ${data.recurringPriceMin} – ${data.recurringPriceMax}
+                                ${serviceType === 'mobile-van' ? data.recurringPriceMinWithMobileVanFee : data.recurringPriceMin} – ${serviceType === 'mobile-van' ? data.recurringPriceMaxWithMobileVanFee : data.recurringPriceMax}
                             </div>
                             {show && <div className="text-xs">Recurring</div>}
                         </div>
@@ -127,7 +128,7 @@ const PackageCard = ({
 
 const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
     const dispatch = useDispatch();
-    const { currentPetIndex, packageDetails, petsDraft } = useSelector(
+    const { currentPetIndex, packageDetails, petsDraft, serviceType } = useSelector(
         (state) => state.bookingFlow
     );
 
@@ -144,9 +145,6 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
     const { packages } = packageDetails || {};
 
     const [activeTab, setActiveTab] = useState(0);
-    const [selectedPackage, setSelectedPackage] = useState(null);
-    // const [selectedPricingType, setSelectedPricingType] = useState(null);
-    // 'one-time' | 'recurring'
     const [recurringPackage, setRecurringPackage] = useState(null);
     const [recurringModal, setRecurringModal] = useState(false);
     const [collarModal, setCollarModal] = useState(false);
@@ -161,21 +159,56 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
 
     /* -------------------- Handlers -------------------- */
 
+    // const handleOneTimeSelect = (pkg) => {
+    //     setRecurringPackage(null);
+    //     setRecurringModal(false);
+    //     setPackageError('');
+
+    //     const TAX_RATE = 0.0887;
+
+    //     const price = Number(pkg.price || 0);
+    //     const insuranceFee = Number(pkg.safetyInsuranceFee || 0);
+
+    //     const subTotal = price + insuranceFee;
+    //     const taxAmount = subTotal * TAX_RATE;
+    //     const totalWithTax = Number((subTotal + taxAmount).toFixed(2));
+
+    //     dispatch(
+    //         updatePetStepData({
+    //             petIndex: currentPetIndex,
+    //             step: 'package',
+    //             data: {
+    //                 id: pkg.productId,
+    //                 packageTitle: pkg?.title,
+    //                 service: pkg?.service,
+    //                 productType: pkg.productType,
+    //                 pricingType: 'one-time',
+    //                 price: pkg.price,
+    //                 safetyInsuranceFee: insuranceFee,
+    //                 taxAmount: Number(taxAmount.toFixed(2)),
+    //                 totalWithTax,
+    //                 disabledCoatType: pkg?.disabledCoatType,
+    //                 disabledCoatTypeMessage: pkg?.disabledCoatTypeMessage,
+    //                 recurringConfig: null, // explicitly cleared
+    //             },
+    //         })
+    //     );
+
+    //     dispatch(updateTotalPrice({ petIndex: currentPetIndex }));
+    // };
+
     const handleOneTimeSelect = (pkg) => {
-        // setSelectedPackage(pkg);
-        // setSelectedPricingType('one-time');
         setRecurringPackage(null);
         setRecurringModal(false);
         setPackageError('');
 
-        const TAX_RATE = 0.0887;
+        // const price = resolvePriceByServiceType(
+        //     serviceType,
+        //     pkg.price,
+        //     pkg.priceWithMobileVanFee
+        // );
 
-        const price = Number(pkg.price || 0);
         const insuranceFee = Number(pkg.safetyInsuranceFee || 0);
-
-        const subTotal = price + insuranceFee;
-        const taxAmount = subTotal * TAX_RATE;
-        const totalWithTax = Number((subTotal + taxAmount).toFixed(2));
 
         dispatch(
             updatePetStepData({
@@ -183,17 +216,17 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                 step: 'package',
                 data: {
                     id: pkg.productId,
-                    packageTitle: pkg?.title,
-                    service: pkg?.service,
+                    packageTitle: pkg.title,
+                    service: pkg.service,
                     productType: pkg.productType,
                     pricingType: 'one-time',
-                    price: pkg.price,
+                    mobileVanFee: serviceType === "mobile-van" ? pkg?.mobileVanFee : 0,
+                    price: pkg?.price,
+                    priceWithMobileVanFee: pkg?.priceWithMobileVanFee,
                     safetyInsuranceFee: insuranceFee,
-                    taxAmount: Number(taxAmount.toFixed(2)),
-                    totalWithTax,
                     disabledCoatType: pkg?.disabledCoatType,
                     disabledCoatTypeMessage: pkg?.disabledCoatTypeMessage,
-                    recurringConfig: null, // explicitly cleared
+                    recurringConfig: null,
                 },
             })
         );
@@ -201,52 +234,88 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
         dispatch(updateTotalPrice({ petIndex: currentPetIndex }));
     };
 
-    // const handleRecurringSelect = (pkg) => {
-    //     setSelectedPackage(pkg);
-    //     setSelectedPricingType('recurring');
-    //     setRecurringPackage(pkg);
-    //     setRecurringModal(true);
-    // };
-
     const handleRecurringSelect = (pkg) => {
         setRecurringPackage(pkg);
         setRecurringModal(true);
     };
 
-    const handleRecurringSubmit = (recurringData) => {
-        if (!recurringPackage) return;
+    // const handleRecurringSubmit = (recurringData) => {
+    //     if (!recurringPackage) return;
 
-        const TAX_RATE = 0.0887;
+    //     const TAX_RATE = 0.0887;
+
+    //     const baseAmount =
+    //         recurringData.billing === 'annual'
+    //             ? recurringData.annualTotal
+    //             : recurringData.perAppointment;
+
+    //     const insuranceFee = Number(recurringPackage.safetyInsuranceFee || 0);
+
+    //     const subTotal = Number(baseAmount) + insuranceFee;
+    //     const taxAmount = Number((subTotal * TAX_RATE).toFixed(2));
+    //     const totalWithTax = Number((subTotal + taxAmount).toFixed(2));
+
+    //     dispatch(
+    //         updatePetStepData({
+    //             petIndex: currentPetIndex,
+    //             step: 'package',
+    //             data: {
+    //                 id: recurringPackage.productId,
+    //                 packageTitle: recurringPackage?.title,
+    //                 service: recurringPackage?.service,
+    //                 productType: recurringPackage.productType,
+    //                 pricingType: 'recurring',
+    //                 safetyInsuranceFee: insuranceFee,
+    //                 taxAmount,
+    //                 totalWithTax,
+    //                 disabledCoatType: recurringData?.disabledCoatType,
+    //                 disabledCoatTypeMessage: recurringData?.disabledCoatTypeMessage,
+    //                 recurringConfig: {
+    //                     ...recurringData,
+    //                     subTotal,
+    //                 },
+    //             },
+    //         })
+    //     );
+
+    //     dispatch(updateTotalPrice({ petIndex: currentPetIndex }));
+    //     setRecurringModal(false);
+    // };
+
+    const handleRecurringSubmit = (recurringData) => {
+        if (!recurringPackage || !recurringData) return;
 
         const baseAmount =
-            recurringData.billing === 'annual'
-                ? recurringData.annualTotal
-                : recurringData.perAppointment;
+            recurringData.billing === "annual"
+                ? Number(recurringData.annualTotal || 0)
+                : Number(recurringData.perAppointment || 0);
 
-        const insuranceFee = Number(recurringPackage.safetyInsuranceFee || 0);
+        const insuranceFee = Number(recurringData.recurringSafetyInsuranceFee || 0);
 
-        const subTotal = Number(baseAmount) + insuranceFee;
-        const taxAmount = Number((subTotal * TAX_RATE).toFixed(2));
-        const totalWithTax = Number((subTotal + taxAmount).toFixed(2));
+        const price = Number((baseAmount + insuranceFee).toFixed(2));
 
         dispatch(
             updatePetStepData({
                 petIndex: currentPetIndex,
-                step: 'package',
+                step: "package",
                 data: {
                     id: recurringPackage.productId,
                     packageTitle: recurringPackage?.title,
                     service: recurringPackage?.service,
                     productType: recurringPackage.productType,
-                    pricingType: 'recurring',
+                    pricingType: "recurring",
+
+                    // same pattern as one-time
+                    price,
                     safetyInsuranceFee: insuranceFee,
-                    taxAmount,
-                    totalWithTax,
+
                     disabledCoatType: recurringData?.disabledCoatType,
-                    disabledCoatTypeMessage: recurringData?.disabledCoatTypeMessage,
+                    disabledCoatTypeMessage:
+                        recurringData?.disabledCoatTypeMessage,
+
                     recurringConfig: {
                         ...recurringData,
-                        subTotal,
+                        baseAmount,
                     },
                 },
             })
@@ -263,9 +332,6 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
             packages?.[savedPackage.productType] ?? null;
 
         if (!pkg) return;
-
-        // setSelectedPackage(pkg);
-        // setSelectedPricingType(savedPackage.pricingType);
     }, [savedPackage, packages]);
 
     useEffect(() => {
@@ -313,6 +379,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                             <PackageCard
                                 key={pkg.productId}
                                 data={pkg}
+                                serviceType={serviceType}
                                 show={petsDraft?.[currentPetIndex]?.stepData?.details?.type === 'dog'}
                                 error={packageError}
                                 isOneTimeSelected={
@@ -336,6 +403,7 @@ const StepTwoContent = ({ showSuccess, setPackageError, packageError }) => {
                             <PackageCard
                                 key={pkg.productId}
                                 data={pkg}
+                                serviceType={serviceType}
                                 show={petsDraft?.[currentPetIndex]?.stepData?.details?.type === 'dog'}
                                 error={packageError}
                                 isOneTimeSelected={

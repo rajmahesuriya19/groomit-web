@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, DeleteIcon } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate, useParams } from 'react-router';
 
@@ -7,6 +7,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm } from 'react-hook-form';
 import { addUpdatePet, clearSelectedPet, getPetProfileID } from '@/utils/store/slices/petList/petListSlice';
+
+import TrashIcon from "../../../assets/icon/trash-black.svg"
 
 import BreedModal from '@/components/Modals/BreedModal';
 import StepAccordion from '@/components/StepAccordion';
@@ -18,10 +20,12 @@ import { StepOneContentCat } from '@/components/Booking-flow-Steps/StepOneConten
 import { normalizeDOB } from '@/pages/my-pets/add-update-cat/AddUpdateCat2';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { toast } from 'react-toastify';
-import { clearBookingFlow, completePetStep, getAddonsDetails, getBookingPetBreeds, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, saveAddonsDetails, saveGroomingDetails, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import { clearBookingFlow, completePetStep, deletePetDraft, getAddonsDetails, getBookingPetSizes, getGroomingDetails, getPackageDetails, getPetProfileGeneratedID, moveToNextPet, saveAddonsDetails, saveGroomingDetails, savePackageDetails, setPetID, updatePetStepData } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
 import CancelBookingFlowModal from '@/components/Modals/CancelBookingFlowModal';
 import BookingFooter from '../BookingFooter';
-import StepTwoContent2 from '@/components/Booking-flow-Steps/StepTwoContent2';
+import TotalPriceModal from '@/components/Modals/TotalPriceModal';
+import TaxInsuranceModal from '@/components/Modals/TaxInsuranceModal';
+import DeletePetModal from '@/components/Modals/DeletePetModal';
 
 /* ---------------- Schema ---------------- */
 const dogSchema = yup.object({
@@ -73,6 +77,9 @@ const PetsDetails = () => {
     const [genderDropdownOpen, setGenderDropdownOpen] = useState(false);
     const [cancelBookingFlow, SetCancelBookingFlow] = useState(false);
     const [petProfileLoaded, setPetProfileLoaded] = useState(false);
+    const [openPriceTotalModal, setOpenPriceTotalModal] = useState(false);
+    const [openTaxModal, setOpenTaxModal] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const token = useSelector((state) => state.auth.unique_token);
     const bookingFlow = useSelector((state) => state.bookingFlow);
@@ -797,7 +804,7 @@ const PetsDetails = () => {
         const details = currentPetDraft?.stepData?.details;
         if (!details || !completedSteps.includes(1)) {
             return {
-                title: "Pet’s Details",
+                title: "Pet's Details",
                 description: "",
             };
         }
@@ -908,6 +915,15 @@ const PetsDetails = () => {
         return `${visible} + ${remaining} more`;
     })();
 
+    const handleDeletePet = () => {
+        dispatch(
+            deletePetDraft({
+                petIndex: petDraft?.petIndex,
+            })
+        );
+        setIsDeleteModalOpen(false);
+    };
+
     const canOpenStep = (stepId) =>
         stepId <= currentStep || completedSteps.includes(stepId);
 
@@ -929,8 +945,18 @@ const PetsDetails = () => {
                         }}
                     />
                     <h1 className="flex-1 text-center font-bold text-xl">
-                        Pet’s Details
+                        Pet's Details
                     </h1>
+                    {selectedPetIdsfromAPI.length > 1 && (
+                        <div className='flex items-center gap-2 mr-2 cursor-pointer'
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsDeleteModalOpen(true);
+                            }}>
+                            <img class="me-2 me-md-0" src={TrashIcon} alt="Delete" className='w-5 h-6' />
+                            <span class="font-bold text-base">Delete Pet</span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -1098,6 +1124,26 @@ const PetsDetails = () => {
                     </div>
                 </div>
             )}
+
+            <DeletePetModal
+                open={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={() => handleDeletePet()}
+                title={`Delete ${selectedPetBooking?.name}`}
+                decription={`Are you sure you want to remove ${selectedPetBooking?.name} from this appointment? Their details will stay saved in your Groomit account.`}
+            />
+
+            <TotalPriceModal
+                open={openPriceTotalModal}
+                onClose={() => setOpenPriceTotalModal(false)}
+                onModal={() => { setOpenTaxModal(true); setOpenPriceTotalModal(false); }}
+            />
+            <TaxInsuranceModal
+                open={openTaxModal}
+                onClose={() => setOpenTaxModal(false)}
+                Insurance="$36.14"
+                Tax="$12.50"
+            />
 
             <BreedModal
                 open={breedModalOpen}

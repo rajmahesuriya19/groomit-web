@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, PlusIcon } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import BookedPetsList from './BookedPetsList';
 import TotalPriceModal from '@/components/Modals/TotalPriceModal';
 import TaxInsuranceModal from '@/components/Modals/TaxInsuranceModal';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { getBookedPetsDetails } from '@/utils/store/slices/booking-flow/bookingFlowSlice';
+import BookedPetsList from './BookedPetsList';
 
 
 const BookedPets = () => {
@@ -91,11 +91,11 @@ const BookedPets = () => {
             {/* Content */}
             <div className="px-4 py-4 pb-32 max-w-xl mx-auto flex flex-col gap-4">
                 <div className="space-y-4">
-                    {bookedPetDetails && pets.map((petDraft, idx) => (
+                    {bookedPetDetails && bookedPetDetails?.pets?.map((petDraft, idx) => (
                         <BookedPetsList
-                            key={idx}
-                            petDraft={petDraft}
-                            isSingle={pets.length === 1}
+                            index={idx}
+                            petsDetails={petDraft}
+                            isSingle={bookedPetDetails?.pets?.length === 1}
                         />
                     ))}
                 </div>

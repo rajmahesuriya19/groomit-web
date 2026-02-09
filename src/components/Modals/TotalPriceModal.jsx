@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Modal, Box, IconButton, Divider } from "@mui/material";
 import Close from "../../assets/icon/close.svg";
 import infoGrey from "../../assets/icon/info-circle-grey.svg";
+import { useSelector } from "react-redux";
 
 const modalStyle = {
     position: "absolute",
@@ -17,30 +18,38 @@ const modalStyle = {
     outline: "none",
 };
 
-const parsePrice = (value) => {
-    if (!value) return 0;
-    if (typeof value === "number") return value;
-    if (value === "Free") return 0;
-    return Number(value.replace(/[^0-9.]/g, ""));
-};
-
 const TotalPriceModal = ({
     open,
     onClose,
     onModal,
-    packageName = "Gold",
-    packagePrice = 105,
-    add_ons = [],
-    Insurance = "$0",
 }) => {
-    const insurancePrice = parsePrice(Insurance);
+    const bookingFlow = useSelector((state) => state.bookingFlow);
+    const {
+        selectedPetIds,
+        selectedPetIdsfromAPI,
+        serviceType,
+        currentPetIndex,
+        petsDraft = [],
+        petCounts = { dog: 0, cat: 0 },
+        address: bookingAddress,
+        totalPrice = 0,
+        petBreeds = [],
+        selectedPet: selectedPetBooking
+    } = bookingFlow;
 
-    const addonsTotal = useMemo(
-        () => add_ons.reduce((sum, item) => sum + parsePrice(item.price), 0),
-        [add_ons]
-    );
+    const currentPetDraft = petsDraft[currentPetIndex];
+    const savedPackage = petsDraft?.[currentPetIndex]?.stepData?.package || {};
 
-    const totalPrice = packagePrice + addonsTotal + insurancePrice;
+    console.log(savedPackage);
+
+    // const insurancePrice = parsePrice(Insurance);
+
+    // const addonsTotal = useMemo(
+    //     () => add_ons.reduce((sum, item) => sum + parsePrice(item.price), 0),
+    //     [add_ons]
+    // );
+
+    // const totalPrice = packagePrice + addonsTotal + insurancePrice;
 
     return (
         <Modal open={open} onClose={onClose}>
@@ -55,15 +64,28 @@ const TotalPriceModal = ({
                 </IconButton>
 
                 {/* Package */}
-                <div className="flex justify-between items-center mt-8 mb-3">
-                    <div>
-                        <p className="text-base">{packageName} Package</p>
+                <div className="mt-4 mb-3">
+                    {savedPackage?.pricingType && <div className="mb-2">
+                        <p className="text-sm font-bold uppercase">Annual Recurring ({savedPackage?.recurringConfig
+                            ?.totalAppointments} Appts)</p>
+                    </div>}
+                    <div className="flex justify-between items-center ">
+                        <div>
+                            <p className="text-base capitalize">{savedPackage?.productType} Package</p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-base text-primary-light line-through">
+                                $1800
+                            </span>
+
+                            <span className="text-base">$1584</span>
+                        </div>
                     </div>
-                    <p>${packagePrice}</p>
                 </div>
 
                 {/* Add-ons */}
-                {add_ons.length > 0 && (
+                {/* {add_ons.length > 0 && (
                     <div className="mt-3 space-y-1">
                         <p className="text-base font-bold">Add-ons</p>
 
@@ -81,7 +103,7 @@ const TotalPriceModal = ({
                             </div>
                         ))}
                     </div>
-                )}
+                )} */}
 
                 {/* Insurance */}
                 <div className="flex justify-between items-center mt-4 text-sm">
@@ -89,7 +111,7 @@ const TotalPriceModal = ({
                         <span className="text-base text-primary-dark">Tax & Safety Insurance</span>
                         <img src={infoGrey} alt="Info" className="w-5 h-5 cursor-pointer" onClick={onModal} />
                     </div>
-                    <span className="text-base text-primary-dark">{Insurance}</span>
+                    {/* <span className="text-base text-primary-dark">{Insurance}</span> */}
                 </div>
 
                 {/* Total */}

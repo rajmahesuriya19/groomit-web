@@ -7,6 +7,7 @@ import Info from "../../assets/icon/info-circle-white.svg"
 import FICollarModal from "./FICollarModal";
 import { useDispatch, useSelector } from "react-redux";
 import { updatePetStepData } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { resolveRecurringPrice } from "@/common/helpers";
 
 const InfoSection = ({ items = [] }) => (
     <div className="w-full flex mt-3">
@@ -51,7 +52,7 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
     const dispatch = useDispatch();
     const [collarModal, setCollarModal] = useState(false)
 
-    const { currentPetIndex, petsDraft } = useSelector(
+    const { currentPetIndex, petsDraft, serviceType } = useSelector(
         (state) => state.bookingFlow
     );
 
@@ -73,21 +74,27 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
     const selectedInterval = useMemo(() => {
         if (!intervals.length) return null;
 
-        const current =
-            intervals.find(i => i.id === recurringConfig.intervalId);
-
-        return current || getDefaultInterval(intervals);
+        return (
+            intervals.find(i => i.id === recurringConfig.intervalId) ||
+            getDefaultInterval(intervals)
+        );
     }, [intervals, recurringConfig.intervalId]);
 
     const billing = recurringConfig.billing || selectedInterval?.type || "flexible";
-    const day = recurringConfig.preferredDay || "Mon";
-    const time = recurringConfig.preferredTime || "Morning";
+    const day = recurringConfig.preferredDay;
+    const time = recurringConfig.preferredTime;
 
     const availableIntervals =
         billing === "annual" ? annualIntervals : flexibleIntervals;
 
-    const annualTotal =
-        selectedInterval?.packageTotalAppointmentsPriceWithMobileVanFee;
+    // const annualTotal =
+    //     selectedInterval?.packageTotalAppointmentsPriceWithMobileVanFee;
+
+    const annualTotal = resolveRecurringPrice(
+        serviceType,
+        selectedInterval,
+        "packageTotalAppointmentsPrice"
+    );
 
     const selectedCard = "border-brand shadow-md font-bold";
     const unselectedCard = "border-primary-light";
@@ -97,15 +104,37 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
             key: "flexible",
             title: "Flexible",
             subtitle: "Pay Per Appointment",
-            priceRange: formatPrice(packageData?.recurringPriceMaxWithMobileVanFee),
-            priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
+            // priceRange: formatPrice(packageData?.recurringPriceMaxWithMobileVanFee),
+            // priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
+
+            priceRange: formatPrice(
+                serviceType === "mobile-van"
+                    ? packageData?.recurringPriceMaxWithMobileVanFee
+                    : packageData?.recurringPriceMax
+            ),
+            priceDiscount: formatPrice(
+                serviceType === "mobile-van"
+                    ? packageData?.priceWithMobileVanFee
+                    : packageData?.price
+            ),
         },
         {
             key: "annual",
             title: "Annual",
             subtitle: "Prepay for Year",
-            priceRange: formatPrice(packageData?.recurringPriceMinWithMobileVanFee),
-            priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
+            // priceRange: formatPrice(packageData?.recurringPriceMinWithMobileVanFee),
+            // priceDiscount: formatPrice(packageData?.priceWithMobileVanFee),
+
+            priceRange: formatPrice(
+                serviceType === "mobile-van"
+                    ? packageData?.recurringPriceMinWithMobileVanFee
+                    : packageData?.recurringPriceMin
+            ),
+            priceDiscount: formatPrice(
+                serviceType === "mobile-van"
+                    ? packageData?.priceWithMobileVanFee
+                    : packageData?.price
+            ),
         },
     ];
 
@@ -130,18 +159,38 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
 
     /* ---------------- confirm ---------------- */
 
-    const handleConfirm = () => {
-        console.log(selectedInterval.weeks);
-        if (selectedInterval.weeks) {
+    // const handleConfirm = () => {
+    //     if (selectedInterval.weeks) {
 
-        }
+    //     }
+    //     onConfirm?.({
+    //         intervalId: selectedInterval.id,
+    //         billing,
+    //         weeks: selectedInterval.weeks,
+    //         days: selectedInterval.days,
+    //         totalAppointments: selectedInterval.total_appointments,
+    //         perAppointment: selectedInterval.packagePriceWithMobileVanFee,
+    //         annualTotal,
+    //         safetyInsuranceFee: selectedInterval.safetyInsuranceFee,
+    //         preferredDay: day,
+    //         preferredTime: time,
+    //     });
+    // };
+
+    const handleConfirm = () => {
+        if (!selectedInterval) return;
+
         onConfirm?.({
             intervalId: selectedInterval.id,
             billing,
             weeks: selectedInterval.weeks,
             days: selectedInterval.days,
             totalAppointments: selectedInterval.total_appointments,
-            perAppointment: selectedInterval.packagePriceWithMobileVanFee,
+            perAppointment: resolveRecurringPrice(
+                serviceType,
+                selectedInterval,
+                "packagePrice"
+            ),
             annualTotal,
             safetyInsuranceFee: selectedInterval.safetyInsuranceFee,
             preferredDay: day,
@@ -216,9 +265,20 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
                                             weeks: interval.weeks,
                                             days: interval.days,
                                             totalAppointments: interval.total_appointments,
-                                            perAppointment: interval.packagePriceWithMobileVanFee,
-                                            annualTotal:
-                                                interval.packageTotalAppointmentsPriceWithMobileVanFee,
+                                            // perAppointment: interval.packagePriceWithMobileVanFee,
+                                            // annualTotal:
+                                            //     interval.packageTotalAppointmentsPriceWithMobileVanFee,
+
+                                            perAppointment: resolveRecurringPrice(
+                                                serviceType,
+                                                interval,
+                                                "packagePrice"
+                                            ),
+                                            annualTotal: resolveRecurringPrice(
+                                                serviceType,
+                                                interval,
+                                                "packageTotalAppointmentsPrice"
+                                            ),
                                             safetyInsuranceFee: interval.safetyInsuranceFee,
                                         })
                                     }
@@ -258,9 +318,20 @@ const RecurringModal = ({ open, onClose, onConfirm, packageData }) => {
                                             weeks: validInterval.weeks,
                                             days: validInterval.days,
                                             totalAppointments: validInterval.total_appointments,
-                                            perAppointment: validInterval.packagePriceWithMobileVanFee,
-                                            annualTotal:
-                                                validInterval.packageTotalAppointmentsPriceWithMobileVanFee,
+                                            // perAppointment: validInterval.packagePriceWithMobileVanFee,
+                                            // annualTotal:
+                                            //     validInterval.packageTotalAppointmentsPriceWithMobileVanFee,
+
+                                            perAppointment: resolveRecurringPrice(
+                                                serviceType,
+                                                validInterval,
+                                                "packagePrice"
+                                            ),
+                                            annualTotal: resolveRecurringPrice(
+                                                serviceType,
+                                                validInterval,
+                                                "packageTotalAppointmentsPrice"
+                                            ),
                                             safetyInsuranceFee: validInterval.safetyInsuranceFee,
                                         });
                                     }}
