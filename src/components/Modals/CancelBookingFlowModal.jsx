@@ -16,7 +16,7 @@ const modalStyle = {
     outline: "none",
 };
 
-const CancelBookingFlowModal = ({ open, onClose, onConfirm }) => {
+const CancelBookingFlowModal = ({ title, decs, open, onClose, onConfirm }) => {
     return (
         <Modal open={open} onClose={onClose}>
             <Box sx={modalStyle} className="relative font-inter">
@@ -32,16 +32,14 @@ const CancelBookingFlowModal = ({ open, onClose, onConfirm }) => {
 
                 {/* Header */}
                 <div className="mt-2 space-y-1">
-                    <h2 className="text-xl font-bold text-primary-dark text-center">
-                        Are you sure you want to go back?
+                    <h2 className={`text-xl font-bold text-primary-dark ${title ? '' : 'text-center'}`}>
+                        {title ? title : 'Are you sure you want to go back?'}
                     </h2>
                 </div>
 
                 {/* Body */}
-                <div className="text-center px-4 mt-4 text-base leading-relaxed text-primary-dark space-y-3 pb-4">
-                    <p>
-                        Going back will erase all the details you've filled. Are you sure you want to go back?
-                    </p>
+                <div className={`${decs ? '' : 'text-center px-4'} mt-4 text-base leading-relaxed text-primary-dark space-y-3 pb-4`}>
+                    <p>{decs ? decs : "Going back will erase all the details you've filled. Are you sure you want to go back?"}</p>
                 </div>
 
                 {/* Footer */}
@@ -50,13 +48,13 @@ const CancelBookingFlowModal = ({ open, onClose, onConfirm }) => {
                         onClick={onClose}
                         className="w-full h-[50px] rounded-[10px] bg-white text-primary-dark font-bold text-base transition hover:opacity-90 border border-primary-dark"
                     >
-                        No, Stay Here
+                        {title ? 'No, Stay' : 'No, Stay Here'}
                     </button>
                     <button
                         onClick={onConfirm}
                         className="w-full h-[50px] rounded-[10px] bg-primary-dark text-white font-bold text-base transition hover:opacity-90"
                     >
-                        Yes, Go Back
+                        {title ? 'Continue' : 'Yes, Go Back'}
                     </button>
                 </div>
 

@@ -30,7 +30,7 @@ const dashboard = () => {
 
   const { dashboard } = useSelector((state) => state.dashboard);
   const {
-    user,
+    user = null,
     catPets = [],
     dogPets = [],
     upcoming_appts = [],

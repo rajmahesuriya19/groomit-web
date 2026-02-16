@@ -309,6 +309,32 @@ export const getBookedPetsDetails = createAsyncThunk(
     }
 );
 
+// Delete pet from booking list
+export const deletePetDraftBooking = createAsyncThunk(
+    "bookingFlow/deletePetDraftBooking",
+    async ({ id, booking_session_token }, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.delete(
+                `api/user/booking/pet/remove/${id}`,
+                {
+                    params: { booking_session_token },
+                }
+            );
+
+            return {
+                id,
+                message: response?.data?.message,
+            };
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data || {
+                    message: "Failed to delete pet from booking",
+                }
+            );
+        }
+    }
+);
+
 const initialState = {
     /* ---------------- Address & Service ---------------- */
     address: null,

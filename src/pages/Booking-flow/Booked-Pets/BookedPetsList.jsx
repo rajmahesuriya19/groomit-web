@@ -27,10 +27,13 @@ import { capitalize } from "@/common/helpers";
 
 import {
     deletePetDraft,
+    deletePetDraftBooking,
+    getBookedPetsDetails,
     moveToNextPet,
     updatePetStepData,
     updateTotalPrice,
 } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 
 /* -------------------- Recommended Add-on Row -------------------- */
 export const RecommendedAddOnRow = ({ item, checked, onToggle, onInfo }) => (
@@ -105,9 +108,11 @@ const InfoRow = ({ icon, title, subtitle, uploadedImages = [], index }) => (
 export default function BookedPetsList({ petsDetails, index, isSingle }) {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const { showLoader, hideLoader } = useLoader();
     const menuRef = useRef(null);
     const buttonRef = useRef(null);
 
+    const token = useSelector((state) => state.auth.unique_token);
     const bookingFlow = useSelector((state) => state.bookingFlow);
 
     const { selectedPetIdsfromAPI, petsDraft = [] } = bookingFlow;
@@ -232,9 +237,31 @@ export default function BookedPetsList({ petsDetails, index, isSingle }) {
         navigate(`/book/pet/${selectedPetIdsfromAPI[index]}/from_pets`);
     };
 
-    const handleDelete = () => {
-        dispatch(deletePetDraft({ petIndex: index }));
-        setDeleteModal(false);
+    const handleDelete = async () => {
+        try {
+            showLoader();
+
+            await dispatch(
+                deletePetDraftBooking({
+                    id: petsDetails?.id,
+                    booking_session_token: token,
+                })
+            ).unwrap();
+
+            await dispatch(getBookedPetsDetails(
+                { booking_session_token: token }
+            )).unwrap();
+
+            // update local draft if needed
+            dispatch(deletePetDraft({ petIndex: index }));
+
+            setDeleteModal(false);
+        } catch (error) {
+            console.error("Delete pet failed:", error);
+            toast.error(error?.message || "Failed to delete pet");
+        } finally {
+            hideLoader();
+        }
     };
 
     useEffect(() => {
@@ -279,7 +306,7 @@ export default function BookedPetsList({ petsDetails, index, isSingle }) {
                 label: "Grooming Details",
                 isCompleted: petsDetails?.isGroomingAdded,
             },
-        ].filter(step => !step.isCompleted); // 👈 show only pending steps
+        ].filter(step => !step.isCompleted);
     }, [petsDetails]);
 
     /* -------------------- Render -------------------- */
@@ -287,7 +314,8 @@ export default function BookedPetsList({ petsDetails, index, isSingle }) {
         <>
             <Accordion
                 expanded={expanded}
-                onChange={() => {
+                onChange={(e) => {
+                    e.stopPropagation();
                     if (!isSingle && !displayContentShow) {
                         setExpanded((prev) => !prev);
                     }
@@ -302,7 +330,14 @@ export default function BookedPetsList({ petsDetails, index, isSingle }) {
                     "& .MuiAccordionDetails-root": { padding: 0 },
                 }}
             >
-                <AccordionSummary>
+                <AccordionSummary
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (!isSingle && !displayContentShow) {
+                            setExpanded((prev) => !prev);
+                        }
+                    }}
+                >
                     <div className="flex flex-col p-[15px] bg-white rounded-t-[15px] w-full gap-4">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-[10px]">
@@ -310,8 +345,8 @@ export default function BookedPetsList({ petsDetails, index, isSingle }) {
                                     <h2 className="font-bold text-base capitalize text-primary-dark">{petsDetails.name}</h2>
                                     <span className="font-inter text-sm text-primary-dark capitalize">
                                         {petsDetails?.type === "cat"
-                                            ? "Cat"
-                                            : (petsDetails?.breed && petsDetails?.size) ? `${petsDetails.breed?.breed_name}, ${petsDetails.size?.size}` : ''}
+                                            ? ""
+                                            : (petsDetails?.breed && petsDetails?.size) ? `${petsDetails.breed?.breed_name}, ${petsDetails.size?.size_name}` : ''}
                                     </span>
                                 </div>
                             </div>
