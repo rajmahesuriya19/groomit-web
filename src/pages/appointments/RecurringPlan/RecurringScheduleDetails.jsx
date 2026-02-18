@@ -48,7 +48,7 @@ const RecurringScheduleDetails = () => {
                 </div>
               </div>
 
-              <div className="w-[35px] h-[35px] border rounded-lg flex justify-center items-center text-primary-line" onClick={() => {}}>
+              <div className="w-[35px] h-[35px] border rounded-lg flex justify-center items-center text-primary-line" onClick={() => { }}>
                 <img src={Edit3} alt="edit" className="w-[21px] h-[21px] rounded-full object-cover" />
               </div>
             </div>
@@ -146,13 +146,13 @@ const RecurringScheduleDetails = () => {
               <div className="flex flex-col justify-center">
                 <span className="font-inter font-semibold text-primary-dark text-sm">Master Card •••••5456</span>
                 <span className="font-inter font-normal text-xs text-primary-dark">Credit Card</span>
-              </div> 
+              </div>
             </div>
           </div>
 
-       <button className='w-full py-[8px] bg-white border border-primary-line rounded-[10px] flex justify-center items-center mt-2'>
-        <span className="font-inter font-semibold text-base text-red">Cancel Recurring Plan</span>
-       </button>
+          <button className='w-full py-[8px] bg-white border border-primary-line rounded-[10px] flex justify-center items-center mt-2'>
+            <span className="font-inter font-semibold text-base text-red">Cancel Recurring Plan</span>
+          </button>
 
         </div>
         {/* Divider */}

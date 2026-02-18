@@ -137,7 +137,7 @@ const PreferredGroomer = ({ groomer, onInfoClick }) => {
                             <img src={Info} alt="Info" className="w-5 h-5" />
                         </button>
                     </div>
-                    <p className="font-inter text-xs text-gray-500 mt-1">{groomer_type || 'Preferred Groomer'}</p>
+                    <p className="font-inter text-xs mt-1">{groomer_type || 'Preferred Groomer'}</p>
                 </div>
 
                 <div className="flex gap-2">

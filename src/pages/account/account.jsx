@@ -334,7 +334,7 @@ const Account = () => {
               </div>
             </div>
           ) : (
-            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white cursor-pointer' onClick={() => navigate("/user/address/add")}>
               <div className='flex gap-2 items-center'>
                 <img src={LocationBlack} alt="LocationBlack" className='w-[26px] h-[26px]' />
                 <div className='text-base font-bold capitalize '>Add Service Address</div>
@@ -368,7 +368,7 @@ const Account = () => {
               </div>
             </div>
           ) : (
-            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white'>
+            <div className='flex justify-between items-center p-[15px] self-stretch rounded-[15px] bg-white cursor-pointer' onClick={() => navigate("/user/payment/card/add")}>
               <div className='flex gap-2 items-center'>
                 <img src={CardBlack} alt="Card" className='w-[26px] h-[26px]' />
                 <div className='text-base font-bold capitalize '>Add Payment Method</div>

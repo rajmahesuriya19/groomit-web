@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react";
+import FallbackDog from '../../../assets/icon/dog-avatar.jpg';
+import FallbackCat from '../../../assets/icon/cat-avatar.jpg';
 
-
-const MyPets = ({ pets }) => {
+const MyPets = ({ pets = [] }) => {
     if (!pets || pets.length === 0) return null;
 
     const packageColors = {
@@ -20,9 +21,8 @@ const MyPets = ({ pets }) => {
                     <div key={pet.pet_id} className="mt-4 pt-3 border-t border-gray-200">
                         <div className="flex items-center gap-4">
                             <img
-                                src={pet.photo_url || pet?.profilePicture?.path || 'https://www.groomit.me/v7/images/icons/dog-avatar.jpg'}
-                                alt={pet.name || 'Pet'}
-                                className="w-[40px] h-[40px] rounded-md object-cover"
+                                src={(pet?.photo || pet?.profilePicture?.path) || (pet?.breed_id ? FallbackDog : FallbackCat)}
+                                className="w-[35px] h-[35px] rounded-md object-cover"
                             />
 
                             <div className="flex-1">

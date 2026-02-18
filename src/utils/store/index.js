@@ -9,6 +9,8 @@ import groomersReducer from './slices/groomersList/groomersListSlice';
 import petsReducer from './slices/petList/petListSlice';
 import inboxReducer from './slices/inbox/inboxSlice';
 import bookingFlowReducer from './slices/booking-flow/bookingFlowSlice';
+import reviewsReducer from './slices/reviews/reviewsSlice';
+import packagesReducer from './slices/packages/packagesSlice';
 import notificationsPreferencesReducer from './slices/notifications-preferences/notificationsPreferencesSlice';
 
 import { persistStore, persistReducer } from 'redux-persist';
@@ -19,7 +21,7 @@ import thunk from 'redux-thunk';
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['dashboard', 'appointments', 'inbox', 'auth', 'user', 'cards', 'addresses', 'groomers', 'pets', 'notifications_preferences', 'bookingFlow'],
+  whitelist: ['dashboard', 'appointments', 'inbox', 'auth', 'user', 'cards', 'addresses', 'groomers', 'pets', 'notifications_preferences', 'bookingFlow', 'reviews', 'packages'],
 };
 
 const appReducer = combineReducers({
@@ -33,7 +35,9 @@ const appReducer = combineReducers({
   pets: petsReducer,
   inbox: inboxReducer,
   notifications_preferences: notificationsPreferencesReducer,
-  bookingFlow: bookingFlowReducer
+  bookingFlow: bookingFlowReducer,
+  reviews: reviewsReducer,
+  packages: packagesReducer,
 });
 
 // ✅ root reducer with reset logic

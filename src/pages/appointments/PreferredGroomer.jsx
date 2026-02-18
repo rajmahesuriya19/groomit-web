@@ -12,9 +12,9 @@ const PreferredGroomer = ({ item, onInfoClick }) => {
     return (
         <div className="mt-4 pt-3 border-t border-gray-200">
             <div className="flex items-start gap-4">
-                <div className="flex justify-center items-center bg-[#F9FAFB] rounded-lg w-[40px] h-[40px]">
+                <div className="flex justify-center items-center">
                     <img src={item?.groomer?.profile_photo_url || 'https://www.groomit.me/v7/images/icons/profile-circle.svg'}
-                        alt={item?.groomer?.first_name || 'Groomer'} className="w-5 h-5" />
+                        alt={item?.groomer?.first_name || 'Groomer'} className="w-[40px] h-[40px] rounded-[10px] object-cover" />
                 </div>
                 <div className="flex-1">
                     <div className="flex gap-1 items-center">
@@ -25,7 +25,7 @@ const PreferredGroomer = ({ item, onInfoClick }) => {
                             <img src={Info} alt="Info" className="w-4 h-4" />
                         </button>}
                     </div>
-                    <p className="font-inter text-xs text-gray-500 mt-1">{item?.groomer_id ? item?.groomer?.groomer_type : 'Best Match Groomer'}</p>
+                    <p className="font-inter text-xs text-primary-dark mt-1">{item?.groomer_id ? item?.groomer?.groomer_type : 'Best Match Groomer'}</p>
                 </div>
 
                 <div className="flex gap-2">
