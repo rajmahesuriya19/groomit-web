@@ -12,7 +12,6 @@ import Scissor from '../../assets/menu-new/scissor-a.svg';
 import CatAnimation from '../../assets/animation/Cat Animation.gif';
 import DogAnimation from '../../assets/animation/Dog Animation.gif';
 import DashboardCarousel from '@/common/DashboardCarousel/DashboardCarousel';
-import AppointmentCard from '../../pages/appointments/AppointmentCard';
 import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import RescheduleAppointemntModal from '@/components/Modals/RescheduleAppointemntModal';
@@ -20,6 +19,7 @@ import CancelAppointemntModal from '@/components/Modals/CancelAppointemntModal';
 import RebookConfirmation from '@/common/AppointmentCards/Rebook Confirmation/RebookConfirmation';
 import RecurringPlanList from "@/common/AppointmentCards/Recurring Plan/RecurringPlanList";
 import { getUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
+import AppointmentCard from '../appointments/AppointmentCard';
 
 const dashboard = () => {
   const dispatch = useDispatch();
@@ -133,7 +133,7 @@ const dashboard = () => {
         )}
       </div>
 
-      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
+      <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-8">
         <div className="space-y-4">
           {/* Reminder Card */}
           {petReminderList?.length > 0 && (
@@ -250,7 +250,7 @@ const dashboard = () => {
             </div>
           )}
 
-          {hasAnyPet.length == 0 && (
+          {!hasAnyPet && (
             <div className="rounded-2xl p-1 bg-white shadow-md">
               <div className="py-3 px-3">
                 <h3 className="font-inter font-bold text-base">Add Your Pets</h3>

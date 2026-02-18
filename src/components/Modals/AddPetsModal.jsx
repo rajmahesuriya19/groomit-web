@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router';
 import { RoutePath } from '@/common/enums/enumConstant';
 import CatAnimation from '../../assets/animation/Cat Animation.gif';
 import DogAnimation from '../../assets/animation/Dog Animation.gif';
+import Cat from '../../assets/animation/Cat.svg';
+import Dog from '../../assets/animation/Dog.svg';
 
 const modalStyle = {
     position: 'absolute',
@@ -16,11 +18,11 @@ const modalStyle = {
     boxShadow: 24,
     p: 4,
     width: '90%',
-    maxWidth: 420,
+    maxWidth: 450,
     outline: 'none',
 };
 
-const AddPetsModal = ({ open, onClose }) => {
+const AddPetsModal = ({ open, type, onClose }) => {
     const navigate = useNavigate();
 
     const handleNavigate = (pet) => {
@@ -43,14 +45,14 @@ const AddPetsModal = ({ open, onClose }) => {
                     <img src={Close} alt="Close" className="w-5 h-5" />
                 </IconButton>
 
-                <div className="flex gap-2 mt-5">
+                <div className="flex gap-2 mt-7">
                     {/* Dog Card */}
                     <div className="flex-1 bg-[#FBFCFC] border border-primary-light rounded-[10px] transition-all cursor-pointer" onClick={() => handleNavigate('dog')}
                         style={{
                             padding: '15px 15px 0 15px'
                         }}>
-                        <h4 className="font-inter font-bold text-base text-center">Add Dog</h4>
-                        <img src={DogAnimation} className="w-full h-[128px]" alt="Dog Animation" />
+                        <h4 className="font-inter font-bold text-base text-center mb-2">Add Dog</h4>
+                        <img src={type ? Dog : DogAnimation} className="w-full h-[128px]" alt="Dog Animation" />
                     </div>
 
                     {/* Cat Card */}
@@ -59,8 +61,8 @@ const AddPetsModal = ({ open, onClose }) => {
                             padding: '15px 15px 0 15px'
                         }}
                     >
-                        <h4 className="font-inter font-bold text-base text-center">Add Cat</h4>
-                        <img src={CatAnimation} className="w-full h-[128px]" alt="Cat Animation" />
+                        <h4 className="font-inter font-bold text-base text-center mb-2">Add Cat</h4>
+                        <img src={type ? Cat : CatAnimation} className="w-full h-[128px]" alt="Cat Animation" />
                     </div>
                 </div>
             </Box>

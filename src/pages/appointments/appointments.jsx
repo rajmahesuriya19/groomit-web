@@ -89,7 +89,7 @@ const Appointments = () => {
                 <CustomTabPanel value={activeTab} index={1}>
                     <History data={appointments?.completed_appts || []} />
                 </CustomTabPanel>
-                
+
                 {/* {tabs.map((tab, index) => {
                     const tabData = getTabData(tab.type);
                     console.log('tabData', tab);

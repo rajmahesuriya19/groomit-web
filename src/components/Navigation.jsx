@@ -5,6 +5,7 @@ import AddressSelector from './AddressSelector.jsx';
 import UserDropdown from './UserDropdown.jsx';
 import MobileMenu from './MobileMenu.jsx';
 import info from '../assets/icon/help-circle-black.svg';
+import FallbackUser from "../assets/static/logo.svg";
 import Rating from '../assets/icon/fill-star.svg';
 import { useSelector } from 'react-redux';
 import AddPetsModal from './Modals/AddPetsModal.jsx';
@@ -127,10 +128,13 @@ const Navigation = () => {
                       </div> :
                         <div className="w-full">
                           <div className="flex items-center gap-1">
-                            <img src={user?.photo} alt="User" className="mr-2 object-cover w-10 h-10 rounded-lg" />
-                            <div>
+                            <img src={user?.photo ? user?.photo : FallbackUser} alt="User" className="mr-2 object-cover w-8 h-8 rounded-[4px]" />
+                            {/* <div>
                               <div className="font-inter font-bold text-base text-primary-dark">{`Hi, ${user?.first_name}`}</div>
                               <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
+                            </div> */}
+                            <div>
+                              <div className='font-inter font-semibold text-xl text-primary-dark capitalize'>{`Welcome, ${user?.first_name} 👋`}</div>
                             </div>
                           </div>
                         </div>

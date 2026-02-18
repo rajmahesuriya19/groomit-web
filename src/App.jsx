@@ -19,7 +19,6 @@ import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
 import Inbox from './pages/inbox/Inbox.jsx';
 import RecurringScheduleDetails from './pages/appointments/RecurringPlan/RecurringScheduleDetails.jsx';
-import TransactionReceipt from './pages/appointments/TransactionReceipt.tsx'
 import CreateEditAccount2 from './pages/account/create-edit-account/CreateEditAccount2.jsx';
 import AddUpdateDog2 from './pages/my-pets/add-update-dog/AddUpdateDog2.jsx';
 import AddUpdateCat2 from './pages/my-pets/add-update-cat/AddUpdateCat2.jsx';
@@ -38,6 +37,8 @@ import BookedPets from './pages/Booking-flow/Booked-Pets/BookedPets.jsx';
 import ExistingPets from './pages/Booking-flow/Existing-Pets/ExistingPets.jsx';
 import Slots from './pages/Booking-flow/Slots/Slots.jsx';
 import Checkout from './pages/Booking-flow/Checkout/Checkout.jsx';
+import LatestDashboard from './pages/dashboard/LatestDashboard.jsx';
+import TransactionReceipt from './pages/appointments/TransactionReceipt.jsx';
 
 function App() {
   return (
@@ -63,7 +64,8 @@ function App() {
             <Route path={RoutePath.EDIT_CARD} element={<CreateEditCards />} />
             <Route path={RoutePath.VIEW_CARD} element={<ViewCard />} />
             <Route path={RoutePath.CHANGE_PASSWORD} element={<ChangePassword />} />
-            <Route path={RoutePath.DASHBOARD} element={<Dashboard />} />
+            {/* <Route path={RoutePath.DASHBOARD} element={<Dashboard />} /> */}
+            <Route path={RoutePath.DASHBOARD} element={<LatestDashboard />} />
             <Route path={RoutePath.PETS} element={<PetsList />} />
             <Route path={RoutePath.INBOX} element={<Inbox />} />
             <Route path={RoutePath.NOTIFICATIONS_PREFERENCES} element={<NotificationsPreferences />} />

@@ -16,7 +16,7 @@ import FallbackDog from '../../../assets/icon/dog-avatar.jpg';
 import DogBlack from '../../../assets/icon/dog-black.svg';
 import { useLoader } from '@/contexts/loaderContext/LoaderContext';
 import { useDispatch, useSelector } from 'react-redux';
-import { addUpdatePet, getBookingPetBreeds, getPetProfileID, updatePetStatus } from '@/utils/store/slices/petList/petListSlice';
+import { addUpdatePet, getBookingPetBreeds, getBookingPetSizes, getPetProfileID, updatePetStatus } from '@/utils/store/slices/petList/petListSlice';
 import DeleteDogModal from '@/components/Modals/DeleteDogModal';
 import MemorialiseModal from '@/components/Modals/MemorialiseModal';
 import { toast } from 'react-toastify';
@@ -104,7 +104,7 @@ const AddUpdateDog2 = () => {
     const [behaviourModal, setBehaviourModal] = useState(false);
     const [successTitle, setSuccessTitle] = useState('');
 
-    const { petBreeds } = useSelector((state) => state.pets);
+    const { petBreeds = [], petSizes = [] } = useSelector((state) => state.pets);
     const token = useSelector((state) => state.auth.unique_token);
     const { pet: selectedPet, loading } = useSelector((state) => state.pets.selectedPet || {});
 
@@ -297,6 +297,7 @@ const AddUpdateDog2 = () => {
     const selectedSize = watch('size_id')
     const selectedTemperament = watch('temperament')
     const selectedGender = watch('gender')
+    const selectedBreedId = watch("breed_id");
 
     return (
         <>
@@ -488,10 +489,23 @@ const AddUpdateDog2 = () => {
                                                                 key={breed?.breed_id}
                                                                 onClick={() => {
                                                                     setValue("breed_id", breed.breed_id, { shouldDirty: true });
+
+                                                                    // Always reset size when breed changes
+                                                                    setValue("size_id", null, { shouldDirty: true });
+
+                                                                    if (breed?.breed_id) {
+                                                                        dispatch(
+                                                                            getBookingPetSizes({
+                                                                                breed_id: breed.breed_id,
+                                                                                booking_session_token: token,
+                                                                            })
+                                                                        );
+                                                                    }
                                                                     setSelectedBreedName(breed.breed_name);
                                                                     setBreedListModalOpen(false);
                                                                     setSearchTerm("");
                                                                 }}
+
                                                                 className={`px-3 py-2 cursor-pointer rounded mb-1
                                 ${watch("breed_id") == breed?.breed_id
                                                                         ? "bg-[#EB5757] text-white hover:bg-[#EB5757]/90"
@@ -603,30 +617,24 @@ const AddUpdateDog2 = () => {
                                     />
                                 </div>
 
-                                <div className="w-full">
+                                {selectedBreedId && petSizes?.length > 0 && <div className="w-full">
                                     <label className="block text-sm font-bold mb-1">Select Size</label>
 
                                     <div className="flex w-full gap-2">
-                                        {[
-                                            { label: 'S', size: '1–20 lbs', id: 2 },
-                                            { label: 'M', size: '21–40 lbs', id: 3 },
-                                            { label: 'L', size: '41–80 lbs', id: 4 },
-                                            { label: 'XL', size: '81–99 lbs', id: 5 },
-                                            { label: 'XXL', size: '100+ lbs', id: 6 },
-                                        ].map((item) => (
+                                        {petSizes?.map((item) => (
                                             <button
                                                 type="button"
-                                                key={item.id}
-                                                onClick={() => setValue("size_id", item.id, { shouldDirty: true })}
+                                                key={item.size_id}
+                                                onClick={() => setValue("size_id", item.size_id, { shouldDirty: true })}
                                                 className={`w-full flex flex-col items-center px-4 py-3 border rounded-[10px] transition-all
-          ${selectedSize == item.id
+          ${selectedSize == item.size_id
                                                         ? 'text-primary-dark border-brand'
                                                         : 'bg-white border-[#BEC3C5] hover:border-brand/60'
                                                     }
         `}
                                             >
-                                                <div className="text-sm font-medium">{item.label}</div>
-                                                <div className="text-[10px] opacity-80">{item.size}</div>
+                                                <div className="text-sm font-medium">{item.size}</div>
+                                                <div className="text-[10px] opacity-80">{item.size_desc_new} lbs</div>
                                             </button>
                                         ))}
                                     </div>
@@ -634,7 +642,7 @@ const AddUpdateDog2 = () => {
                                     {errors.size_id && (
                                         <p className="text-brand text-xs mt-2">{errors.size_id.message}</p>
                                     )}
-                                </div>
+                                </div>}
 
                                 <div className="w-full mt-2">
                                     <label className="block text-sm font-bold mb-1">Behavior</label>

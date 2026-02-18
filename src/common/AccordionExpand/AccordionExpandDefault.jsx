@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import MuiAccordion from '@mui/material/Accordion';
 import MuiAccordionSummary, {
@@ -75,7 +75,7 @@ const StarRating = ({ rating, onRate }) => (
 );
 
 // === Accordion Component ===
-export default function RateServiceAccordion({ ratings, fromModal=false }) {
+export default function RateServiceAccordion({ ratings, fromModal = false }) {
     const [expanded, setExpanded] = useState(true);
 
     const [groomerRating, setGroomerRating] = useState(parseInt(ratings?.groomer_rating));
@@ -85,34 +85,33 @@ export default function RateServiceAccordion({ ratings, fromModal=false }) {
     const [bookingComment, setBookingComment] = useState(ratings?.booking_experience_comment || "");
     const [rateServiceCheckbox, setRateServiceCheckbox] = useState(false)
     const [isDisable, setIsDisable] = useState(true)
-    
+
     let isReRating = ratings?.is_enabled_rating == 1;
 
     useEffect(() => {
         if (
-          groomerRating !== 0 &&
-          supportRating !== 0 &&
-          bookingRating !== 0
+            groomerRating !== 0 &&
+            supportRating !== 0 &&
+            bookingRating !== 0
         ) {
-          setIsDisable(false)
+            setIsDisable(false)
         } else {
-          setIsDisable(true)
+            setIsDisable(true)
         }
-      }, [groomerRating, supportRating, bookingRating])
+    }, [groomerRating, supportRating, bookingRating])
 
     return (
         <div className="w-full">
             <Accordion expanded={expanded}>
                 <AccordionSummary onClick={() => setExpanded(!expanded)}>
-                    <div className={fromModal ? "" :"flex items-center gap-3"}>
+                    <div className={fromModal ? "" : "flex items-center gap-3"}>
                         <div className="flex justify-center items-center bg-[#F2F2F2] rounded-[10px] w-[40px] h-[40px]">
-                        <img src={RatingStar} alt="Rating" className="w-6 h-6" />
+                            <img src={RatingStar} alt="Rating" className="w-6 h-6" />
                         </div>
                         {/* <div className={"flex flex-col items-start justify-center"}> */}
                         <div
-                            className={`flex flex-col justify-center ${
-                            fromModal ? 'items-center text-center' : 'items-start text-left'
-                            }`}
+                            className={`flex flex-col justify-center ${fromModal ? 'items-center text-center' : 'items-start text-left'
+                                }`}
                         >
                             <span className="font-bold text-base">Rate Service</span>
                             <p className="text-sm">We appreciate your feedback</p>
@@ -126,21 +125,21 @@ export default function RateServiceAccordion({ ratings, fromModal=false }) {
                         <div className="bg-[#F1F1F1] p-4 rounded-[10px] flex flex-col gap-3">
                             <h3 className="font-normal mb-2 text-base">Groomer Rating</h3>
                             <StarRating rating={groomerRating} onRate={setGroomerRating} />
-                            {parseInt(ratings?.groomer_rating) && !isReRating 
-                            ?  <>
-                                {ratings?.groomer_rating_comment && (
-                                <span  className='text-sm font-normal text-primary-dark'>
-                                    {ratings?.groomer_rating_comment}
-                                </span>
-                                )}
-                              </>
-                             : <textarea
-                                placeholder="Write a review (Optional)"
-                                value={groomerComment}
-                                onChange={(e) => setGroomerComment(e.target.value)}
-                                className="w-full h-[52px] mt-2 p-3 border border-gray-300 rounded-[10px] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary overflow-y-auto scrollbar-none"
-                                rows={3}
-                            />}
+                            {parseInt(ratings?.groomer_rating) && !isReRating
+                                ? <>
+                                    {ratings?.groomer_rating_comment && (
+                                        <span className='text-sm font-normal text-primary-dark'>
+                                            {ratings?.groomer_rating_comment}
+                                        </span>
+                                    )}
+                                </>
+                                : <textarea
+                                    placeholder="Write a review (Optional)"
+                                    value={groomerComment}
+                                    onChange={(e) => setGroomerComment(e.target.value)}
+                                    className="w-full h-[52px] mt-2 p-3 border border-gray-300 rounded-[10px] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary overflow-y-auto scrollbar-none"
+                                    rows={3}
+                                />}
                         </div>
 
                         {/* Customer Support & Booking Experience */}
@@ -153,21 +152,21 @@ export default function RateServiceAccordion({ ratings, fromModal=false }) {
                             <div className="flex flex-col gap-2">
                                 <h3 className="font-normal text-base">Booking Experience</h3>
                                 <StarRating rating={bookingRating} onRate={setBookingRating} />
-                                {parseInt(ratings?.booking_experience_rating) && !isReRating 
-                                ?  <>
-                                    {ratings?.booking_experience_comment && (
-                                    <span  className='text-sm font-normal text-primary-dark'>
-                                        {ratings?.booking_experience_comment}
-                                    </span>
-                                    )}
+                                {parseInt(ratings?.booking_experience_rating) && !isReRating
+                                    ? <>
+                                        {ratings?.booking_experience_comment && (
+                                            <span className='text-sm font-normal text-primary-dark'>
+                                                {ratings?.booking_experience_comment}
+                                            </span>
+                                        )}
                                     </>
-                                : <textarea
-                                    placeholder="Write a review (Optional)"
-                                    value={bookingComment}
-                                    onChange={(e) => setBookingComment(e.target.value)}
-                                    className="w-full h-[52px] mt-2 p-3 border border-gray-300 rounded-[10px] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary overflow-y-auto scrollbar-none"
-                                    rows={3}
-                                />}
+                                    : <textarea
+                                        placeholder="Write a review (Optional)"
+                                        value={bookingComment}
+                                        onChange={(e) => setBookingComment(e.target.value)}
+                                        className="w-full h-[52px] mt-2 p-3 border border-gray-300 rounded-[10px] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary overflow-y-auto scrollbar-none"
+                                        rows={3}
+                                    />}
                             </div>
                         </div>
 
@@ -178,9 +177,8 @@ export default function RateServiceAccordion({ ratings, fromModal=false }) {
                                     type="checkbox"
                                     checked={rateServiceCheckbox}
                                     onChange={() => setRateServiceCheckbox(!rateServiceCheckbox)}
-                                    className={`w-[22px] h-[22px] ${
-                                        rateServiceCheckbox ? 'accent-primary-dark' : 'accent-gray-300'
-                                      }`}
+                                    className={`w-[22px] h-[22px] ${rateServiceCheckbox ? 'accent-primary-dark' : 'accent-gray-300'
+                                        }`}
                                 />
                                 <span className="text-base font-normal text-primary-dark">
                                     Hide my review from other users.

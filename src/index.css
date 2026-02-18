@@ -2,36 +2,255 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =======================
+   Fonts
+======================= */
+
 @font-face {
   font-family: 'Filson Soft';
   src: url('/fonts/FilsonPro-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Filson Soft';
-  src: url('/fonts/FilsonPro-Bold.woff2') format('truetype');
+  src: url('/fonts/FilsonPro-Bold.woff2') format('woff2');
+  /* fixed */
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
 
-
-body {
-  @apply font-inter;
-}
+/* =======================
+   Global Styles
+======================= */
 
 html {
   scroll-behavior: smooth;
 }
 
+body {
+  @apply font-inter;
+}
+
+/* =======================
+   Scrollbar Utilities
+======================= */
+
 @layer utilities {
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;              /* Chrome, Safari, Opera */
+
+  /* ========================
+     TEXT XS
+  ======================== */
+
+  .text-xs {
+    font-size: 8px;
+    line-height: 10px;
   }
 
+  @screen xs {
+    .text-xs {
+      font-size: 10px;
+      line-height: 14px;
+    }
+  }
+
+  @screen md {
+    .text-xs {
+      font-size: 12px;
+      line-height: 16px;
+    }
+  }
+
+
+  /* ========================
+     TEXT SM
+  ======================== */
+
+  .text-sm {
+    font-size: 10px;
+    line-height: 14px;
+  }
+
+  @screen xs {
+    .text-sm {
+      font-size: 12px;
+      line-height: 16px;
+    }
+  }
+
+  @screen md {
+    .text-sm {
+      font-size: 14px;
+      line-height: 20px;
+    }
+  }
+
+  /* ========================
+     TEXT BASE
+  ======================== */
+
+  .text-base {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  @screen xs {
+    .text-base {
+      font-size: 14px;
+      line-height: 20px;
+    }
+  }
+
+  @screen md {
+    .text-base {
+      font-size: 16px;
+      line-height: 24px;
+    }
+  }
+
+
+  /* ========================
+     TEXT LG
+  ======================== */
+
+  .text-lg {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  @screen xs {
+    .text-lg {
+      font-size: 16px;
+      line-height: 24px;
+    }
+  }
+
+  @screen md {
+    .text-lg {
+      font-size: 18px;
+      line-height: 26px;
+    }
+  }
+
+  /* ========================
+     TEXT XL
+  ======================== */
+
+  .text-xl {
+    font-size: 16px;
+    line-height: 22px;
+  }
+
+  @screen xs {
+    .text-xl {
+      font-size: 18px;
+      line-height: 24px;
+    }
+  }
+
+  @screen md {
+    .text-xl {
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  /* ========================
+     TEXT 2XL
+  ======================== */
+
+  .text-2xl {
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  @screen xs {
+    .text-2xl {
+      font-size: 20px;
+      line-height: 26px;
+    }
+  }
+
+  @screen md {
+    .text-2xl {
+      font-size: 24px;
+      line-height: 32px;
+    }
+  }
+
+  /* ========================
+     TEXT 3XL
+  ======================== */
+
+  .text-3xl {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  @screen xs {
+    .text-3xl {
+      font-size: 22px;
+      line-height: 28px;
+    }
+  }
+
+  @screen md {
+    .text-3xl {
+      font-size: 28px;
+      line-height: 36px;
+    }
+  }
+
+  /* ========================
+     TEXT 4XL
+  ======================== */
+
+  .text-4xl {
+    font-size: 22px;
+    line-height: 28px;
+  }
+
+  @screen xs {
+    .text-4xl {
+      font-size: 26px;
+      line-height: 32px;
+    }
+  }
+
+  @screen md {
+    .text-4xl {
+      font-size: 32px;
+      line-height: 40px;
+    }
+  }
+
+  /* Thin horizontal scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #BEC3C5;
+    border-radius: 10px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Hide scrollbar */
   .scrollbar-none {
-    -ms-overflow-style: none;   /* IE and Edge */
-    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;
+    /* IE & Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari */
   }
 }

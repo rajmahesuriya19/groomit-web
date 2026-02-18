@@ -20,21 +20,7 @@ import RebookConfirmation from '@/common/AppointmentCards/Rebook Confirmation/Re
 import { useDispatch } from 'react-redux';
 import { getAppointmentDetail } from '@/utils/store/slices/appointments/appointmentsSlice';
 
-type RecurringType = 'NONE' | 'RECURRING' | 'ONETIME' | 'CANCEL_RECURRING';
-
-interface AppointmentCardProps {
-  onPressAppointmentCard: () => void;
-  item: any;
-  index: number | string;
-  onPressGiveTip?: (appointmentItem: any) => void;
-  onPressRateService?: (appointmentItem: any) => void;
-  onPressRebook?: () => void;
-  displayFrom?: 'Home' | 'AppointmentsTabNavigator' | 'RECURRING_RESCHEDULE';
-  isAllowedAction?: boolean;
-  refreshParent?: () => void;
-}
-
-const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, refreshParent }: AppointmentCardProps) => {
+const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, refreshParent }) => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -229,7 +215,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
     } catch (error) { }
   }
 
-  let tempButtons: ReactNode[] = [];
+  let tempButtons = [];
   let isReRating = item?.is_enabled_rating == 1;
 
   if ((!item?.is_hide_rating_and_tip_after_30_days && item?.isRatingEnable) || isReRating) {
@@ -263,7 +249,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
   }
 
   // Break buttons into chunks of 2
-  const chunkedButtons: ReactNode[][] = [];
+  const chunkedButtons = [];
   for (let i = 0; i < tempButtons.length; i += 2) {
     chunkedButtons.push(tempButtons.slice(i, i + 2));
   }
@@ -272,31 +258,31 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
     return (
       <div
         key={index}
-        className={`mb-4 p-5 bg-white rounded-2xl shadow-md border-t-4 hover:shadow-lg transition
+        className={`mb-4 p-5 bg-white rounded-[15px] shadow-md border-t-4 hover:shadow-lg transition
         ${getStatusLabelColor()?.borderClass ?? 'border-gray-200'}`}
       >
         {/* Header */}
         <div className="flex justify-between items-start">
           <div className="cursor-pointer">
             <CopyTooltip textToCopy={`#${item?.appointment_id}`}>
-              <div className="flex items-center gap-1 font-inter font-semibold text-xs uppercase text-primary-dark tracking-wide">
+              <div className="flex items-center gap-1 font-inter font-bold text-xs uppercase text-primary-dark tracking-wide">
                 #{item?.appointment_id}
                 <img src={CopyIcon} alt="Copy" className="w-3 h-3 cursor-pointer opacity-80 hover:opacity-100 transition" />
               </div>
             </CopyTooltip>
             {item?.type === 'rebook' ? (
-              <p className="font-inter font-bold text-base text-gray-800 mt-1"> Rebooking Suggested by {item?.rebook_groomer?.first_name}</p>
+              <p className="font-inter font-bold text-base text-primary-dark mt-1 capitalize"> Rebooking Suggested by {item?.rebook_groomer?.first_name}</p>
             ) : (
-              <p className="font-inter font-bold text-base text-gray-800 mt-1">{item.appointment_status_label}</p>
+              <p className="font-inter font-bold text-base text-primary-dark mt-1 capitalize">{item.appointment_status_label}</p>
             )}
             {item?.appointment_status_label === 'Groomer arrived' && item?.arrived_at && (
-              <p className="font-inter font-normal text-xs text-gray-800">{item.arrived_at}</p>
+              <p className="font-inter font-normal text-xs text-primary-dark capitalize">{item.arrived_at}</p>
             )}
             {item?.appointment_status_label === 'Groomer on the way' && item?.display_eta && (
-              <p className="font-inter font-normal text-xs text-gray-800 ">{item.display_eta}</p>
+              <p className="font-inter font-normal text-xs text-primary-dark capitalize">{item.display_eta}</p>
             )}
             {item?.appointment_status_label === 'Grooming in progress' && item?.grooming_started_at && (
-              <p className="font-inter font-normal text-xs text-gray-800">{item.grooming_started_at}</p>
+              <p className="font-inter font-normal text-xs text-primary-dark capitalize">{item.grooming_started_at}</p>
             )}
           </div>
 
@@ -438,7 +424,7 @@ const AppointmentCard = ({ item, index, displayFrom, isAllowedAction = true, ref
     return <></>
   }
 
-  let recurringType: RecurringType = 'RECURRING';
+  let recurringType = 'RECURRING';
 
   if (displayFrom === 'RECURRING_RESCHEDULE') {
     recurringType = 'NONE';

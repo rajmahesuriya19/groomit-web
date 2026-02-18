@@ -8,9 +8,13 @@ const Index = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const token = useSelector((state) => state.auth.token);
+
   const handleLogin = async () => {
     const email = 'raj@groomit.me';
     const password = 'Password@19';
+    // const email = 'hiyicic541@advarm.com';
+    // const password = 'Password@19';
     // const email = 'xixox64504@datehype.com';
     // const password = 'Rajtest19';
     // const email = 'pivimo3635@noihse.com';
@@ -44,7 +48,7 @@ const Index = () => {
     if (!localToken) {
       handleLogin();
     }
-  }, [])
+  }, [token])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
