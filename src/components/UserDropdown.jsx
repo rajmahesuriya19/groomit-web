@@ -141,7 +141,9 @@ const UserDropdown = ({ onProtectedAction }) => {
           }
         >
           {user?.photo ? (
-            <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px] object-contain' : 'w-[45px] h-[45px] object-contain'}`} />
+            <div onClick={() => navigate("/user/account")}>
+              <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px] object-contain' : 'w-[45px] h-[45px] object-contain'}`} />
+            </div>
           ) : (
             <img
               src="https://randomuser.me/api/portraits/men/75.jpg"
