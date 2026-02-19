@@ -112,42 +112,56 @@ const Navigation = () => {
                           <div className="font-filson font-bold text-xl text-primary-dark">{location.pathname.includes("/user/address/edit") ? `Edit Service Address` : `Add Service Address`}</div>
                         </div>
                       </div>
-                      : location.pathname.includes("/user/payment/card") ?
+                      : location.pathname.includes("/user/notifications-preferences") ?
                         <div className="w-full">
                           <div className="flex items-center gap-2 w-full">
                             <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
-                            <div className="font-filson font-bold text-xl text-primary-dark">{location.pathname.includes("/user/payment/card/add") ? `Add Card` : `Edit Card`}</div>
+                            <div className="font-filson font-bold text-xl text-primary-dark">Notification Preferences</div>
                           </div>
                         </div>
-                        :
-                        petType ?
+                        : location.pathname.includes("/user/account/password/change") ?
                           <div className="w-full">
                             <div className="flex items-center gap-2 w-full">
                               <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
-                              <div className="font-filson font-bold text-xl text-primary-dark">
-                                {location.pathname.includes("/user/pet/edit") ? `Edit ${petType}` : `Add ${petType}`}
-                              </div>
+                              <div className="font-filson font-bold text-xl text-primary-dark">Change Password</div>
                             </div>
                           </div>
-                          : location.pathname === "/user/inbox" ? <div>
-                            <div className="font-filson font-bold text-xl text-primary-dark">Inbox</div>
-                          </div> : location.pathname === "/user/groomers" ? <div>
-                            <div className="font-filson font-bold text-xl text-primary-dark">My Groomers</div>
-                          </div> : location.pathname === "/user/appointments" ? <div>
-                            <div className="font-filson font-bold text-xl text-primary-dark">Appointments</div>
-                          </div> :
+                          : location.pathname.includes("/user/payment/card") ?
                             <div className="w-full">
-                              <div className="flex items-center gap-1">
-                                <img src={user?.photo ? user?.photo : FallbackUser} alt="User" className="mr-2 object-cover w-8 h-8 rounded-[4px]" />
-                                {/* <div>
+                              <div className="flex items-center gap-2 w-full">
+                                <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
+                                <div className="font-filson font-bold text-xl text-primary-dark">{location.pathname.includes("/user/payment/card/add") ? `Add Card` : `Edit Card`}</div>
+                              </div>
+                            </div>
+                            :
+                            petType ?
+                              <div className="w-full">
+                                <div className="flex items-center gap-2 w-full">
+                                  <ChevronLeft size={24} className="text-primary-light cursor-pointer" onClick={() => navigate(-1)} />
+                                  <div className="font-filson font-bold text-xl text-primary-dark">
+                                    {location.pathname.includes("/user/pet/edit") ? `Edit ${petType}` : `Add ${petType}`}
+                                  </div>
+                                </div>
+                              </div>
+                              : location.pathname === "/user/inbox" ? <div>
+                                <div className="font-filson font-bold text-xl text-primary-dark">Inbox</div>
+                              </div> : location.pathname === "/user/groomers" ? <div>
+                                <div className="font-filson font-bold text-xl text-primary-dark">My Groomers</div>
+                              </div> : location.pathname === "/user/appointments" ? <div>
+                                <div className="font-filson font-bold text-xl text-primary-dark">Appointments</div>
+                              </div> :
+                                <div className="w-full">
+                                  <div className="flex items-center gap-1">
+                                    <img src={user?.photo ? user?.photo : FallbackUser} alt="User" className="mr-2 object-cover w-8 h-8 rounded-[4px]" />
+                                    {/* <div>
                               <div className="font-inter font-bold text-base text-primary-dark">{`Hi, ${user?.first_name}`}</div>
                               <div className="font-inter font-normal text-xs text-primary-dark">Ready to pamper your pets?</div>
                             </div> */}
-                                <div>
-                                  <div className='font-inter font-semibold text-xl text-primary-dark capitalize'>{`Welcome, ${user?.first_name} 👋`}</div>
+                                    <div>
+                                      <div className='font-inter font-semibold text-xl text-primary-dark capitalize'>{`Welcome, ${user?.first_name} 👋`}</div>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
               }
             </div>
 

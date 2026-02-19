@@ -8,7 +8,6 @@ import Groomers from './pages/groomers/groomers.jsx';
 import Appointments from './pages/appointments/appointments.jsx';
 import Dashboard from './pages/dashboard/dashboard.jsx';
 import Page404 from './pages/page404/index.jsx';
-import CreateEditAccount from './pages/account/create-edit-account/CreateEditAccount.jsx';
 import CreateEditCards from './pages/cards/create-edit-cards/CreateEditCards.jsx';
 import ViewCard from './pages/cards/view-card/ViewCard.jsx';
 import Pets from './pages/my-pets/pets.jsx';
@@ -19,7 +18,6 @@ import ScrollToTop from './common/ScrollToTop/ScrollToTop.jsx';
 import AppointmentDetail from './pages/appointments/AppointmentDetail/AppointmentDetail.jsx';
 import Inbox from './pages/inbox/Inbox.jsx';
 import RecurringScheduleDetails from './pages/appointments/RecurringPlan/RecurringScheduleDetails.jsx';
-import CreateEditAccount2 from './pages/account/create-edit-account/CreateEditAccount2.jsx';
 import AddUpdateDog2 from './pages/my-pets/add-update-dog/AddUpdateDog2.jsx';
 import AddUpdateCat2 from './pages/my-pets/add-update-cat/AddUpdateCat2.jsx';
 import PetsList from './pages/my-pets/Pets2.jsx';
@@ -39,6 +37,7 @@ import Slots from './pages/Booking-flow/Slots/Slots.jsx';
 import Checkout from './pages/Booking-flow/Checkout/Checkout.jsx';
 import LatestDashboard from './pages/dashboard/LatestDashboard.jsx';
 import TransactionReceipt from './pages/appointments/TransactionReceipt.jsx';
+import { CreateEditAccount2 } from './pages/account/create-edit-account/CreateEditAccount2.jsx';
 
 function App() {
   return (

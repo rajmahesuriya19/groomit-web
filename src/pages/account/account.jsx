@@ -193,7 +193,7 @@ const Account = () => {
         </div>
       </div>
 
-      <div className="gap-4 grid grid-cols-1 md:gap-8 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] px-5 py-[18px]">
+      <div className="px-4 sm:px-5 py-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 md:gap-6 lg:gap-8 relative">
         {/* Left Section */}
         <div className="space-y-4">
           {/* Profile Card */}
@@ -673,21 +673,23 @@ const Account = () => {
         </div>
 
         {/* Right Section */}
-        <div className="space-y-4 w-full min-w-0 block">
+        <div className="hidden md:block w-full min-w-0">
           {/* Support List */}
-          <SupportItems />
+          <div className="sticky top-24 space-y-4">
+            <SupportItems />
 
-          {/* Logout */}
-          <div className="bg-white rounded-[15px] p-[15px] flex items-center justify-between cursor-pointer">
-            <div className="flex items-center gap-2">
-              <img src={LogOut} alt="Logout" className="w-6 h-6" />
-              <span className="text-base font-bold text-primary-dark tracking-[-0.01em] font-inter">
-                Log Out
-              </span>
+            {/* Logout */}
+            <div className="bg-white rounded-[15px] p-[15px] flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <img src={LogOut} alt="Logout" className="w-6 h-6" />
+                <span className="text-base font-bold text-primary-dark tracking-[-0.01em] font-inter">
+                  Log Out
+                </span>
+              </div>
+              <button onClick={handleLogout}>
+                <ChevronRight size={24} className="text-primary-light" />
+              </button>
             </div>
-            <button onClick={handleLogout}>
-              <ChevronRight size={24} className="text-primary-light" />
-            </button>
           </div>
         </div>
       </div>

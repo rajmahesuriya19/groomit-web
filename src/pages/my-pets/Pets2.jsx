@@ -44,7 +44,7 @@ const Pets2 = () => {
             </div>
 
             <div className={`mb-28 ${allPets.length === 1 ? 'h-full' : ''}`}>
-                <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
+                <div className="px-4 sm:px-5 py-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 md:gap-6 lg:gap-8 relative">
                     {/* Left Section */}
                     <div className="space-y-4">
                         {allPets.map((pet) => (
@@ -78,9 +78,10 @@ const Pets2 = () => {
                     </div>
 
                     {/* Right Section */}
-                    <div className="space-y-4 w-full min-w-0 hidden md:block">
-                        {/* Support List */}
-                        <SupportItems />
+                    <div className="hidden md:block w-full min-w-0">
+                        <div className="sticky top-24 space-y-4">
+                            <SupportItems />
+                        </div>
                     </div>
                 </div>
 

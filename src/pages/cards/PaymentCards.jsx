@@ -34,9 +34,9 @@ const PaymentCards = () => {
             </div>
 
             <div className={`mb-28`}>
-                <div className="px-5 py-[18px] grid grid-cols-1 md:grid-cols-[minmax(0,1.25fr)_auto_minmax(0,1fr)] gap-8">
+                <div className="px-4 sm:px-5 py-5 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-2 md:gap-6 lg:gap-8 relative">
                     {/* Left Section */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 pb-32">
                         <div className="rounded-[15px] bg-white shadow-md p-4 flex flex-col gap-4 w-full">
                             <div className='flex justify-between items-center w-full border-b border-[#E4E4E4] pb-4'>
                                 <div className='font-base font-bold'>Credit/Debit Cards</div>
@@ -58,9 +58,10 @@ const PaymentCards = () => {
                     </div>
 
                     {/* Right Section */}
-                    <div className="space-y-4 w-full min-w-0 hidden md:block">
-                        {/* Support List */}
-                        <SupportItems />
+                    <div className="hidden md:block w-full min-w-0">
+                        <div className="sticky top-24 space-y-4">
+                            <SupportItems />
+                        </div>
                     </div>
                 </div>
             </div>
