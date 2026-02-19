@@ -35,6 +35,72 @@ body {
   @apply font-inter;
 }
 
+/* Rounded toast */
+.Toastify__toast {
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* Add side padding on mobile */
+.Toastify__toast-container {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* Smooth animated dots */
+.loading-dots::after {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  text-align: left;
+  animation: dots 1.5s steps(3, end) infinite;
+}
+
+@keyframes dots {
+  0% {
+    content: "";
+  }
+
+  33% {
+    content: ".";
+  }
+
+  66% {
+    content: "..";
+  }
+
+  100% {
+    content: "...";
+  }
+}
+
+/* Elegant moving progress bar */
+@keyframes loadingBar {
+  0% {
+    width: 0%;
+  }
+
+  50% {
+    width: 60%;
+  }
+
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-loadingBar {
+  animation: loadingBar 1.4s ease-in-out infinite;
+}
+
+/* Prevent edge clipping on iPhone */
+@supports (padding: max(0px)) {
+  .Toastify__toast-container {
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
 /* =======================
    Scrollbar Utilities
 ======================= */
