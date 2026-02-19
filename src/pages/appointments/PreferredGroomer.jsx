@@ -11,7 +11,7 @@ const PreferredGroomer = ({ item, onInfoClick }) => {
 
     return (
         <div className="mt-4 pt-3 border-t border-gray-200">
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
                 <div className="flex justify-center items-center">
                     <img src={item?.groomer?.profile_photo_url || 'https://www.groomit.me/v7/images/icons/profile-circle.svg'}
                         alt={item?.groomer?.first_name || 'Groomer'} className="w-[40px] h-[40px] rounded-[10px] object-cover" />

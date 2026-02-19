@@ -426,7 +426,7 @@ const AddUpdateDog = () => {
 
                                 {breedListModalOpen && (
                                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-                                        <div className="bg-white rounded-xl p-4 w-full max-w-md">
+                                        <div className="bg-white rounded-xl p-4 w-full max-w-[390px]">
                                             <div className="flex justify-between items-center mb-3">
                                                 <h2 className="font-bold text-lg">Select Breed</h2>
                                                 <button

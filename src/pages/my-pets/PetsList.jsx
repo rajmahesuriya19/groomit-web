@@ -18,8 +18,12 @@ import MemorialiseModal from "@/components/Modals/MemorialiseModal";
 import DeleteDogModal from "@/components/Modals/DeleteDogModal";
 import SuccessModal from "@/components/Modals/SuccessModal";
 import { useLoader } from "@/contexts/loaderContext/LoaderContext";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { getPetList, updatePetStatus } from "@/utils/store/slices/petList/petListSlice";
+import { CheckboxIcon } from "@/common/CustomCheckbox/CustomCheckboxIcons";
+import { Checkbox } from "@mui/material";
+import { SavePetServiceType, setPetCounts, toggleExistingPetSelection } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
+import { toast } from "react-toastify";
 
 const InfoRow = ({ booster, type, icon, title, subtitle, onDetails, id }) => (
     <>
@@ -71,6 +75,19 @@ export default function PetsList({ pet, isSingle, memorizez }) {
     const [successModal, setSuccessModal] = useState(false);
     const [successTitle, setSuccessTitle] = useState('');
 
+    const bookingFlow = useSelector((state) => state.bookingFlow);
+    const { serviceType, currentPetIndex, petCounts = { dog: 0, cat: 0 }, bookingAddress, petsDraft, selectedPetIds = [], selectedNewPetIdsExisting = [], selectedPetIdsfromAPI = [] } = bookingFlow;
+
+    const {
+        dogPets = [],
+        catPets = []
+    } = useSelector((state) => state.pets.pets || {});
+
+    const allPets = [...dogPets, ...catPets];
+
+    const isChecked = selectedPetIds.includes(pet.pet_id);
+    const isDisabled = selectedPetIds.length >= 6 && !isChecked;
+
     const {
         name = "Unnamed Pet",
         breed_name = "Unknown",
@@ -97,6 +114,72 @@ export default function PetsList({ pet, isSingle, memorizez }) {
 
     const handlePetDetails = (type, id) => {
         navigate(`/user/pet/edit/${type}/${id}`);
+    };
+
+    const togglePetSelection = (petId) => {
+        const isRemoving = selectedPetIds.includes(petId);
+
+        // 🔹 Update Redux pet list
+        dispatch(toggleExistingPetSelection(petId));
+
+        // 🔹 Increment / decrement counts
+        dispatch(
+            setPetCounts({
+                dog: pet.type === "dog" ? (isRemoving ? -1 : 1) : 0,
+                cat: pet.type === "cat" ? (isRemoving ? -1 : 1) : 0,
+            })
+        );
+    };
+
+    const handleSubmit = async () => {
+        showLoader();
+        // 🔒 Max pets guard
+        if (selectedPetIds.length > 6) {
+            toast.error("We are allowing 6 pets for now");
+            hideLoader();
+            return;
+        }
+
+        // 🔒 Must select at least one NEW pet on this screen
+        if (allPets.length > 0 && selectedNewPetIdsExisting.length === 0) {
+            toast.error("Please select at least one pet");
+            hideLoader();
+            return;
+        }
+
+        try {
+            const res = await dispatch(
+                SavePetServiceType({
+                    address_id: displayAddress?.address_id,
+                    book_pet_ids: selectedPetIds,
+                    service_type: serviceType,
+                    pet_type,
+                    total_cats: catCount,
+                    total_dogs: dogCount,
+                    total_pets: totalPets,
+                    booking_session_token: token,
+                })
+            ).unwrap();
+
+            const nextPetIndex = currentPetIndex + 1;
+            const nextPetId = res[nextPetIndex]
+
+            if (nextPetId) {
+                navigate(`/book/pet/${nextPetId}`);
+            }
+            hideLoader();
+
+            // ✅ Move booking flow forward
+            dispatch(
+                moveToNextPet({
+                    petIndex: petsDraft.length,
+                })
+            );
+        } catch (error) {
+            console.error("SavePetServiceType failed", error);
+            toast.error("Unable to save pets. Please try again.");
+            hideLoader();
+        }
     };
 
     const handleMemorialisePet = async (id) => {
@@ -151,7 +234,8 @@ export default function PetsList({ pet, isSingle, memorizez }) {
         <>
             <Accordion
                 expanded={expanded}
-                onChange={() => {
+                onChange={(e) => {
+                    e.stopPropagation();
                     if (!isSingle) {
                         setExpanded((prev) => !prev);
                     }
@@ -167,9 +251,26 @@ export default function PetsList({ pet, isSingle, memorizez }) {
                 }}
             >
                 {/* HEADER */}
-                <AccordionSummary>
+                <AccordionSummary onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isSingle) {
+                        setExpanded((prev) => !prev);
+                    }
+                }}>
                     <div className="flex p-[15px] bg-white rounded-t-[15px] w-full items-center justify-between">
                         <div className="flex items-center gap-[10px]">
+                            {!memorizez && <Checkbox
+                                checked={isChecked}
+                                disabled={isDisabled}
+                                onClick={() => {
+                                    if (!isDisabled) togglePetSelection(pet.pet_id);
+                                }}
+                                disableRipple
+                                icon={<CheckboxIcon disabled={isDisabled} />}
+                                checkedIcon={<CheckboxIcon checked />}
+                                sx={{ p: 0 }}
+                            />}
+
                             <img
                                 src={petImage}
                                 alt={name}
@@ -178,9 +279,11 @@ export default function PetsList({ pet, isSingle, memorizez }) {
 
                             <div>
                                 <h2 className="font-bold text-base capitalize text-primary-dark">{name}</h2>
-                                <span className="font-inter text-sm text-primary-dark capitalize">
-                                    {breed_name}
-                                </span>
+                                {pet?.type === 'dog' ? (
+                                    <div className="font-inter font-normal text-sm text-primary-dark capitalize">{(pet?.breed_name && pet?.size?.size_name) ? [pet?.breed_name, pet?.size?.size_name].filter(Boolean).join(', ') : 'Dog'}</div>
+                                ) : (
+                                    <div className="font-inter font-normal text-sm text-primary-dark capitalize">{'Cat'}</div>
+                                )}
                             </div>
                         </div>
 
@@ -309,6 +412,22 @@ export default function PetsList({ pet, isSingle, memorizez }) {
                     </div>
                 </AccordionDetails>
             </Accordion>
+
+            {/* Footer */}
+            {selectedPetIds.length > 0 && <div className="fixed bottom-0 w-full left-0 bg-white z-10"
+                style={{
+                    padding: "15px 20px 25px",
+                }}
+            >
+                <div className="flex justify-center items-center">
+                    <button
+                        onClick={handleSubmit}
+                        className={`w-[390px] h-[50px] rounded-[10px] font-bold transition text-white   bg-primary-dark`}
+                    >
+                        Book Appointment
+                    </button>
+                </div>
+            </div>}
 
             <DeleteDogModal
                 open={isDeleteModalOpen}

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import UserDropdown from './UserDropdown.jsx';
 import info from '../assets/icon/help-circle-black.svg';
+import Logo from '../assets/logo/header-logo.png';
 import Rating from '../assets/icon/fill-star.svg';
 import MobileMenuHeader from './MobileMenuHeader.jsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -68,7 +69,7 @@ const Header = () => {
                             >
                                 <img
                                     className="h-12 w-40"
-                                    src="https://groomit.me/v7/images/home/groomit-logo.svg"
+                                    src={Logo}
                                     alt="Groomit.me"
                                 />
                             </Link>

@@ -129,32 +129,30 @@ const Groomers = () => {
                                                     </button>
                                                 </div>
 
-                                                {((item.rating_avg > 0) || (item.rating_qty > 0)) && (
-                                                    <div
-                                                        className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1"
-                                                    >
-                                                        {
-                                                            item.rating_avg > 0 && (
-                                                                <>
-                                                                    <img
-                                                                        src={FillStar}
-                                                                        alt="rating"
-                                                                    />
+                                                <div className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1">
 
-                                                                    <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                        {item.rating_avg}
-                                                                    </span>
-                                                                </>
-                                                            )
-                                                        }
+                                                    {/* Always show star */}
+                                                    <img
+                                                        src={FillStar}
+                                                        alt="rating"
+                                                    />
 
-                                                        {item.rating_qty > 0 && (
+                                                    {item.rating_qty > 0 ? (
+                                                        <>
                                                             <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                {item.rating_avg > 0 ? `| ${item.rating_qty}` : item.rating_qty}
+                                                                {item.rating_avg}
                                                             </span>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                            <span className="font-inter font-bold text-xs leading-[8px]">
+                                                                | {item.rating_qty}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="font-inter font-bold text-xs leading-[8px]">
+                                                            New
+                                                        </span>
+                                                    )}
+
+                                                </div>
                                             </div>
                                         </div>
 
@@ -209,32 +207,30 @@ const Groomers = () => {
                                                     </button>
                                                 </div>
 
-                                                {((item.rating_avg > 0) || (item.rating_qty > 0)) && (
-                                                    <div
-                                                        className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1"
-                                                    >
-                                                        {
-                                                            item.rating_avg > 0 && (
-                                                                <>
-                                                                    <img
-                                                                        src={FillStar}
-                                                                        alt="rating"
-                                                                    />
+                                                <div className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1">
 
-                                                                    <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                        {item.rating_avg}
-                                                                    </span>
-                                                                </>
-                                                            )
-                                                        }
+                                                    {/* Always show star */}
+                                                    <img
+                                                        src={FillStar}
+                                                        alt="rating"
+                                                    />
 
-                                                        {item.rating_qty > 0 && (
+                                                    {item.rating_qty > 0 ? (
+                                                        <>
                                                             <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                {item.rating_avg > 0 ? `| ${item.rating_qty}` : item.rating_qty}
+                                                                {item.rating_avg}
                                                             </span>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                            <span className="font-inter font-bold text-xs leading-[8px]">
+                                                                | {item.rating_qty}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="font-inter font-bold text-xs leading-[8px]">
+                                                            New
+                                                        </span>
+                                                    )}
+
+                                                </div>
                                             </div>
                                         </div>
 
@@ -289,32 +285,30 @@ const Groomers = () => {
                                                     </button>
                                                 </div>
 
-                                                {((item.rating_avg > 0) || (item.rating_qty > 0)) && (
-                                                    <div
-                                                        className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1"
-                                                    >
-                                                        {
-                                                            item.rating_avg > 0 && (
-                                                                <>
-                                                                    <img
-                                                                        src={FillStar}
-                                                                        alt="rating"
-                                                                    />
+                                                <div className="flex items-center justify-center rounded-[25px] border border-primary-line px-[6px] py-[4px] gap-1">
 
-                                                                    <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                        {item.rating_avg}
-                                                                    </span>
-                                                                </>
-                                                            )
-                                                        }
+                                                    {/* Always show star */}
+                                                    <img
+                                                        src={FillStar}
+                                                        alt="rating"
+                                                    />
 
-                                                        {item.rating_qty > 0 && (
+                                                    {item.rating_qty > 0 ? (
+                                                        <>
                                                             <span className="font-inter font-bold text-xs leading-[8px]">
-                                                                {item.rating_avg > 0 ? `| ${item.rating_qty}` : item.rating_qty}
+                                                                {item.rating_avg}
                                                             </span>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                            <span className="font-inter font-bold text-xs leading-[8px]">
+                                                                | {item.rating_qty}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="font-inter font-bold text-xs leading-[8px]">
+                                                            New
+                                                        </span>
+                                                    )}
+
+                                                </div>
                                             </div>
                                         </div>
 

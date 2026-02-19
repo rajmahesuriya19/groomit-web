@@ -2,6 +2,8 @@ import React from 'react';
 import { X } from 'lucide-react';
 
 // ICONS
+import PlayStore from "../assets/menu-new/play-store.svg";
+import AppStore from "../assets/menu-new/app-store.svg";
 import HomeIcon from "../assets/menu-new/home.svg";
 import HomeRed from "../assets/menu-new/home-a.svg";
 
@@ -17,19 +19,26 @@ import MessageRed from "../assets/menu-new/message-a.svg";
 import User from "../assets/menu-new/user.svg";
 import UserRed from "../assets/icon/user.svg";
 
-import Review from "../assets/icon/help-circle-black.svg";
-import ReviewRed from "../assets/icon/info-circle.svg";
+import HelpCircle from "../assets/icon/help-circle-black.svg";
+import RedHelpCircle from "../assets/icon/info-circle.svg";
 
 import Star from "../assets/icon/star-gray.svg";
-import StarRed from "../assets/icon/red-star.svg";
+import RedStar from "../assets/icon/red-star.svg";
 
 import Logout from "../assets/icon/logout.svg";
 import LogoutRed from "../assets/icon/logout.svg";
 
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import { useLoader } from '@/contexts/loaderContext/LoaderContext';
+import { logoutUser } from '@/utils/store/slices/auth/authSlice';
+import { toast } from 'react-toastify';
 
 const MobileMenu = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { showLoader, hideLoader } = useLoader();
   const currentPath = location.pathname;
 
   const menuItems = [
@@ -41,9 +50,23 @@ const MobileMenu = ({ isOpen, onClose }) => {
   ];
 
   const secondMenu = [
-    { label: 'Review Us', href: '#/', icon: Review, iconRed: ReviewRed },
-    { label: 'How It Works', href: '#/', icon: Star, iconRed: StarRed },
+    { label: "Review Us", href: "https://g.page/r/CcYk6tuuu6NhEB0/review", icon: Star, activeIcon: RedStar },
+    { label: "How It Works", href: "https://www.groomit.me/how-it-works", icon: HelpCircle, activeIcon: RedHelpCircle },
   ];
+
+  const handleLogout = async () => {
+    showLoader();
+    try {
+      await dispatch(logoutUser()).unwrap();
+      onClose();
+      toast.success("Logout successful 🎉");
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error.message);
+    } finally {
+      hideLoader();
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -120,6 +143,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               {secondMenu.map((item, index) => (
                 <a
                   key={index}
+                  target="_blank"
                   href={item.href}
                   onClick={onClose}
                   className="group flex items-center gap-3 px-4 py-2 transition-colors"
@@ -142,11 +166,11 @@ const MobileMenu = ({ isOpen, onClose }) => {
                 Download the app
               </p>
               <div className="flex gap-1">
-                <a href="https://groomit.me/download-groomit-app" target="_blank">
-                  <img className="h-auto w-full" src="https://groomit.me/v7/images/webapp/icons/menu-new/play-store.svg" alt="Play Store" />
+                <a href="https://www.groomit.me/download-groomit-app" target="_blank" rel="noopener noreferrer">
+                  <img src={PlayStore} alt="Google Play" className="h-[36px]" />
                 </a>
-                <a href="https://groomit.me/download-groomit-app" target="_blank">
-                  <img className="h-auto w-full" src="https://groomit.me/v7/images/webapp/icons/menu-new/app-store.svg" alt="App Store" />
+                <a href="https://www.groomit.me/download-groomit-app" target="_blank" rel="noopener noreferrer">
+                  <img src={AppStore} alt="App Store" className="h-[36px]" />
                 </a>
               </div>
             </div>
@@ -154,10 +178,9 @@ const MobileMenu = ({ isOpen, onClose }) => {
             <hr className="my-2 border-gray-100" />
 
             {/* Logout */}
-            <a
-              href="#"
+            <div
               className="group flex items-center gap-3 px-4 py-2 transition-colors"
-              onClick={onClose}
+              onClick={handleLogout}
             >
               <img src={Logout} className="w-6 h-6 group-hover:hidden" alt="" />
               <img src={LogoutRed} className="w-6 h-6 hidden group-hover:block" alt="" />
@@ -165,7 +188,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               <span className="font-bold font-inter text-sm group-hover:text-brand">
                 Logout
               </span>
-            </a>
+            </div>
 
             <div className="pb-6" />
           </div>

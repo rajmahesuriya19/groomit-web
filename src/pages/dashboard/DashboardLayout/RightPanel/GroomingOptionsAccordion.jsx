@@ -6,8 +6,6 @@ import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 
-import FallbackDog from '../../../../assets/icon/dog-avatar.jpg';
-import FallbackCat from '../../../../assets/icon/cat-avatar.jpg';
 import DogIcon from "../../../../assets/icon/dog-black.svg";
 import CatIcon from "../../../../assets/icon/cat-black.svg";
 import Searchh from "../../../../assets/icon/search-black.svg";
@@ -15,7 +13,7 @@ import CommonActionButton from "@/common/ActionButton/CommonActionButton";
 import { CustomInput } from "@/components/CustomInput";
 import { useDispatch, useSelector } from "react-redux";
 import { getBookingPetBreeds, getBookingPetSizes } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
-import { getPackageByPet, getPackages } from "@/utils/store/slices/packages/packagesSlice";
+import { getPackages } from "@/utils/store/slices/packages/packagesSlice";
 import PackagesModal from "../PackagesModal";
 import { useLoader } from "@/contexts/loaderContext/LoaderContext";
 
@@ -40,19 +38,17 @@ const schema = yup.object().shape({
     }),
 });
 
-const GroomingOptionsAccordion = ({ allPets = [] }) => {
+const GroomingOptionsAccordion = () => {
     const dispatch = useDispatch();
     const { showLoader, hideLoader } = useLoader();
 
     const [expanded, setExpanded] = useState(false);
+    const [packagesModal, setPackagesModal] = useState(false);
     const [breedListModalOpen, setBreedListModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedBreedName, setSelectedBreedName] = useState("");
-    const [selectedPet, setSelectedPet] = useState(null);
-    const [packagesModal, setPackagesModal] = useState(false);
 
     const { packages = [] } = useSelector((state) => state.packages);
-
     const bookingFlow = useSelector((state) => state.bookingFlow);
     const token = useSelector((state) => state.auth.unique_token);
 
@@ -75,12 +71,6 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
         },
     });
 
-    // ---------------- WATCHED VALUES ----------------
-    const selectedType = watch("type");
-    const zipValue = watch("zip");
-    const selectedBreedId = watch("breed_id");
-    const selectedSize = watch("size_id");
-
     // ---------------- FILTER BREEDS ----------------
     const filteredBreeds = useMemo(() => {
         if (!searchTerm.trim()) return breeds;
@@ -90,6 +80,12 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
                 .includes(searchTerm.toLowerCase())
         );
     }, [breeds, searchTerm]);
+
+    // ---------------- WATCHED VALUES ----------------
+    const selectedType = watch("type");
+    const zipValue = watch("zip");
+    const selectedBreedId = watch("breed_id");
+    const selectedSize = watch("size_id");
 
     // ---------------- HANDLERS ----------------
     const handlePetTypeSelect = (type) => {
@@ -131,25 +127,6 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
                 setPackagesModal(true);
             }
 
-        } catch (error) {
-            console.error("Failed to fetch packages:", error);
-        } finally {
-            hideLoader();
-        }
-    };
-
-    const handlePackagePet = async (petId) => {
-        try {
-            showLoader();
-
-            const response = await dispatch(
-                getPackageByPet({ petId })
-            ).unwrap();
-
-            // 🔥 Prevent opening empty modal
-            if (response?.packages?.length > 0) {
-                setPackagesModal(true);
-            }
         } catch (error) {
             console.error("Failed to fetch packages:", error);
         } finally {
@@ -218,61 +195,6 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
 
     return (
         <>
-            {allPets.length > 0 && (
-                <div>
-                    <div className="mb-2">
-                        <div className="flex items-center justify-between">
-                            <h3 className="font-inter font-bold text-base text-primary-dark">My Pets</h3>
-                        </div>
-                    </div>
-
-                    {allPets?.map((pet, index) => (
-                        <div key={index} className="mb-3 flex flex-col items-start gap-4 w-full">
-                            <div className="p-[15px] bg-white rounded-[15px] w-full">
-                                <div className="flex justify-between items-center">
-                                    <div className="flex gap-3 items-center">
-                                        <img
-                                            src={pet?.profilePicture?.path || pet?.photo_url || (pet?.type == 'dog' ? FallbackDog : FallbackCat)}
-                                            className="w-9 h-9 object-cover rounded-[10px] cursor-pointer"
-                                            alt="Pet Profile"
-                                        />
-                                        <div>
-                                            <h4 className="font-inter font-bold text-base cursor-pointer capitalize text-primary-dark">{pet.name}</h4>
-                                            {pet?.type === 'dog' ? (
-                                                <div className="font-inter font-normal text-sm text-primary-dark">{(pet?.breed_name && pet?.size?.size_name) ? [pet?.breed_name, pet?.size?.size_name].filter(Boolean).join(', ') : 'Dog'}</div>
-                                            ) : (
-                                                <div className="font-inter font-normal text-sm text-primary-dark">{pet?.ageFull ? pet?.ageFull : 'Cat'}</div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <motion.button
-                                        whileHover={{ scale: 1.03 }}
-                                        whileTap={{ scale: 0.97 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="px-4 py-2 border border-primary-dark rounded-[10px] text-primary-dark font-inter font-bold text-base"
-                                    >
-                                        Book
-                                    </motion.button>
-                                </div>
-                            </div>
-
-                            <CommonActionButton
-                                borderColor="border-primary-dark"
-                                textColor="text-white"
-                                className="bg-primary-dark"
-                                onClick={() => {
-                                    setSelectedPet(pet);
-                                    handlePackagePet(pet?.pet_id);
-                                }}
-                            >
-                                View Pricing For Bruno
-                            </CommonActionButton>
-                        </div>
-                    ))}
-                </div>
-            )}
-
             <div>
                 <Accordion
                     expanded={expanded}
@@ -425,7 +347,7 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
                                                             animate={{ scale: 1, opacity: 1 }}
                                                             exit={{ scale: 0.95, opacity: 0 }}
                                                             transition={{ duration: 0.2 }}
-                                                            className="bg-white rounded-xl p-4 w-full max-w-md"
+                                                            className="bg-white rounded-xl p-4 w-full max-w-[390px]"
                                                         >
                                                             <div className="flex justify-between items-center mb-3">
                                                                 <h2 className="font-bold text-lg">Select Breed</h2>
@@ -508,10 +430,10 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
                                                                     : "border border-[#BEC3C5]"
                                                                 }`}
                                                         >
-                                                            <div className="text-sm font-medium">
+                                                            <div className={`text-sm ${selectedSize === item.size_id ? 'font-bold' : ''}`}>
                                                                 {item.size}
                                                             </div>
-                                                            <div className="text-xs opacity-80">
+                                                            <div className={`text-xs opacity-80 ${selectedSize === item.size_id ? 'font-bold' : ''}`}>
                                                                 {item.size_desc_new} lbs
                                                             </div>
                                                         </motion.button>
@@ -555,7 +477,7 @@ const GroomingOptionsAccordion = ({ allPets = [] }) => {
                 {packagesModal && (<PackagesModal
                     open={packagesModal}
                     packages={packages}
-                    petType={selectedType ? selectedType : selectedPet?.type}
+                    petType={selectedType}
                     onClose={() => setPackagesModal(false)} />
                 )}
             </AnimatePresence>

@@ -11,14 +11,17 @@ const Index = () => {
   const token = useSelector((state) => state.auth.token);
 
   const handleLogin = async () => {
-    const email = 'raj@groomit.me';
-    const password = 'Password@19';
+    // const email = 'raj@groomit.me';
+    // const password = 'Password@19';
     // const email = 'hiyicic541@advarm.com';
     // const password = 'Password@19';
     // const email = 'xixox64504@datehype.com';
     // const password = 'Rajtest19';
     // const email = 'pivimo3635@noihse.com';
     // const password = 'Test@123';
+
+    const email = 'nitesh1111@groomit.me';
+    const password = 'Nitesh99';
 
     try {
       const result = await dispatch(loginUser({ email, password }));
