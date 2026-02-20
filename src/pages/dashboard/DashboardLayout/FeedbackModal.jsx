@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Modal, Box, IconButton, Fade, Backdrop, Divider } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import Close from "../../../assets/icon/close.svg";
-import StarIcon from "../../../assets/icon/fill-red-star.svg";
+import StarIcon from "../../../assets/icon/rating-fill-star.svg";
+import StarBlank from "../../../assets/icon/shadow-blank-star.svg";
 
 const modalStyle = {
     position: "absolute",
@@ -28,24 +28,25 @@ const scrollStyle = {
     padding: "24px",
 };
 
-const tagBaseClass =
-    "flex flex-col justify-center items-center gap-[10px] px-[10px] py-[5px] rounded-[15px] text-center font-inter text-sm transition-all duration-200 cursor-pointer";
-
 const StarRating = React.memo(({ value, onChange }) => {
     return (
-        <div className="flex">
-            {[...Array(5)].map((_, i) => (
-                <motion.img
-                    key={i}
-                    src={StarIcon}
-                    alt="star"
-                    onClick={() => onChange(i + 1)}
-                    initial={false}
-                    animate={{ opacity: i < value ? 1 : 0.3 }}
-                    transition={{ duration: 0.2 }}
-                    className="w-[30px] h-[30px] cursor-pointer"
-                />
-            ))}
+        <div className="flex gap-1">
+            {[...Array(5)].map((_, i) => {
+                const isActive = i < value;
+
+                return (
+                    <motion.img
+                        key={i}
+                        src={isActive ? StarIcon : StarBlank}
+                        alt="star"
+                        onClick={() => onChange(i + 1)}
+                        initial={false}
+                        animate={{ opacity: isActive ? 1 : 0.3, scale: isActive ? 1.05 : 1 }}
+                        transition={{ duration: 0.2 }}
+                        className="w-[30px] h-[30px] cursor-pointer drop-shadow-md"
+                    />
+                );
+            })}
         </div>
     );
 });

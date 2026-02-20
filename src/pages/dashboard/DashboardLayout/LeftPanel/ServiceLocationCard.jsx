@@ -329,7 +329,7 @@ const ServiceLocationCard = () => {
                     isDefault: false,
                 })}
                 title="We're not in your area yet"
-                description={`We'll notify you once we arrive in ${zipValue}`}
+                description={`We're not currently serving ${zipValue}, but we'll let you know as soon as we arrive!`}
             />
         </>
     )

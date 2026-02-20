@@ -22,8 +22,8 @@ const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [petsModal, setPetsModal] = useState(false);
 
-  const { dashboard } = useSelector((state) => state.dashboard);
-  const { user } = dashboard;
+  const { dashboard = [] } = useSelector((state) => state.dashboard);
+  const { user = null } = dashboard;
   const showRating = location.pathname.startsWith('/user');
 
   const toggleMobileMenu = () => {

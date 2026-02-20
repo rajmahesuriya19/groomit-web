@@ -42,8 +42,8 @@ const CreateEditServices2 = () => {
         zip: false,
     });
 
-    const { addresses } = useSelector((state) => state.addresses);
-    const { user } = useSelector((state) => state.user);
+    const { addresses = [] } = useSelector((state) => state.addresses);
+    const { user = null } = useSelector((state) => state.user);
 
     const {
         register,
@@ -362,7 +362,7 @@ const CreateEditServices2 = () => {
                             </div>
                         </div>
 
-                        {isEdit && <button type="button" onClick={() => setIsDeleteModalOpen(true)}
+                        {(isEdit && addresses.length !== 1) && <button type="button" onClick={() => setIsDeleteModalOpen(true)}
                             className="bg-white shadow-md rounded-[10px] font-bold text-[#EB5757] text-sm flex justify-center items-center align-middle w-full px-4 py-3 border border-primary-line"
                         >
                             Delete Service Address

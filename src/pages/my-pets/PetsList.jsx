@@ -24,6 +24,7 @@ import { CheckboxIcon } from "@/common/CustomCheckbox/CustomCheckboxIcons";
 import { Checkbox } from "@mui/material";
 import { SavePetServiceType, setPetCounts, toggleExistingPetSelection } from "@/utils/store/slices/booking-flow/bookingFlowSlice";
 import { toast } from "react-toastify";
+import { createBookingData } from "@/utils/store/slices/auth/authSlice";
 
 const InfoRow = ({ booster, type, icon, title, subtitle, onDetails, id }) => (
     <>
@@ -76,7 +77,7 @@ export default function PetsList({ pet, isSingle, memorizez }) {
     const [successTitle, setSuccessTitle] = useState('');
 
     const bookingFlow = useSelector((state) => state.bookingFlow);
-    const { serviceType, currentPetIndex, petCounts = { dog: 0, cat: 0 }, bookingAddress, petsDraft, selectedPetIds = [], selectedNewPetIdsExisting = [], selectedPetIdsfromAPI = [] } = bookingFlow;
+    const { selectedPetIds = [] } = bookingFlow;
 
     const {
         dogPets = [],
@@ -133,52 +134,23 @@ export default function PetsList({ pet, isSingle, memorizez }) {
 
     const handleSubmit = async () => {
         showLoader();
-        // 🔒 Max pets guard
-        if (selectedPetIds.length > 6) {
-            toast.error("We are allowing 6 pets for now");
-            hideLoader();
-            return;
-        }
 
-        // 🔒 Must select at least one NEW pet on this screen
-        if (allPets.length > 0 && selectedNewPetIdsExisting.length === 0) {
-            toast.error("Please select at least one pet");
-            hideLoader();
-            return;
-        }
+        // CASE 1: Existing pets
+        if (allPets.length > 0) {
+            if (!selectedPetIds.length) {
+                toast.error("Please select at least one pet");
+                return;
+            }
 
-        try {
-            const res = await dispatch(
-                SavePetServiceType({
-                    address_id: displayAddress?.address_id,
-                    book_pet_ids: selectedPetIds,
-                    service_type: serviceType,
-                    pet_type,
-                    total_cats: catCount,
-                    total_dogs: dogCount,
-                    total_pets: totalPets,
-                    booking_session_token: token,
-                })
-            ).unwrap();
+            try {
+                const res = await dispatch(createBookingData()).unwrap();
+                navigate(`/book/service-address`);
 
-            const nextPetIndex = currentPetIndex + 1;
-            const nextPetId = res[nextPetIndex]
-
-            if (nextPetId) {
-                navigate(`/book/pet/${nextPetId}`);
+            } catch (err) {
+                toast.error(err?.message || "Something went wrong");
             }
             hideLoader();
-
-            // ✅ Move booking flow forward
-            dispatch(
-                moveToNextPet({
-                    petIndex: petsDraft.length,
-                })
-            );
-        } catch (error) {
-            console.error("SavePetServiceType failed", error);
-            toast.error("Unable to save pets. Please try again.");
-            hideLoader();
+            return;
         }
     };
 

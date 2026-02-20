@@ -93,9 +93,11 @@ const BookAddresses = () => {
 
     const { addresses = [] } = useSelector((state) => state.addresses);
     const { user } = useSelector((state) => state.user);
+    const bookingFlow = useSelector((state) => state.bookingFlow);
     const bookingAddress = useSelector(
         (state) => state.bookingFlow.address
     );
+    const { selectedPetIds = [] } = bookingFlow;
 
     const [selectedAddressId, setSelectedAddressId] = useState(null);
     const [addService, setAddService] = useState(false);
@@ -189,7 +191,9 @@ const BookAddresses = () => {
                 );
 
                 dispatch(setBookingAddress(selectedAddress));
-                dispatch(createBookingData());
+                if (selectedPetIds.length === 0) {
+                    dispatch(createBookingData());
+                }
                 navigate("/book/service-type");
                 return;
             }

@@ -16,8 +16,8 @@ const UserDropdown = ({ onProtectedAction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const { dashboard } = useSelector((state) => state.dashboard);
-  const { user } = dashboard;
+  const { dashboard = [] } = useSelector((state) => state.dashboard);
+  const { user = null } = dashboard;
 
   const showDropdown = location.pathname.startsWith('/user');
 
@@ -145,11 +145,15 @@ const UserDropdown = ({ onProtectedAction }) => {
               <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px] object-contain' : 'w-[45px] h-[45px] object-contain'}`} />
             </div>
           ) : (
-            <img
-              src="https://randomuser.me/api/portraits/men/75.jpg"
-              alt="User Avatar"
-              className="w-[45px] h-[45px] object-contain"
-            />
+            <div
+            //  onClick={() => navigate("/user/account")}
+            >
+              <img
+                src="https://randomuser.me/api/portraits/men/75.jpg"
+                alt="User Avatar"
+                className="w-[45px] h-[45px] object-contain"
+              />
+            </div>
           )}
         </div>
       </div>

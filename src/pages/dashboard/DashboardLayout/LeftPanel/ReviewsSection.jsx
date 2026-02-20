@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import StarIcon from "../../../../assets/icon/fill-red-star.svg";
+import StarBlank from "../../../../assets/icon/shadow-blank-star.svg";
 import ExpandableText from "@/common/ExpandableText/ExpandableText";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
@@ -9,7 +10,6 @@ const ReviewsSection = () => {
         reviews = [],
         averageRating,
         totalReviews,
-        loading,
     } = useSelector((state) => state.reviews);
 
     // Limit to 6 latest
@@ -20,17 +20,31 @@ const ReviewsSection = () => {
     const renderStars = (rating) => {
         const rounded = Math.round(Number(rating));
 
-        return [...Array(5)].map((_, i) => (
-            <motion.img
-                key={i}
-                src={StarIcon}
-                alt="star"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: i < rounded ? 1 : 0.3 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="w-4 h-4"
-            />
-        ));
+        return (
+            <div className="flex gap-1">
+                {[...Array(5)].map((_, i) => {
+                    const isActive = i < rounded;
+
+                    return (
+                        <motion.img
+                            key={i}
+                            src={isActive ? StarIcon : StarBlank}
+                            alt="star"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{
+                                opacity: isActive ? 1 : 1,
+                                scale: isActive ? 1 : 0.9,
+                            }}
+                            transition={{
+                                duration: 0.3,
+                                delay: i * 0.05,
+                            }}
+                            className="w-4 h-4"
+                        />
+                    );
+                })}
+            </div>
+        );
     };
 
     if (!latestReviews.length) {

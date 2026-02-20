@@ -424,16 +424,25 @@ const GroomingOptionsAccordion = () => {
                                                                     shouldValidate: true,
                                                                 })
                                                             }
-                                                            className={`w-full flex flex-col items-center px-4 py-3 rounded-[10px]
-  ${selectedSize === item.size_id
+                                                            className={`w-full flex flex-col items-center 
+    px-1 py-2 sm:px-4 sm:py-3
+    rounded-[10px] transition-all duration-200
+    ${selectedSize === item.size_id
                                                                     ? "border-2 border-brand text-primary-dark shadow-md"
                                                                     : "border border-[#BEC3C5]"
                                                                 }`}
                                                         >
-                                                            <div className={`text-sm ${selectedSize === item.size_id ? 'font-bold' : ''}`}>
+                                                            <div
+                                                                className={`text-xs sm:text-sm ${selectedSize === item.size_id ? "font-bold" : ""
+                                                                    }`}
+                                                            >
                                                                 {item.size}
                                                             </div>
-                                                            <div className={`text-xs opacity-80 ${selectedSize === item.size_id ? 'font-bold' : ''}`}>
+
+                                                            <div
+                                                                className={`text-[10px] sm:text-xs opacity-80 ${selectedSize === item.size_id ? "font-bold" : ""
+                                                                    }`}
+                                                            >
                                                                 {item.size_desc_new} lbs
                                                             </div>
                                                         </motion.button>
