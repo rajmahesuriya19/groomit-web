@@ -60,14 +60,26 @@ const LatestDashboard = () => {
             try {
                 showLoader();
 
-                await Promise.all([
+                const promises = [
                     dispatch(getDashboardData()),
-                    dispatch(getReviews()),
                     dispatch(getUserInfo()),
-                    dispatch(fetchAddresses())
-                ]);
+                    dispatch(fetchAddresses()),
+                ];
+
+                if (!isAnyAppoitment) {
+                    promises.push(dispatch(getReviews()));
+                }
+
+                const results = await Promise.allSettled(promises);
+
+                results.forEach((result, index) => {
+                    if (result.status === "rejected") {
+                        console.error(`Request ${index} failed:`, result.reason);
+                    }
+                });
+
             } catch (error) {
-                console.error("Error fetching dashboard data:", error);
+                console.error("Unexpected error:", error);
             } finally {
                 hideLoader();
             }

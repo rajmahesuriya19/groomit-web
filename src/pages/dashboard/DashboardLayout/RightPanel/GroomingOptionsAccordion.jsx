@@ -102,9 +102,9 @@ const GroomingOptionsAccordion = () => {
     };
 
     const handleBreedSelect = (breed) => {
-        setValue("breed_id", breed.breed_id, { shouldValidate: true });
+        setValue("breed_id", (breed?.id ?? breed?.breed_id), { shouldValidate: true });
         setValue("size_id", "", { shouldValidate: true, shouldDirty: true });
-        setSelectedBreedName(breed.breed_name);
+        setSelectedBreedName(breed?.breed_name);
         setBreedListModalOpen(false);
         setSearchTerm("");
     };
@@ -375,17 +375,17 @@ const GroomingOptionsAccordion = () => {
 
                                                             <div className="max-h-64 overflow-y-auto">
                                                                 {filteredBreeds.length > 0 ? (
-                                                                    filteredBreeds.map((breed) => (
+                                                                    filteredBreeds.map((breed, idx) => (
                                                                         <div
-                                                                            key={breed.breed_id}
+                                                                            key={idx}
                                                                             onClick={() => handleBreedSelect(breed)}
                                                                             className={`px-3 py-2 cursor-pointer rounded mb-1
-                                ${selectedBreedId === breed.breed_id
+                                ${(selectedBreedId === breed.id) || (selectedBreedId === breed.breed_id)
                                                                                     ? "bg-[#EB5757] text-white"
                                                                                     : "hover:bg-gray-100"
                                                                                 }`}
                                                                         >
-                                                                            {breed.breed_name}
+                                                                            {breed?.breed_name}
                                                                         </div>
                                                                     ))
                                                                 ) : (
