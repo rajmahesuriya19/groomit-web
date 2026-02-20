@@ -84,13 +84,13 @@ const PetsDashboard = ({ allPets = [] }) => {
                             <CommonActionButton
                                 borderColor="border-primary-dark"
                                 textColor="text-white"
-                                className="bg-primary-dark"
+                                className="bg-primary-dark capitalize"
                                 onClick={() => {
                                     setSelectedPet(pet);
                                     handlePackagePet(pet?.pet_id);
                                 }}
                             >
-                                View Pricing For Bruno
+                                {`View Pricing For ${pet?.name}`}
                             </CommonActionButton>
                         </div>
                     ))}

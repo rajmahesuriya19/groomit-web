@@ -32,7 +32,14 @@ export const SmartReminderCard = ({ onChange }) => {
     };
 
     const handleSelect = (option) => {
+        if (!isEnabled) return;
+
+        const isChanging = selected !== option.id;
+
         setSelected(option.id);
+        if (isChanging) {
+            setIsModalOpen(true);
+        }
 
         if (onChange) {
             onChange({
@@ -91,16 +98,19 @@ export const SmartReminderCard = ({ onChange }) => {
                     <motion.button
                         key={option.id}
                         type="button"
-                        whileHover={{ y: -2 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={isEnabled ? { y: -2 } : {}}
+                        whileTap={isEnabled ? { scale: 0.98 } : {}}
                         transition={{ duration: 0.2 }}
                         onClick={() => handleSelect(option)}
-                        className={`w-full flex items-center justify-center md:px-4 px-1 py-3 rounded-[10px] transition-all ${selected === option.id
-                            ? "border-2 border-brand text-primary-dark shadow-md"
-                            : "border border-primary-light"
+                        className={`w-full flex items-center justify-center md:px-4 px-1 py-3 rounded-[10px] transition-all
+    ${!isEnabled
+                                ? "border border-primary-light opacity-50 cursor-not-allowed"
+                                : selected === option.id
+                                    ? "border-2 border-brand text-primary-dark shadow-md"
+                                    : "border border-primary-light"
                             }`}
                     >
-                        <div className={`text-sm ${selected === option.id ? "font-bold" : ""}`}>
+                        <div className={`text-sm ${(selected === option.id && isEnabled) ? "font-bold" : ""}`}>
                             {option.label}
                         </div>
                     </motion.button>
