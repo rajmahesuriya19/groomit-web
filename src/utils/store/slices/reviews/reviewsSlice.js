@@ -64,7 +64,7 @@ const reviewsSlice = createSlice({
             .addCase(getReviews.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message;
-                toast.error(action.payload?.message || "Something went wrong");
+                // toast.error(action.payload?.message || "Something went wrong");
             });
     },
 });

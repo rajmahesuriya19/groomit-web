@@ -12,7 +12,7 @@ const Addresses = () => {
     const navigate = useNavigate();
     const { showLoader, hideLoader } = useLoader();
 
-    const addresses = useSelector((state) => state.addresses.addresses);
+    const { addresses = [] } = useSelector((state) => state.addresses);
 
     useEffect(() => {
         showLoader();

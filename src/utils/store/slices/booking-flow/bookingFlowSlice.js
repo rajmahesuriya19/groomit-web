@@ -402,7 +402,8 @@ const bookingFlowSlice = createSlice({
             state.serviceType = action.payload;
 
             // FULL reset only when service actually changes
-            state.selectedPetIds = [];
+            // state.selectedPetIds = [];
+            state.selectedNewPetIdsExisting = [];
             state.selectedPetIdsfromAPI = [];
             state.petCounts = { dog: 0, cat: 0 };
             state.petQueue = [];

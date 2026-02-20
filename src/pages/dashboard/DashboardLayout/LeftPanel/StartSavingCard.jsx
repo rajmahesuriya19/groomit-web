@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import CommonActionButton from "@/common/ActionButton/CommonActionButton";
 import Saving from "../../../../assets/dashboard/saving.png";
 import FeedbackModal from "../FeedbackModal";
+import PlansModal from "../PlansModal";
 
 const StartSavingCard = () => {
     const navigate = useNavigate();
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [feedbackModal, setFeedbackModal] = useState(false);
 
     const handleBook = () => {
@@ -36,7 +38,8 @@ const StartSavingCard = () => {
                         <CommonActionButton
                             borderColor="border-[#0A7170]"
                             textColor="text-[#0A7170]"
-                            onClick={handleBook}
+                            // onClick={handleBook}
+                            onClick={() => setIsModalOpen(true)}
                             className="w-full"
                         >
                             Start Saving
@@ -56,12 +59,18 @@ const StartSavingCard = () => {
 
             {/* Animated Modal Mount/Unmount */}
             <AnimatePresence>
-                {feedbackModal && (
+                {/* {feedbackModal && (
                     <FeedbackModal
                         open={feedbackModal}
                         onClose={() => setFeedbackModal(false)}
                     />
-                )}
+                )} */}
+
+                {/* Modal */}
+                {isModalOpen && <PlansModal
+                    open={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                />}
             </AnimatePresence>
         </>
     );
