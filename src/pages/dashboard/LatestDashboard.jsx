@@ -7,7 +7,7 @@ import { fetchAddresses } from '@/utils/store/slices/serviceAddressList/serviceA
 import PromoCard from './DashboardLayout/LeftPanel/PromoCard';
 import ReviewsSection from './DashboardLayout/LeftPanel/ReviewsSection';
 import { getReviews } from '@/utils/store/slices/reviews/reviewsSlice';
-import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
+import { getDashboardData, getPetParticulars } from '@/utils/store/slices/dashboard/dashboardSlice';
 import { getUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
 import GroomingOptionsAccordion from './DashboardLayout/RightPanel/GroomingOptionsAccordion';
 import { ChevronRight } from 'lucide-react';
@@ -45,41 +45,11 @@ const LatestDashboard = () => {
         current_appts = [],
         show_start_saving = false,
         pets_due_for_refresh = [],
-        pets_with_reminder_setup = [],
         pets_without_reminder_setup = [],
     } = dashboard;
 
     const allPets = [...dogPets, ...catPets];
     const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0;
-
-    // Convert setup list into string IDs for safe comparison
-    const reminderSetupIds = (pets_with_reminder_setup || []).map((pet) =>
-        typeof pet === "object"
-            ? String(pet?.user_pet_id)
-            : String(pet)
-    );
-
-    let selectedPet = null;
-
-    // Loop through due pets in order
-    for (const [petId, dueDays] of Object.entries(pets_due_for_refresh || {})) {
-
-        // 🔥 Skip if already has reminder setup
-        if (reminderSetupIds.includes(String(petId))) continue;
-
-        // 🔥 Find matching pet
-        const foundPet = allPets.find(
-            (pet) => String(pet.id || pet.pet_id) === String(petId)
-        );
-
-        if (foundPet) {
-            selectedPet = {
-                ...foundPet,
-                dueDays,
-            };
-            break; // ✅ Stop after first valid pet
-        }
-    }
 
     const isAnyAppoitment =
         completed_appts?.length > 0 ||
@@ -87,6 +57,39 @@ const LatestDashboard = () => {
         recurring_cancelled?.length > 0 ||
         upcoming_appts?.length > 0 ||
         current_appts?.length > 0
+
+    // ======================
+    // Selected Due Pet
+    // ======================
+    const selectedDuePet = (() => {
+        if (!pets_due_for_refresh?.length || !allPets?.length) return null;
+
+        const { user_pet_id, days_due } = pets_due_for_refresh[0] || {};
+        if (!user_pet_id) return null;
+
+        const pet = allPets.find(
+            (p) => String(p?.id || p?.pet_id) === String(user_pet_id)
+        );
+
+        return pet ? { ...pet, dueDays: days_due } : null;
+    })();
+
+
+    // ======================
+    // Selected Reminder Pet
+    // ======================
+    const selectedPet = (() => {
+        if (!pets_without_reminder_setup?.length || !allPets?.length) return null;
+
+        const { user_pet_id } = pets_without_reminder_setup[0] || {};
+        if (!user_pet_id) return null;
+
+        return (
+            allPets.find(
+                (p) => String(p?.id || p?.pet_id) === String(user_pet_id)
+            ) || null
+        );
+    })();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -97,6 +100,7 @@ const LatestDashboard = () => {
                     dispatch(getDashboardData()),
                     dispatch(getUserInfo()),
                     dispatch(fetchAddresses()),
+                    dispatch(getPetParticulars())
                 ];
 
                 if (!isAnyAppoitment) {
@@ -151,8 +155,8 @@ const LatestDashboard = () => {
                             <PromoCard />
                         </CommonCard>}
 
-                        {(completed_appts?.length > 0 && selectedPet) && <CommonCard className='flex flex-col items-center gap-[15px]'>
-                            <PetDueCard selectedPet={selectedPet} />
+                        {selectedDuePet && <CommonCard className='flex flex-col items-center gap-[15px]'>
+                            <PetDueCard selectedPet={selectedDuePet} />
                         </CommonCard>}
 
                         {/* If Rebook Appointments are available */}
@@ -229,7 +233,7 @@ const LatestDashboard = () => {
                             <ReviewsSection />
                         </CommonCard>}
 
-                        {(completed_appts?.length > 0 && selectedPet) && <CommonCard className='flex flex-col items-start gap-[15px]'>
+                        {selectedPet && <CommonCard className='flex flex-col items-start gap-[15px]'>
                             <SmartReminderCard selectedPet={selectedPet} />
                         </CommonCard>}
 

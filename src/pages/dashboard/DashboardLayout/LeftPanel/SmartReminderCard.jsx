@@ -3,14 +3,8 @@ import { motion } from "framer-motion";
 import Notification from "../../../../assets/icon/notification-bing.svg";
 import PlansModal from "../PlansModal";
 import { useDispatch, useSelector } from "react-redux";
-import { closeReminderModal, getDashboardData, SaveReminder } from "@/utils/store/slices/dashboard/dashboardSlice";
+import { closeReminderModal, getDashboardData, SaveReminder, toggleEnable } from "@/utils/store/slices/dashboard/dashboardSlice";
 import { capitalize } from "@/common/helpers";
-
-let options = [
-    { id: 1, label: "Every 4 weeks", value: 4 },
-    { id: 2, label: "Every 6 weeks", value: 6 },
-    { id: 3, label: "Every 8 weeks", value: 8 },
-];
 
 export const SmartReminderCard = ({ selectedPet }) => {
     const dispatch = useDispatch();
@@ -18,29 +12,27 @@ export const SmartReminderCard = ({ selectedPet }) => {
     const dashboardState = useSelector((state) => state.dashboard);
     const { isEnabled, isModalOpen } = dashboardState;
 
-    const reminderOptions =
-        dashboardState?.reminderOptions?.length
-            ? dashboardState.reminderOptions
-            : options;
+    const reminderOptions = dashboardState?.reminderOptions || [];
 
-    const selectedFrequency = dashboardState?.selectedFrequency ? dashboardState?.selectedFrequency : '6';
+    const selectedFrequency = dashboardState?.selectedFrequency;
 
     /* ========================
        Toggle Handler
     ======================== */
     const handleToggle = async () => {
-        if ((selectedPet?.id || selectedPet?.pet_id) && selectedFrequency) {
+        if ((selectedPet?.id || selectedPet?.pet_id)) {
             try {
-                await dispatch(
-                    SaveReminder({
-                        user_pet_id: selectedPet?.id || selectedPet?.pet_id,
-                        frequency_weeks: selectedFrequency,
-                        is_enabled: !isEnabled,
-                    })
-                ).unwrap();
+                await dispatch(toggleEnable(!isEnabled));
 
-                // ✅ Only runs if SaveReminder succeeded
-                dispatch(getDashboardData());
+                if (!isEnabled && selectedFrequency) {
+                    await dispatch(
+                        SaveReminder({
+                            user_pet_id: selectedPet?.id || selectedPet?.pet_id,
+                            frequency_weeks: selectedFrequency,
+                            is_enabled: !isEnabled,
+                        })
+                    ).unwrap();
+                }
 
             } catch (error) {
                 console.log("Save failed, dashboard not refreshed");

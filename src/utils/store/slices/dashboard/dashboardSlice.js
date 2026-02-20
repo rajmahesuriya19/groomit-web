@@ -40,6 +40,33 @@ export const SaveReminder = createAsyncThunk(
     }
 );
 
+/* =========================
+   GET PET PARTICULARS
+========================= */
+
+export const getPetParticulars = createAsyncThunk(
+    "dashboard/getPetParticulars",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get(
+                "api/user/get-pet-particulars"
+            );
+
+            return response.data?.data;
+        } catch (error) {
+            toast.error(
+                error.response?.data?.message ||
+                "Failed to fetch pet particulars"
+            );
+            return rejectWithValue(
+                error.response?.data || {
+                    message: "Failed to fetch pet particulars",
+                }
+            );
+        }
+    }
+);
+
 const dashboardSlice = createSlice({
     name: "dashboard",
     initialState: {
@@ -50,13 +77,15 @@ const dashboardSlice = createSlice({
         reminderOptions: [],
         isEnabled: false,
         selectedFrequency: null,
-        reminderLoading: false,
         isModalOpen: false,
     },
     reducers: {
         closeReminderModal: (state) => {
             state.isModalOpen = false;
         },
+        toggleEnable: (state, action) => {
+            state.isEnabled = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -67,6 +96,8 @@ const dashboardSlice = createSlice({
             .addCase(getDashboardData.fulfilled, (state, action) => {
                 state.loading = false;
                 state.dashboard = action.payload;
+                state.isEnabled = false;
+                state.selectedFrequency = 0;
             })
             .addCase(getDashboardData.rejected, (state, action) => {
                 state.loading = false;
@@ -75,14 +106,13 @@ const dashboardSlice = createSlice({
 
             // Save Reminder
             .addCase(SaveReminder.pending, (state) => {
-                state.reminderLoading = true;
+                state.loading = true;
             })
             .addCase(SaveReminder.fulfilled, (state, action) => {
-                state.reminderLoading = false;
+                state.loading = false;
 
                 // ✅ Update state from API response
                 state.isEnabled = action.meta.arg.is_enabled;
-                state.selectedFrequency = action.meta.arg.frequency_weeks;
 
                 // ✅ Open modal ONLY after success
                 if (state.isEnabled) {
@@ -90,10 +120,36 @@ const dashboardSlice = createSlice({
                 }
             })
             .addCase(SaveReminder.rejected, (state) => {
-                state.reminderLoading = false;
-            });
+                state.loading = false;
+            })
+
+            // Get Pet Particulars
+            .addCase(getPetParticulars.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getPetParticulars.fulfilled, (state, action) => {
+                state.loading = false;
+
+                const frequencies = action.payload?.pet_reminder_frequencies || [];
+
+                // Convert [2,4,6] → option objects
+                state.reminderOptions = frequencies.map((week, index) => ({
+                    id: index + 1,
+                    label: `Every ${week} weeks`,
+                    value: week,
+                }));
+
+                // Optional: set first as default if none selected
+                if (!state.selectedFrequency && frequencies.length) {
+                    state.selectedFrequency = frequencies[0];
+                }
+            })
+            .addCase(getPetParticulars.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message;
+            })
     },
 });
 
-export const { closeReminderModal } = dashboardSlice.actions;
+export const { closeReminderModal, toggleEnable } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
