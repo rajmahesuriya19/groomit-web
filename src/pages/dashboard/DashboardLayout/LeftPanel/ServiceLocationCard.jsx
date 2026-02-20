@@ -202,8 +202,6 @@ const ServiceLocationCard = () => {
             isDefault: formData.isDefault,
         };
 
-        console.log(formData);
-
         try {
             showLoader();
 

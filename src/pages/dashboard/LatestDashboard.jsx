@@ -42,11 +42,44 @@ const LatestDashboard = () => {
         rebook_requests = [],
         completed_appts = [],
         recurring_cancelled = [],
-        current_appts = []
+        current_appts = [],
+        show_start_saving = false,
+        pets_due_for_refresh = [],
+        pets_with_reminder_setup = [],
+        pets_without_reminder_setup = [],
     } = dashboard;
 
     const allPets = [...dogPets, ...catPets];
     const hasAnyPet = dogPets?.length > 0 || catPets?.length > 0;
+
+    // Convert setup list into string IDs for safe comparison
+    const reminderSetupIds = (pets_with_reminder_setup || []).map((pet) =>
+        typeof pet === "object"
+            ? String(pet?.user_pet_id)
+            : String(pet)
+    );
+
+    let selectedPet = null;
+
+    // Loop through due pets in order
+    for (const [petId, dueDays] of Object.entries(pets_due_for_refresh || {})) {
+
+        // 🔥 Skip if already has reminder setup
+        if (reminderSetupIds.includes(String(petId))) continue;
+
+        // 🔥 Find matching pet
+        const foundPet = allPets.find(
+            (pet) => String(pet.id || pet.pet_id) === String(petId)
+        );
+
+        if (foundPet) {
+            selectedPet = {
+                ...foundPet,
+                dueDays,
+            };
+            break; // ✅ Stop after first valid pet
+        }
+    }
 
     const isAnyAppoitment =
         completed_appts?.length > 0 ||
@@ -118,9 +151,9 @@ const LatestDashboard = () => {
                             <PromoCard />
                         </CommonCard>}
 
-                        <CommonCard className='flex flex-col items-center gap-[15px]'>
-                            <PetDueCard />
-                        </CommonCard>
+                        {(completed_appts?.length > 0 && selectedPet) && <CommonCard className='flex flex-col items-center gap-[15px]'>
+                            <PetDueCard selectedPet={selectedPet} />
+                        </CommonCard>}
 
                         {/* If Rebook Appointments are available */}
                         {rebook_requests?.length > 0 && (
@@ -196,13 +229,13 @@ const LatestDashboard = () => {
                             <ReviewsSection />
                         </CommonCard>}
 
-                        <CommonCard className='flex flex-col items-start gap-[15px]'>
-                            <SmartReminderCard />
-                        </CommonCard>
+                        {(completed_appts?.length > 0 && selectedPet) && <CommonCard className='flex flex-col items-start gap-[15px]'>
+                            <SmartReminderCard selectedPet={selectedPet} />
+                        </CommonCard>}
 
-                        <CommonCard className="flex flex-col items-start gap-[15px] relative overflow-hidden">
+                        {show_start_saving && <CommonCard className="flex flex-col items-start gap-[15px] relative overflow-hidden">
                             <StartSavingCard />
-                        </CommonCard>
+                        </CommonCard>}
                     </div>
 
                     <div className="hidden md:flex justify-center">
