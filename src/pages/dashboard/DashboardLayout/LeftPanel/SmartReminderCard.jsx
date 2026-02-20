@@ -2,50 +2,68 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Notification from "../../../../assets/icon/notification-bing.svg";
 import PlansModal from "../PlansModal";
+import { useDispatch, useSelector } from "react-redux";
+import { closeReminderModal, getDashboardData, SaveReminder, toggleEnable } from "@/utils/store/slices/dashboard/dashboardSlice";
+import { capitalize } from "@/common/helpers";
 
-const data = [
-    { id: 1, label: "Every 4 weeks", value: 4 },
-    { id: 2, label: "Every 6 weeks", value: 6 },
-    { id: 3, label: "Every 8 weeks", value: 8 },
-];
+export const SmartReminderCard = ({ selectedPet }) => {
+    const dispatch = useDispatch();
 
-export const SmartReminderCard = ({ onChange }) => {
-    const [options] = useState(data);
-    const [selected, setSelected] = useState(2);
-    const [isEnabled, setIsEnabled] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const dashboardState = useSelector((state) => state.dashboard);
+    const { isEnabled, isModalOpen } = dashboardState;
 
-    const handleToggle = () => {
-        const newValue = !isEnabled;
-        setIsEnabled(newValue);
+    const reminderOptions = dashboardState?.reminderOptions || [];
 
-        if (newValue) {
-            setIsModalOpen(true);
-        }
+    const selectedFrequency = dashboardState?.selectedFrequency;
 
-        if (onChange) {
-            onChange({
-                enabled: newValue,
-                frequency: selected,
-            });
+    /* ========================
+       Toggle Handler
+    ======================== */
+    const handleToggle = async () => {
+        if ((selectedPet?.id || selectedPet?.pet_id)) {
+            try {
+                await dispatch(toggleEnable(!isEnabled));
+
+                if (!isEnabled && selectedFrequency) {
+                    await dispatch(
+                        SaveReminder({
+                            user_pet_id: selectedPet?.id || selectedPet?.pet_id,
+                            frequency_weeks: selectedFrequency,
+                            is_enabled: !isEnabled,
+                        })
+                    ).unwrap();
+                }
+
+            } catch (error) {
+                console.log("Save failed, dashboard not refreshed");
+            }
         }
     };
 
-    const handleSelect = (option) => {
+    /* ========================
+       Select Frequency
+    ======================== */
+    const handleSelect = async (option) => {
         if (!isEnabled) return;
 
-        const isChanging = selected !== option.id;
+        if (option.value === selectedFrequency) return;
 
-        setSelected(option.id);
-        if (isChanging) {
-            setIsModalOpen(true);
-        }
+        if (selectedPet?.id || selectedPet?.pet_id) {
+            try {
+                await dispatch(
+                    SaveReminder({
+                        user_pet_id: selectedPet?.id || selectedPet?.pet_id,
+                        frequency_weeks: option.value,
+                        is_enabled: true,
+                    })
+                ).unwrap(); // 👈 wait for success
 
-        if (onChange) {
-            onChange({
-                enabled: isEnabled,
-                frequency: option.value,
-            });
+                // ✅ Only after success
+                dispatch(getDashboardData());
+
+            } catch (error) {
+                console.log("Save reminder failed");
+            }
         }
     };
 
@@ -67,7 +85,7 @@ export const SmartReminderCard = ({ onChange }) => {
                             Smart Reminder
                         </h4>
                         <div className="font-inter font-normal text-sm text-primary-dark">
-                            Set a grooming schedule that fits your pet.
+                            {`Set a grooming schedule that fits ${capitalize(selectedPet?.name)}.`}
                         </div>
                     </div>
                 </div>
@@ -94,9 +112,9 @@ export const SmartReminderCard = ({ onChange }) => {
 
             {/* Options */}
             <div className={`flex w-full gap-2`}>
-                {options.map((option) => (
+                {reminderOptions?.map((option, idx) => (
                     <motion.button
-                        key={option.id}
+                        key={idx}
                         type="button"
                         whileHover={isEnabled ? { y: -2 } : {}}
                         whileTap={isEnabled ? { scale: 0.98 } : {}}
@@ -105,12 +123,12 @@ export const SmartReminderCard = ({ onChange }) => {
                         className={`w-full flex items-center justify-center md:px-4 px-1 py-3 rounded-[10px] transition-all
     ${!isEnabled
                                 ? "border border-primary-light opacity-50 cursor-not-allowed"
-                                : selected === option.id
+                                : selectedFrequency == option.value
                                     ? "border-2 border-brand text-primary-dark shadow-md"
                                     : "border border-primary-light"
                             }`}
                     >
-                        <div className={`text-sm ${(selected === option.id && isEnabled) ? "font-bold" : ""}`}>
+                        <div className={`text-sm ${(selectedFrequency == option.value && isEnabled) ? "font-bold" : ""}`}>
                             {option.label}
                         </div>
                     </motion.button>
@@ -120,7 +138,7 @@ export const SmartReminderCard = ({ onChange }) => {
             {/* Modal */}
             <PlansModal
                 open={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => dispatch(closeReminderModal())}
             />
         </div>
     );

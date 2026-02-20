@@ -158,8 +158,6 @@ const FeedbackModal = ({ open, onClose }) => {
             },
         };
 
-        console.log("Submitting:", payload);
-
         // 🔥 Replace with your API
         // await submitFeedback(payload)
 

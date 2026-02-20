@@ -15,14 +15,14 @@ const TwilioProvider = ({ children }) => {
                 const response = await fetch("https://groomit-rn-4528.twil.io/access-token");
                 const token = await response.text();
 
-                console.log("TOKEN:", token);
+                // console.log("TOKEN:", token);
 
                 const twilioDevice = new Device(token, {
                     debug: true,
                 });
 
                 twilioDevice.on("registered", () => {
-                    console.log("Twilio Device Registered ✅");
+                    // console.log("Twilio Device Registered ✅");
                 });
 
                 twilioDevice.on("error", (error) => {

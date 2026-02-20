@@ -67,8 +67,8 @@ function App() {
               <Route path={RoutePath.VIEW_CARD} element={<ViewCard />} />
               <Route path={RoutePath.CHANGE_PASSWORD} element={<ChangePassword />} />
               {/* <Route path={RoutePath.DASHBOARD} element={<Dashboard />} /> */}
-              {/* <Route path={RoutePath.DASHBOARD} element={<LatestDashboard />} /> */}
-              <Route path={RoutePath.DASHBOARD} element={<DemoCall />} />
+              <Route path={RoutePath.DASHBOARD} element={<LatestDashboard />} />
+              {/* <Route path={RoutePath.DASHBOARD} element={<DemoCall />} /> */}
               <Route path={RoutePath.PETS} element={<PetsList />} />
               <Route path={RoutePath.INBOX} element={<Inbox />} />
               <Route path={RoutePath.NOTIFICATIONS_PREFERENCES} element={<NotificationsPreferences />} />

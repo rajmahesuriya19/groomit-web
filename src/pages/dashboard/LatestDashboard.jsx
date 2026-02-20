@@ -7,7 +7,7 @@ import { fetchAddresses } from '@/utils/store/slices/serviceAddressList/serviceA
 import PromoCard from './DashboardLayout/LeftPanel/PromoCard';
 import ReviewsSection from './DashboardLayout/LeftPanel/ReviewsSection';
 import { getReviews } from '@/utils/store/slices/reviews/reviewsSlice';
-import { getDashboardData } from '@/utils/store/slices/dashboard/dashboardSlice';
+import { getDashboardData, getPetParticulars } from '@/utils/store/slices/dashboard/dashboardSlice';
 import { getUserInfo } from '@/utils/store/slices/userInfo/userInfoSlice';
 import GroomingOptionsAccordion from './DashboardLayout/RightPanel/GroomingOptionsAccordion';
 import { ChevronRight } from 'lucide-react';
@@ -42,7 +42,10 @@ const LatestDashboard = () => {
         rebook_requests = [],
         completed_appts = [],
         recurring_cancelled = [],
-        current_appts = []
+        current_appts = [],
+        show_start_saving = false,
+        pets_due_for_refresh = [],
+        pets_without_reminder_setup = [],
     } = dashboard;
 
     const allPets = [...dogPets, ...catPets];
@@ -55,6 +58,39 @@ const LatestDashboard = () => {
         upcoming_appts?.length > 0 ||
         current_appts?.length > 0
 
+    // ======================
+    // Selected Due Pet
+    // ======================
+    const selectedDuePet = (() => {
+        if (!pets_due_for_refresh?.length || !allPets?.length) return null;
+
+        const { user_pet_id, days_due } = pets_due_for_refresh[0] || {};
+        if (!user_pet_id) return null;
+
+        const pet = allPets.find(
+            (p) => String(p?.id || p?.pet_id) === String(user_pet_id)
+        );
+
+        return pet ? { ...pet, dueDays: days_due } : null;
+    })();
+
+
+    // ======================
+    // Selected Reminder Pet
+    // ======================
+    const selectedPet = (() => {
+        if (!pets_without_reminder_setup?.length || !allPets?.length) return null;
+
+        const { user_pet_id } = pets_without_reminder_setup[0] || {};
+        if (!user_pet_id) return null;
+
+        return (
+            allPets.find(
+                (p) => String(p?.id || p?.pet_id) === String(user_pet_id)
+            ) || null
+        );
+    })();
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -64,6 +100,7 @@ const LatestDashboard = () => {
                     dispatch(getDashboardData()),
                     dispatch(getUserInfo()),
                     dispatch(fetchAddresses()),
+                    dispatch(getPetParticulars())
                 ];
 
                 if (!isAnyAppoitment) {
@@ -118,9 +155,9 @@ const LatestDashboard = () => {
                             <PromoCard />
                         </CommonCard>}
 
-                        <CommonCard className='flex flex-col items-center gap-[15px]'>
-                            <PetDueCard />
-                        </CommonCard>
+                        {selectedDuePet && <CommonCard className='flex flex-col items-center gap-[15px]'>
+                            <PetDueCard selectedPet={selectedDuePet} />
+                        </CommonCard>}
 
                         {/* If Rebook Appointments are available */}
                         {rebook_requests?.length > 0 && (
@@ -196,13 +233,13 @@ const LatestDashboard = () => {
                             <ReviewsSection />
                         </CommonCard>}
 
-                        <CommonCard className='flex flex-col items-start gap-[15px]'>
-                            <SmartReminderCard />
-                        </CommonCard>
+                        {selectedPet && <CommonCard className='flex flex-col items-start gap-[15px]'>
+                            <SmartReminderCard selectedPet={selectedPet} />
+                        </CommonCard>}
 
-                        <CommonCard className="flex flex-col items-start gap-[15px] relative overflow-hidden">
+                        {show_start_saving && <CommonCard className="flex flex-col items-start gap-[15px] relative overflow-hidden">
                             <StartSavingCard />
-                        </CommonCard>
+                        </CommonCard>}
                     </div>
 
                     <div className="hidden md:flex justify-center">

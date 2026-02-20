@@ -15,11 +15,10 @@ const PET_LABELS = {
   cat: "Cat",
 };
 
-const Navigation = () => {
+const Navigation = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [petsModal, setPetsModal] = useState(false);
 
   const { dashboard = [] } = useSelector((state) => state.dashboard);

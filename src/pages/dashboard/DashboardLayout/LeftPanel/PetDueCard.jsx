@@ -5,8 +5,9 @@ import { useNavigate } from "react-router";
 import Banner from "../../../../assets/dashboard/lapsed-user-banner.png";
 import CommonActionButton from "@/common/ActionButton/CommonActionButton";
 import AddPetsModal from "@/components/Modals/AddPetsModal";
+import { capitalize } from "@/common/helpers";
 
-const PetDueCard = () => {
+const PetDueCard = ({ selectedPet }) => {
     const navigate = useNavigate();
     const [petsModal, setPetsModal] = useState(false);
 
@@ -67,7 +68,7 @@ const PetDueCard = () => {
                         }}
                         className="font-semibold text-base text-primary-dark font-inter"
                     >
-                        Bruno is due for a refresh
+                        {`${capitalize(selectedPet?.name)} is due for a refresh`}
                     </motion.div>
 
                     <motion.div
@@ -77,7 +78,7 @@ const PetDueCard = () => {
                         }}
                         className="font-normal text-sm text-primary-dark font-inter"
                     >
-                        It’s been 42 days since the last groom.
+                        {`It’s been ${selectedPet?.dueDays} days since the last groom.`}
                     </motion.div>
                 </motion.div>
 

@@ -99,6 +99,7 @@ const GroomingOptionsAccordion = () => {
             setValue("breed_id", "");
             setValue("size_id", "");
         }
+        setValue("zip", null);
     };
 
     const handleBreedSelect = (breed) => {
