@@ -81,7 +81,7 @@ const LatestDashboard = () => {
     const selectedPet = (() => {
         if (!pets_without_reminder_setup?.length || !allPets?.length) return null;
 
-        const { user_pet_id } = pets_without_reminder_setup[0] || {};
+        const user_pet_id = pets_without_reminder_setup[0];
         if (!user_pet_id) return null;
 
         return (

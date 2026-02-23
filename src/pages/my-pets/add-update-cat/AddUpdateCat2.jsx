@@ -145,6 +145,7 @@ const AddUpdateCat2 = () => {
     }, [selectedPet, reset, isEdit])
 
     const dateOfBirth = watch("date_of_birth");
+    const petName = watch("name");
 
     useEffect(() => {
         if (!dateOfBirth) return;
@@ -226,12 +227,12 @@ const AddUpdateCat2 = () => {
     };
 
     const handleBook = async () => {
-        navigate('/user/pet/list');
+        navigate('/book/service-address');
         setCreatePetModal(false);
     };
 
     const handleNavigate = async () => {
-        navigate('/user/pet/list');
+        navigate('/user/dashboard');
         setCreatePetModal(false);
     };
 
@@ -673,7 +674,7 @@ const AddUpdateCat2 = () => {
                 onNavigate={handleNavigate}
                 icon={CatAnimation}
                 title={`Pet Profile Successfully Created!`}
-                decription={`${selectedPet?.name}'s profile has successfully created, Celebrate with their first booking!`}
+                decription={`${selectedPet ? selectedPet?.name : petName}'s profile has successfully created, Celebrate with their first booking!`}
             />
         </>
     );

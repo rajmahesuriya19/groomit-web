@@ -58,9 +58,6 @@ export const SmartReminderCard = ({ selectedPet }) => {
                     })
                 ).unwrap(); // 👈 wait for success
 
-                // ✅ Only after success
-                dispatch(getDashboardData());
-
             } catch (error) {
                 console.log("Save reminder failed");
             }
@@ -138,7 +135,10 @@ export const SmartReminderCard = ({ selectedPet }) => {
             {/* Modal */}
             <PlansModal
                 open={isModalOpen}
-                onClose={() => dispatch(closeReminderModal())}
+                onClose={() => {
+                    dispatch(getDashboardData());
+                    dispatch(closeReminderModal())
+                }}
             />
         </div>
     );

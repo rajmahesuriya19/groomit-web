@@ -13,18 +13,11 @@ const Index = () => {
   const handleLogin = async () => {
     // const email = 'raj@groomit.me';
     // const password = 'Password@19';
-    // const email = '3b9gg@dollicons.com';
-    // const password = 'Password@19';
-    // const email = 'xixox64504@datehype.com';
-    // const password = 'Rajtest19';
-    // const email = 'hemin.patel@groomit.me';
-    // const password = 'Hemin@123';
-    // const email = 'jun@groomit.me';
-    // const password = 'Aaaa123456';
 
     // const email = 'nitesh1111@groomit.me';
     // const password = 'Nitesh99';
-    const email = 'test8181@gmail.com';
+
+    const email = 'test9191@gmail.com';
     const password = 'Test@123';
 
     try {
