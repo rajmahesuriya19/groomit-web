@@ -42,7 +42,7 @@ const GroomingOptionsAccordion = () => {
     const dispatch = useDispatch();
     const { showLoader, hideLoader } = useLoader();
 
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(true);
     const [packagesModal, setPackagesModal] = useState(false);
     const [breedListModalOpen, setBreedListModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
