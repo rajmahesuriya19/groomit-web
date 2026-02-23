@@ -16,6 +16,7 @@ export const RoutePath = {
   VIEW_CARD: '/user/card/view/:id',
   CHANGE_PASSWORD: 'user/account/password/change',
   DASHBOARD: '/user/dashboard',
+  DASHBOARD_TEST: '/user/dashboard/test',
   PETS: '/user/pet/list',
   SERVICE_ADDRESSES: '/user/address',
   CARDS: '/user/payment/card/list',
