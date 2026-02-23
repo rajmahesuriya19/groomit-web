@@ -217,19 +217,21 @@ const Navigation = ({ isMobileMenuOpen, setIsMobileMenuOpen }) => {
                 <UserDropdown />
 
                 {/* Help Link */}
-                <Link
-                  to="/book/service-address"
-                  className="flex items-center px-[12px] py-[10px] rounded-[10px] border border-[#7C868A80] transition-colors hover:text-red-600 group"
+                <a
+                  href="https://groomit.me/help"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-[12px] py-[10px] rounded-[10px] border border-primary-light transition-colors"
                 >
                   <img
                     src={info}
                     alt="Help Icon"
                     className="w-[24px] h-[24px]"
                   />
-                  <span className="text-sm font-semibold text-primary-dark leading-none tracking-[-0.01em]  font-inter px-2 py-0.5 rounded-sm">
+                  <span className="text-sm font-semibold text-primary-dark leading-none tracking-[-0.01em] font-inter px-2 py-0.5 rounded-sm">
                     Need Help?
                   </span>
-                </Link>
+                </a>
               </div>
             </div>
           </div>
