@@ -145,11 +145,9 @@ const UserDropdown = ({ onProtectedAction }) => {
               <img src={user.photo} alt={user.name} className={`${showDropdown ? 'w-[45px] h-[45px] object-contain' : 'w-[45px] h-[45px] object-contain'}`} />
             </div>
           ) : (
-            <div
-            //  onClick={() => navigate("/user/account")}
-            >
+            <div onClick={() => navigate("/user/account")}>
               <img
-                src="https://randomuser.me/api/portraits/men/75.jpg"
+                src="https://groomit.me/v7/images/webapp/icons/menu-new/user-profile-icon.png"
                 alt="User Avatar"
                 className="w-[45px] h-[45px] object-contain"
               />
